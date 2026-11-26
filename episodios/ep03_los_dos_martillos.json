@@ -1,0 +1,35 @@
+{
+  "serie": "Done, not perfect",
+  "episodio": 3,
+  "id": "ep03_los_dos_martillos",
+  "titulo": "Los dos martillos",
+  "fondo": "gris_pizarra",
+  "video": {
+    "ancho": 1080,
+    "alto": 1920,
+    "fps": 30,
+    "duracion_s": 18
+  },
+  "tiempos": {
+    "gancho_fin_s": 1,
+    "rebobinado_fin_s": 3,
+    "accion_fin_s": 14
+  },
+  "textos": {
+    "gancho": "Same nails. Same day.",
+    "cierre": "Done > Perfect",
+    "marca": "Done, not perfect"
+  },
+  "perfeccionista": {
+    "intentos": 3
+  },
+  "hacedor": {
+    "inclinacion_tapa_grados": 2.5
+  },
+  "audio": {
+    "musica": "auto",
+    "volumen_musica": 0.35,
+    "volumen_efectos": 0.9,
+    "bpm_aproximado": 80
+  }
+}

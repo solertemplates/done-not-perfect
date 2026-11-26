@@ -17,7 +17,8 @@ from dataclasses import dataclass
 import numpy as np
 from PIL import Image
 
-from .lienzo import ESCALA, LUZ_LAMPARA, Lienzo, tenue
+from .lienzo import BLANCO, ESCALA, LUZ_LAMPARA, VERDE, Lienzo, fondo, mezcla, rotar, tenue
+from .tiempo import rebote, tramo
 
 SUELO = 800
 
@@ -83,8 +84,12 @@ def estrellas(lz: Lienzo, lista, panel: int, fase_bucle: float):
 
 
 def cono_luz(img: Image.Image, x: float, y_boca: float, oy: float, ancho_boca: float = 70,
-             ancho_suelo: float = 460, alfa_max: float = 0.15):
-    """Funde en `img` (a ESCALA) un cono de luz ámbar con degradado hacia abajo."""
+             ancho_suelo: float = 460, alfa_max: float = 0.15, y_suelo: float = SUELO):
+    """Funde en `img` (a ESCALA) un cono de luz ámbar con degradado hacia abajo.
+
+    La luz llega hasta `y_suelo` (el suelo o, por ejemplo, el tablero de una mesa).
+    """
+    SUELO = y_suelo  # noqa: N806
     s = ESCALA
     arr = np.asarray(img).astype(np.float32)
     y0, y1 = int((y_boca + oy) * s), int((SUELO + 70 + oy) * s)
@@ -113,14 +118,15 @@ def cono_luz(img: Image.Image, x: float, y_boca: float, oy: float, ancho_boca: f
     img.paste(Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)))
 
 
-def lampara(img: Image.Image, lz: Lienzo, x: float, cable: float, oy: float, semilla: int, luz: bool = True):
-    """Lámpara colgante del techo. Con `luz`, cono ámbar cálido debajo."""
+def lampara(img: Image.Image, lz: Lienzo, x: float, cable: float, oy: float, semilla: int, luz: bool = True,
+            techo: float = 0.0, **luz_kw):
+    """Lámpara colgante del techo. Con `luz`, cono ámbar cálido debajo (opciones en `luz_kw`)."""
     boca = cable + 48
     if luz:
-        cono_luz(img, x, boca, oy)
+        cono_luz(img, x, boca, oy, **luz_kw)
         lz = Lienzo(img, lz.ox, lz.oy)
     linea = tenue(0.72)
-    lz.boceto((x, 0), (x, cable), 1.8, linea, semilla=semilla)
+    lz.boceto((x, techo), (x, cable), 1.8, linea, semilla=semilla)
     lz.boceto_poli([(x - 40, boca), (x + 40, boca), (x + 20, cable), (x - 20, cable)], 2.2, linea,
                    semilla=semilla + 1, cerrado=True)
     lz.arco((x, boca), 10, 0, 180, 2.0, linea)
@@ -139,3 +145,33 @@ def cartel(lz: Lienzo, rect, trazos, cotas, semilla: int):
         lz.linea([p0, p1], 1.2, suave_c)
         for p in (p0, p1):
             lz.linea([(p[0] - 4, p[1] - 4), (p[0] + 4, p[1] + 4)], 1.2, suave_c)
+
+
+def tabla(lz: Lienzo, centro, largo, grosor, angulo, semilla, color=BLANCO):
+    """Tabla de madera (contorno blanco, vetas tenues), girada `angulo` grados sobre su centro."""
+    hx, hy = largo / 2, grosor / 2
+    pts = [rotar((centro[0] + dx, centro[1] + dy), centro, angulo)
+           for dx, dy in ((-hx, -hy), (hx, -hy), (hx, hy), (-hx, hy))]
+    lz.poligono(pts, relleno=fondo(), borde=color, ancho=3)
+    rnd = random.Random(semilla)
+    for _ in range(2):
+        y = rnd.uniform(-hy * 0.4, hy * 0.4)
+        x0, x1 = rnd.uniform(-hx * 0.8, -hx * 0.2), rnd.uniform(hx * 0.1, hx * 0.8)
+        lz.linea([rotar((centro[0] + x0, centro[1] + y), centro, angulo),
+                  rotar((centro[0] + x1, centro[1] + y), centro, angulo)], 1.4, mezcla(color, fondo(), 0.5))
+
+
+def marca_ok(lz: Lienzo, a: float, c, t0: float):
+    """Marca verde de 'conseguido' que aparece en `t0` con un pequeño estallido."""
+    if a < t0:
+        return
+    s = rebote(tramo(a, t0, t0 + 0.3), 2.2)
+    pts = [(-34, 0), (-10, 26), (38, -30)]
+    lz.linea([(c[0] + x * s, c[1] + y * s) for x, y in pts], 12 * max(s, 0.1), VERDE)
+    u = tramo(a, t0, t0 + 0.45)
+    if u < 1:
+        for k in range(8):
+            ang = 2 * math.pi * k / 8
+            r0, r1 = 50 + 40 * u, 62 + 52 * u
+            lz.linea([(c[0] + math.cos(ang) * r0, c[1] + math.sin(ang) * r0),
+                      (c[0] + math.cos(ang) * r1, c[1] + math.sin(ang) * r1)], 4 * (1 - u) + 0.5, VERDE)

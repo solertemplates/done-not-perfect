@@ -65,13 +65,7 @@ ESQUEMA: dict[str, Any] = {
         "tipo": dict,
         "campos": {"intentos": {"tipo": int, "min": 1, "max": 4}},
     },
-    "hacedor": {
-        "tipo": dict,
-        "campos": {
-            "inclinacion_inicial_grados": {"tipo": _NUM, "min": 2, "max": 15},
-            "inclinacion_final_grados": {"tipo": _NUM, "min": 0, "max": 10},
-        },
-    },
+    "hacedor": {"tipo": dict, "campos": None},  # depende del episodio: ver HACEDOR_POR_EPISODIO
     "audio": {
         "tipo": dict,
         "campos": {
@@ -81,6 +75,17 @@ ESQUEMA: dict[str, Any] = {
             "bpm_aproximado": {"tipo": _NUM, "min": 50, "max": 160},
         },
     },
+}
+
+# Ajustes del Hacedor de cada episodio (cada historia tiene los suyos).
+_HACEDOR_MUNECOS = {
+    "inclinacion_inicial_grados": {"tipo": _NUM, "min": 2, "max": 15},
+    "inclinacion_final_grados": {"tipo": _NUM, "min": 0, "max": 10},
+}
+HACEDOR_POR_EPISODIO = {
+    1: _HACEDOR_MUNECOS,
+    2: _HACEDOR_MUNECOS,
+    3: {"inclinacion_tapa_grados": {"tipo": _NUM, "min": 0, "max": 8}},
 }
 
 _NOMBRE_TIPO = {
@@ -137,7 +142,8 @@ def _validar_valor(valor: Any, regla: dict, nombre: str, errores: list[str]) -> 
         )
         return
     if tipo is dict:
-        _validar_objeto(valor, regla["campos"], f"{nombre}.", errores)
+        if regla["campos"] is not None:  # None = no se puede comprobar por dentro (episodio desconocido)
+            _validar_objeto(valor, regla["campos"], f"{nombre}.", errores)
         return
     if "opciones" in regla and valor not in regla["opciones"]:
         sugerencia = difflib.get_close_matches(str(valor), regla["opciones"], n=1, cutoff=0.5)
@@ -187,7 +193,7 @@ def _validar_coherencia(d: dict, errores: list[str]) -> None:
             f"'video.duracion_s' ({dur}) por 'video.fps' ({v['fps']}) debe dar un número entero de fotogramas."
         )
     h = d["hacedor"]
-    if h["inclinacion_final_grados"] >= h["inclinacion_inicial_grados"]:
+    if "inclinacion_final_grados" in h and h["inclinacion_final_grados"] >= h["inclinacion_inicial_grados"]:
         errores.append(
             "'hacedor.inclinacion_final_grados' debe ser menor que 'hacedor.inclinacion_inicial_grados': "
             "al arreglarla, la silla tiene que quedar mejor."
@@ -230,7 +236,16 @@ def validar(datos: Any, archivo: str | None = None) -> Episodio:
     errores: list[str] = []
     if not isinstance(datos, dict):
         raise ErrorConfig([f"El contenido principal debe ser un objeto {{ }}, pero es {_tipo_de(datos)}."], archivo)
-    _validar_objeto(datos, ESQUEMA, "", errores)
+    esquema = dict(ESQUEMA)
+    num = datos.get("episodio")
+    if isinstance(num, int) and not isinstance(num, bool) and num in HACEDOR_POR_EPISODIO:
+        esquema["hacedor"] = {"tipo": dict, "campos": HACEDOR_POR_EPISODIO[num]}
+    else:
+        esquema["hacedor"] = {"tipo": dict, "campos": None}
+        if isinstance(num, int) and not isinstance(num, bool) and 1 <= num <= 999:
+            disponibles = ", ".join(str(n) for n in sorted(HACEDOR_POR_EPISODIO))
+            errores.append(f"Todavía no hay animación para el episodio {num}. Episodios disponibles: {disponibles}.")
+    _validar_objeto(datos, esquema, "", errores)
     if not errores:
         _validar_coherencia(datos, errores)
     if errores:

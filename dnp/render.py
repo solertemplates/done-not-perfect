@@ -19,10 +19,11 @@ from . import audio
 from .config import ErrorConfig, cargar
 from .ep01_silla import EpisodioSilla
 from .ep02_escalera import EpisodioEscalera
+from .ep03_martillos import EpisodioMartillos
 from .verificar import informe, verificar
 
 RAIZ = Path(__file__).resolve().parent.parent
-ESCENAS = {1: EpisodioSilla, 2: EpisodioEscalera}
+ESCENAS = {1: EpisodioSilla, 2: EpisodioEscalera, 3: EpisodioMartillos}
 
 _escena = None
 

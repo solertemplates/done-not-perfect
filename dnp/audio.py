@@ -192,10 +192,42 @@ def titulo() -> np.ndarray:
     return _fundido(pop + brillo, 0.002, 0.1)
 
 
+def clavo_torcido() -> np.ndarray:
+    """Clavo que se dobla: 'boing' metálico que cae de tono, con un rasguño al principio."""
+    rng = np.random.default_rng(12)
+    dur = 0.65
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = 820 * np.exp(-t * 1.6) + 260 + 26 * np.sin(2 * np.pi * 17 * t) * np.exp(-t * 3)
+    fase = 2 * np.pi * np.cumsum(f) / SR
+    boing = (np.sin(fase) + 0.35 * np.sin(2.7 * fase)) * _decae(n, 0.22)
+    m = int(0.09 * SR)
+    rasguno = np.zeros(n)
+    rasguno[:m] = _banda(_ruido(m, rng), 2500, 9000) * np.linspace(1, 0, m) ** 2
+    return _fundido(0.6 * boing + 0.4 * rasguno, 0.002, 0.08)
+
+
+def regla(semilla: int = 0) -> np.ndarray:
+    """Regla de plástico: deslizamiento corto y dos clics al apoyarla."""
+    rng = np.random.default_rng(140 + semilla)
+    dur = 0.4
+    n = int(dur * SR)
+    s = np.zeros(n)
+    m = int(0.16 * SR)
+    s[:m] = _banda(_ruido(m, rng), 1800, 7000) * np.sin(np.linspace(0, np.pi, m)) * 0.45
+    for k, dt in enumerate((0.17, 0.25)):
+        i = int(dt * SR)
+        c = int(0.03 * SR)
+        clic = (_banda(_ruido(c, rng), 2000, 8000) * _decae(c, 0.004)
+                + 0.5 * np.sin(2 * np.pi * 2900 * np.arange(c) / SR) * _decae(c, 0.008))
+        s[i:i + c] += clic * (0.9 if k == 0 else 0.6)
+    return _fundido(s, 0.005, 0.03)
+
+
 EFECTOS = {
     "martillo": martillo, "golpe_madera": golpe_madera, "crujido": crujido, "ding": ding, "lapiz": lapiz,
     "borrador": borrador, "papel": papel, "hoja": hoja, "bola": bola, "suspiro": suspiro,
-    "rebobinado": rebobinado, "titulo": titulo,
+    "rebobinado": rebobinado, "titulo": titulo, "clavo_torcido": clavo_torcido, "regla": regla,
 }
 
 

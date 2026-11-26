@@ -8,7 +8,8 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
 EP1 = RAIZ / "episodios" / "ep01_la_silla.json"
 EP2 = RAIZ / "episodios" / "ep02_la_escalera.json"
-EPISODIOS = [EP1, EP2]
+EP3 = RAIZ / "episodios" / "ep03_los_dos_martillos.json"
+EPISODIOS = [EP1, EP2, EP3]
 
 
 @pytest.fixture
@@ -32,3 +33,8 @@ def escena():
 @pytest.fixture(scope="session", params=EPISODIOS, ids=lambda p: p.stem)
 def cada_escena(request):
     return _crear(request.param)
+
+
+@pytest.fixture(scope="session")
+def martillos():
+    return _crear(EP3)

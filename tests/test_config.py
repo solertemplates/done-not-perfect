@@ -141,3 +141,23 @@ def test_episodio_2_es_valido():
 
     ep = cargar(EP2)
     assert ep["fondo"] == "marron_cafe"
+
+
+def test_episodio_3_es_valido():
+    from tests.conftest import EP3
+
+    ep = cargar(EP3)
+    assert ep["fondo"] == "gris_pizarra"
+    assert ep["hacedor"] == {"inclinacion_tapa_grados": 2.5}
+
+
+def test_hacedor_depende_del_episodio(datos):
+    datos["episodio"] = 3
+    e = " ".join(errores(datos))
+    assert "Campo desconocido 'hacedor.inclinacion_inicial_grados'" in e
+    assert "Falta el campo obligatorio 'hacedor.inclinacion_tapa_grados'." in e
+
+
+def test_episodio_sin_animacion(datos):
+    datos["episodio"] = 42
+    assert errores(datos) == ["Todavía no hay animación para el episodio 42. Episodios disponibles: 1, 2, 3."]

@@ -1,0 +1,27 @@
+{
+  "serie": "Done, not perfect", "episodio": 5, "id": "ep05_constancia", "titulo": "Constancia", "fondo": "morado_oscuro",
+  "video": { "ancho": 1080, "alto": 1920, "fps": 30, "duracion_s": 18 },
+  "tiempos": { "gancho_fin_s": 1, "rebobinado_fin_s": 3, "accion_fin_s": 15 },
+  "textos": { "gancho": "12 hits beat 60.", "cierre": "Daily > Fast", "marca": "Done, not perfect" },
+  "guion": {
+    "formato": "pantalla_partida", "gancho": "centro",
+    "arriba": {
+      "escena": { "tipo": "cantera_noche" },
+      "objetos": [ { "tipo": "roca", "golpes_para_partir": 12, "brillo": "verde" },
+                   { "tipo": "contador", "de": "hacedor", "color_final": "verde" } ],
+      "personajes": [ { "tipo": "hacedor", "herramienta": "mandarria", "paneo": -0.2, "acciones": [
+        { "accion": "golpear", "desde_s": 3.0, "hasta_s": 14.0, "golpes": 12, "velocidad": "lenta", "objeto": "roca" },
+        { "accion": "celebrar", "desde_s": 14.15, "hasta_s": 15.0 } ] } ]
+    },
+    "abajo": {
+      "escena": { "tipo": "cantera_noche" },
+      "objetos": [ { "tipo": "roca", "golpes_para_partir": 100 },
+                   { "tipo": "contador", "de": "perfeccionista", "color_final": "rojo" } ],
+      "personajes": [ { "tipo": "perfeccionista", "herramienta": "mandarria", "paneo": 0.2, "acciones": [
+        { "accion": "golpear", "desde_s": 3.0, "hasta_s": 9.0, "golpes": 60, "velocidad": "rapida", "objeto": "roca" },
+        { "accion": "dudar", "desde_s": 9.0, "hasta_s": 11.0 },
+        { "accion": "rendirse", "desde_s": 11.0, "hasta_s": 15.0 } ] } ]
+    }
+  },
+  "audio": { "musica": "auto", "volumen_musica": 0.35, "volumen_efectos": 0.9, "bpm_aproximado": 72 }
+}

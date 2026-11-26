@@ -35,6 +35,7 @@ class Pose:
     parpado: float = 0.0  # 0 ojos abiertos, 1 cerrados
     mirada: tuple[float, float] = (0.0, 0.0)  # desplazamiento de las pupilas (-1..1)
     hombros: float = 0.0  # cuánto bajan los hombros (suspiro), en px
+    espalda: bool = False  # de espaldas a la cámara: la cabeza no muestra la cara
     extra: dict = field(default_factory=dict)
 
 
@@ -60,6 +61,7 @@ def mezclar(a: Pose, b: Pose, t: float) -> Pose:
         parpado=l(a.parpado, b.parpado),
         mirada=p(a.mirada, b.mirada),
         hombros=l(a.hombros, b.hombros),
+        espalda=a.espalda if t < 0.5 else b.espalda,
     )
 
 
@@ -104,6 +106,18 @@ def esqueleto(p: Pose) -> dict:
     )
 
 
+def a_escala(lz: Lienzo, factor: float, ancla) -> Lienzo:
+    """Lienzo que dibuja todo `factor` veces más grande (o pequeño) alrededor de `ancla`.
+
+    Sirve para alejar a un personaje hacia el fondo sin cambiar su dibujo.
+    """
+    if factor == 1.0:
+        return lz
+    ox = (ancla[0] * (1 - factor) + lz.ox) / factor
+    oy = (ancla[1] * (1 - factor) + lz.oy) / factor
+    return Lienzo(lz.img, ox, oy, escala=lz.s * factor)
+
+
 def dibujar(lz: Lienzo, p: Pose, perfeccionista: bool, en_mano=None):
     """Dibuja el personaje. `en_mano(lz, esqueleto)` dibuja un objeto sujeto
     con la mano delantera, entre el cuerpo y el brazo delantero."""
@@ -134,6 +148,12 @@ def _local(e, p: Pose, x, y):
 def _cabeza(lz: Lienzo, e, p: Pose, gafas: bool):
     R = R_CABEZA
     lz.circulo(e["cabeza"], R, relleno=BLANCO)
+    if p.espalda:
+        if gafas:  # de espaldas solo se ven las patillas de las gafas, a los lados
+            for lado in (-1, 1):
+                lz.linea([_local(e, p, lado * 0.98 * R, -0.16 * R), _local(e, p, lado * 0.78 * R, -0.12 * R)], 5,
+                         TINTA)
+        return
     mx, my = p.mirada
     ojos = [(-0.02 * R, -0.12 * R), (0.42 * R, -0.12 * R)]
     for ox, oy in ojos:

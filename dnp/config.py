@@ -129,7 +129,8 @@ def _validar_objeto(datos: dict, esquema: dict, ruta: str, errores: list[str]) -
     for clave, regla in esquema.items():
         nombre = f"{ruta}{clave}"
         if clave not in datos:
-            errores.append(f"Falta el campo obligatorio '{nombre}'.")
+            if not regla.get("opcional"):
+                errores.append(f"Falta el campo obligatorio '{nombre}'.")
             continue
         _validar_valor(datos[clave], regla, nombre, errores)
 
@@ -192,7 +193,7 @@ def _validar_coherencia(d: dict, errores: list[str]) -> None:
         errores.append(
             f"'video.duracion_s' ({dur}) por 'video.fps' ({v['fps']}) debe dar un número entero de fotogramas."
         )
-    h = d["hacedor"]
+    h = d.get("hacedor", {})
     if "inclinacion_final_grados" in h and h["inclinacion_final_grados"] >= h["inclinacion_inicial_grados"]:
         errores.append(
             "'hacedor.inclinacion_final_grados' debe ser menor que 'hacedor.inclinacion_inicial_grados': "
@@ -238,7 +239,12 @@ def validar(datos: Any, archivo: str | None = None) -> Episodio:
         raise ErrorConfig([f"El contenido principal debe ser un objeto {{ }}, pero es {_tipo_de(datos)}."], archivo)
     esquema = dict(ESQUEMA)
     num = datos.get("episodio")
-    if isinstance(num, int) and not isinstance(num, bool) and num in HACEDOR_POR_EPISODIO:
+    con_guion = "guion" in datos
+    if con_guion:
+        # Episodio hecho solo con JSON: no usa los bloques de los episodios programados a mano.
+        del esquema["hacedor"], esquema["perfeccionista"]
+        esquema["guion"] = {"tipo": dict, "campos": None}
+    elif isinstance(num, int) and not isinstance(num, bool) and num in HACEDOR_POR_EPISODIO:
         esquema["hacedor"] = {"tipo": dict, "campos": HACEDOR_POR_EPISODIO[num]}
     else:
         esquema["hacedor"] = {"tipo": dict, "campos": None}
@@ -246,6 +252,10 @@ def validar(datos: Any, archivo: str | None = None) -> Episodio:
             disponibles = ", ".join(str(n) for n in sorted(HACEDOR_POR_EPISODIO))
             errores.append(f"Todavía no hay animación para el episodio {num}. Episodios disponibles: {disponibles}.")
     _validar_objeto(datos, esquema, "", errores)
+    if con_guion and isinstance(datos.get("guion"), dict):
+        from .guion import validar_guion  # aquí para evitar una importación circular
+
+        validar_guion(datos, errores)
     if not errores:
         _validar_coherencia(datos, errores)
     if errores:

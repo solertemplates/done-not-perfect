@@ -20,6 +20,7 @@ from .config import ErrorConfig, cargar
 from .ep01_silla import EpisodioSilla
 from .ep02_escalera import EpisodioEscalera
 from .ep03_martillos import EpisodioMartillos
+from .guion import EpisodioGuion
 from .verificar import informe, verificar
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -29,6 +30,8 @@ _escena = None
 
 
 def crear_escena(ep):
+    if "guion" in ep.datos:
+        return EpisodioGuion(ep)
     clase = ESCENAS.get(ep["episodio"])
     if clase is None:
         raise SystemExit(f"Todavía no hay animación para el episodio {ep['episodio']}.")

@@ -9,7 +9,7 @@ on:
         default: "episodios/ep01_la_silla.json"
 
 permissions:
-  contents: write  # necesario para publicar la Release
+  contents: write  # necesario para guardar el vídeo en main
 
 jobs:
   render:
@@ -39,29 +39,44 @@ jobs:
           EPISODIO: ${{ inputs.episodio }}
         run: python -m dnp.render "$EPISODIO" --salida salida --capturas 0,8,16
 
-      - name: Publicar en Releases
+      - name: Guardar MP4 y miniatura en /videos de main
         env:
-          GH_TOKEN: ${{ github.token }}
           EPISODIO: ${{ inputs.episodio }}
         run: |
-          read -r ID NUM TITULO < <(python -c "import json,sys; d=json.load(open(sys.argv[1], encoding='utf-8')); print(d['id'], d['episodio'], d['titulo'])" "$EPISODIO")
-          read -r FECHA HORA HORA_TXT < <(date -u '+%Y-%m-%d %H%M %H:%M')
-          TAG="${ID}-${FECHA}-${HORA}"
+          read -r ID NUM < <(python -c "import json,sys; d=json.load(open(sys.argv[1], encoding='utf-8')); print(d['id'], d['episodio'])" "$EPISODIO")
+          read -r FECHA HORA < <(date -u '+%Y-%m-%d %H:%M')
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Siempre sobre la última main, aunque el workflow se lance desde otra rama.
+          for intento in 1 2 3 4; do
+            git fetch --quiet origin main
+            git checkout --quiet -B publicar origin/main
+            mkdir -p videos
+            cp "salida/${ID}.mp4" "videos/${ID}.mp4"
+            cp salida/miniatura.png "videos/${ID}_miniatura.png"
+            git add "videos/${ID}.mp4" "videos/${ID}_miniatura.png"
+            if git diff --cached --quiet; then
+              echo "El vídeo ya estaba guardado y no ha cambiado."
+              break
+            fi
+            git commit --quiet -m "Episodio ${NUM}: vídeo renderizado el ${FECHA} ${HORA} UTC" \
+              -m "Generado por el workflow Render episodio (ejecución ${GITHUB_RUN_ID}) desde ${GITHUB_SHA}."
+            if git push --quiet origin HEAD:main; then
+              break
+            fi
+            if [ "$intento" = 4 ]; then
+              echo "No se pudo guardar el vídeo en main." >&2
+              exit 1
+            fi
+            sleep $((intento * 5))
+          done
+          URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/raw/main/videos/${ID}.mp4"
           {
-            echo "Episodio ${NUM}: ${TITULO}"
             echo
-            echo "Descarga el MP4 y la miniatura en **Assets**, aquí debajo."
+            echo "**Descarga directa del MP4:** ${URL}"
             echo
-            echo '```'
-            cat salida/informe.txt
-            echo '```'
-          } > salida/notas.md
-          gh release create "$TAG" "salida/${ID}.mp4" salida/miniatura.png \
-            --target "$GITHUB_SHA" \
-            --title "Ep. ${NUM} · ${TITULO} · ${FECHA} ${HORA_TXT} UTC" \
-            --notes-file salida/notas.md \
-            --latest
-          echo "Release publicada: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"
+            echo "Miniatura: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/raw/main/videos/${ID}_miniatura.png"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Subir MP4 y miniatura
         if: always()

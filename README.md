@@ -9,12 +9,12 @@ Todo se genera por código en GitHub Actions: dibujo, animación, música y efec
 1. Abre el repositorio en Safari o en la app de GitHub y ve a **Actions**.
 2. Elige **Render episodio** y pulsa **Run workflow**. Deja el episodio que viene por defecto y vuelve a pulsar **Run workflow**.
 3. Espera unos 2 minutos hasta que salga la marca verde ✅.
-4. Ve a la página principal del repositorio y toca **Releases**. Arriba del todo está la última, con el nombre del episodio y la fecha, por ejemplo `Ep. 1 · La silla · 2026-11-26 15:06 UTC`.
-5. En **Assets**, toca `ep01_la_silla.mp4` para descargarlo. Ábrelo desde Descargas, pulsa compartir y elige **Guardar vídeo** para llevarlo a Fotos. `miniatura.png` es el primer fotograma, para usarlo de portada.
+4. Abre el enlace de descarga directa:
+   https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep01_la_silla.mp4
+   También lo tienes en el resumen de la ejecución y en la carpeta [`videos/`](videos/). Pulsa compartir y elige **Guardar vídeo** para llevarlo a Fotos.
+5. La miniatura (el primer fotograma) está en `videos/ep01_la_silla_miniatura.png`.
 
-La Release solo se publica si el vídeo pasa todas las comprobaciones. Si alguna falla, la ejecución sale en rojo ❌ y el vídeo queda en **Artifacts**, al final de la página de la ejecución, como `.zip`, para que puedas revisarlo.
-
-El resumen de la ejecución muestra todas las comprobaciones y el enlace directo a la Release.
+Cada ejecución que pasa todas las comprobaciones guarda el vídeo en la carpeta `videos/` de `main` y sustituye al anterior. Las versiones anteriores quedan en el historial del archivo. Si alguna comprobación falla, la ejecución sale en rojo ❌, no se toca `videos/` y el vídeo queda en **Artifacts**, al final de la página de la ejecución, para revisarlo.
 
 ## Cambiar textos o tiempos
 

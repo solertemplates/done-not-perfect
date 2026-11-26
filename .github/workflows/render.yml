@@ -7,11 +7,12 @@ on:
         description: "Episodio"
         required: true
         type: choice
-        default: "episodios/ep03_los_dos_martillos.json"
+        default: "episodios/04_roca.json"
         options:
           - "episodios/ep01_la_silla.json"
           - "episodios/ep02_la_escalera.json"
           - "episodios/ep03_los_dos_martillos.json"
+          - "episodios/04_roca.json"
 
 permissions:
   contents: write  # necesario para guardar el vídeo en main

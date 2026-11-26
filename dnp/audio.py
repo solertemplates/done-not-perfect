@@ -224,10 +224,57 @@ def regla(semilla: int = 0) -> np.ndarray:
     return _fundido(s, 0.005, 0.03)
 
 
+def mandarria(semilla: int = 0) -> np.ndarray:
+    """Golpe de mandarria contra la roca: impacto grave y seco con chasquido de piedra."""
+    rng = np.random.default_rng(160 + semilla)
+    n = int(0.45 * SR)
+    grave = _seno_barrido(110, 48, 0.45) * _decae(n, 0.09)
+    piedra = _banda(_ruido(n, rng), 400, 3500) * _decae(n, 0.025)
+    chasquido = _banda(_ruido(n, rng), 3000, 10000) * _decae(n, 0.006)
+    grava = np.zeros(n)
+    for _ in range(6):
+        i = int(rng.uniform(0.02, 0.22) * SR)
+        m = int(0.012 * SR)
+        grava[i:i + m] += _banda(_ruido(m, rng), 1500, 6000) * _decae(m, 0.004) * rng.uniform(0.1, 0.3)
+    return _fundido(1.0 * grave + 0.55 * piedra + 0.3 * chasquido + grava, 0.001, 0.08)
+
+
+def grieta(semilla: int = 0) -> np.ndarray:
+    """La roca se agrieta: crujido seco con chasquidos y un retumbo grave."""
+    rng = np.random.default_rng(170 + semilla)
+    dur = 0.5
+    n = int(dur * SR)
+    s = np.zeros(n)
+    for _ in range(40):
+        i = int(rng.beta(1.4, 2.6) * (n - 800))
+        m = int(rng.uniform(0.002, 0.009) * SR)
+        s[i:i + m] += _ruido(m, rng) * _decae(m, rng.uniform(0.001, 0.003)) * rng.uniform(0.3, 1.0)
+    s = _banda(s, 700, 7000)
+    retumbo = _banda(_ruido(n, rng), 40, 220) * np.exp(-np.arange(n) / SR / 0.15) * 0.5
+    return _fundido(0.7 * s + retumbo, 0.002, 0.08)
+
+
+def crac(semilla: int = 0) -> np.ndarray:
+    """La roca se parte: chasquido fuerte, golpe grave y piedrecitas que caen."""
+    rng = np.random.default_rng(180 + semilla)
+    dur = 1.1
+    n = int(dur * SR)
+    chasquido = _banda(_ruido(n, rng), 1500, 12000) * _decae(n, 0.018)
+    boom = _seno_barrido(80, 35, dur) * _decae(n, 0.2)
+    cuerpo = _banda(_ruido(n, rng), 150, 1500) * _decae(n, 0.08)
+    piedras = np.zeros(n)
+    for _ in range(30):
+        i = int(rng.uniform(0.1, 0.85) * n)
+        m = int(rng.uniform(0.004, 0.015) * SR)
+        piedras[i:i + m] += _banda(_ruido(m, rng), 1200, 7000) * _decae(m, 0.004) * rng.uniform(0.05, 0.25)
+    return _fundido(0.8 * chasquido + 1.0 * boom + 0.6 * cuerpo + piedras, 0.001, 0.15)
+
+
 EFECTOS = {
     "martillo": martillo, "golpe_madera": golpe_madera, "crujido": crujido, "ding": ding, "lapiz": lapiz,
     "borrador": borrador, "papel": papel, "hoja": hoja, "bola": bola, "suspiro": suspiro,
     "rebobinado": rebobinado, "titulo": titulo, "clavo_torcido": clavo_torcido, "regla": regla,
+    "mandarria": mandarria, "grieta": grieta, "crac": crac,
 }
 
 

@@ -13,11 +13,16 @@ Todo se genera por código en GitHub Actions: dibujo, animación, música y efec
    - Ep. 1: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep01_la_silla.mp4
    - Ep. 2: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep02_la_escalera.mp4
    - Ep. 3: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep03_los_dos_martillos.mp4
+   - Ep. 4: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep04_la_roca.mp4
 
    También lo tienes en el resumen de la ejecución y en la carpeta [`videos/`](videos/). Pulsa compartir y elige **Guardar vídeo** para llevarlo a Fotos.
 5. La miniatura (el primer fotograma) está al lado, en `videos/<episodio>_miniatura.png`.
 
 Cada ejecución que pasa todas las comprobaciones guarda el vídeo en la carpeta `videos/` de `main` y sustituye al anterior. Las versiones anteriores quedan en el historial del archivo. Si alguna comprobación falla, la ejecución sale en rojo ❌, no se toca `videos/` y el vídeo queda en **Artifacts**, al final de la página de la ejecución, para revisarlo.
+
+## Crear episodios solo con JSON
+
+Desde el episodio 4 se pueden crear episodios sin programar, con un bloque `"guion"` en el JSON. Ahí se eligen la escena, los personajes, las herramientas, los objetos, las acciones y los contadores. Todo está explicado en [GUIA_GUIONES.md](GUIA_GUIONES.md).
 
 ## Cambiar textos o tiempos
 

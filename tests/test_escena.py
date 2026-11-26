@@ -15,7 +15,8 @@ def luma(img):
 def test_tamano_y_fondo(cada_escena):
     img = cada_escena.fotograma(0)
     assert img.size == (1080, 1920)
-    assert img.getpixel((1076, 600)) == FONDOS[cada_escena.ep["fondo"]]
+    colores, cuentas = np.unique(np.asarray(img).reshape(-1, 3), axis=0, return_counts=True)
+    assert tuple(colores[cuentas.argmax()]) == FONDOS[cada_escena.ep["fondo"]]  # el fondo es lo que más hay
 
 
 def test_ultimo_fotograma_empalma_con_el_primero(cada_escena):
@@ -55,7 +56,8 @@ def test_perfeccionista_nunca_termina(cada_escena):
 def test_eventos_de_audio_dentro_del_video(cada_escena):
     ev = cada_escena.eventos_audio()
     nombres = {e[1] for e in ev}
-    assert {"martillo", "suspiro", "ding", "rebobinado", "titulo"} <= nombres
+    assert {"suspiro", "ding", "rebobinado", "titulo"} <= nombres
+    assert nombres & {"martillo", "mandarria"}  # siempre hay golpes
     assert all(0 <= e[0] < cada_escena.D for e in ev)
     if cada_escena.ep["episodio"] in (1, 2):
         assert {"borrador", "papel"} <= nombres
@@ -75,6 +77,8 @@ def test_hay_estrellas_que_parpadean(cada_escena):
 
 def test_luz_de_lampara_ambar_y_suave(cada_escena):
     """Bajo la lámpara el fondo se calienta (más rojo que azul) pero sigue siendo oscuro."""
+    if "guion" in cada_escena.ep.datos:
+        pytest.skip("la cantera de noche no tiene lámpara")
     arr = np.asarray(cada_escena._fondo.reduce(2)).astype(int)
     abajo = arr
     fondo = np.array(FONDOS[cada_escena.ep["fondo"]])

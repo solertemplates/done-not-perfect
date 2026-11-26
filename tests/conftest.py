@@ -9,7 +9,8 @@ sys.path.insert(0, str(RAIZ))
 EP1 = RAIZ / "episodios" / "ep01_la_silla.json"
 EP2 = RAIZ / "episodios" / "ep02_la_escalera.json"
 EP3 = RAIZ / "episodios" / "ep03_los_dos_martillos.json"
-EPISODIOS = [EP1, EP2, EP3]
+EP4 = RAIZ / "episodios" / "04_roca.json"
+EPISODIOS = [EP1, EP2, EP3, EP4]
 
 
 @pytest.fixture
@@ -38,3 +39,13 @@ def cada_escena(request):
 @pytest.fixture(scope="session")
 def martillos():
     return _crear(EP3)
+
+
+@pytest.fixture(scope="session")
+def roca():
+    return _crear(EP4)
+
+
+@pytest.fixture
+def datos_roca():
+    return json.loads(EP4.read_text(encoding="utf-8"))

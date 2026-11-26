@@ -18,8 +18,14 @@ EXT_MUSICA = (".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg", ".aiff", ".aif")
 
 # --- utilidades -----------------------------------------------------------------
 
+def muestras(dur: float) -> int:
+    """Número de muestras de una duración. Se redondea (no se trunca): 0,41249999999999964 s y
+    0,4125 s deben dar el mismo sonido aunque la suma en coma flotante salga distinta."""
+    return int(round(dur * SR))
+
+
 def _t(dur: float) -> np.ndarray:
-    return np.arange(int(dur * SR)) / SR
+    return np.arange(muestras(dur)) / SR
 
 
 def _ruido(n: int, rng) -> np.ndarray:
@@ -52,7 +58,7 @@ def _fundido(x: np.ndarray, entrada: float = 0.005, salida: float = 0.02) -> np.
 
 
 def _seno_barrido(f0: float, f1: float, dur: float) -> np.ndarray:
-    n = int(dur * SR)
+    n = muestras(dur)
     f = np.geomspace(f0, f1, n)
     return np.sin(2 * np.pi * np.cumsum(f) / SR)
 
@@ -106,7 +112,7 @@ def ding() -> np.ndarray:
 
 def lapiz(dur: float, semilla: int = 0) -> np.ndarray:
     rng = np.random.default_rng(40 + semilla)
-    n = int(dur * SR)
+    n = muestras(dur)
     base = _banda(_ruido(n, rng), 2500, 8000)
     trazos = np.clip(np.sin(2 * np.pi * 4.5 * _t(dur) + rng.uniform(0, 6)) + 0.3, 0, 1) ** 1.5
     return _fundido(base * trazos * 0.5, 0.03, 0.05)
@@ -114,7 +120,7 @@ def lapiz(dur: float, semilla: int = 0) -> np.ndarray:
 
 def borrador(dur: float, semilla: int = 0) -> np.ndarray:
     rng = np.random.default_rng(50 + semilla)
-    n = int(dur * SR)
+    n = muestras(dur)
     base = _banda(_ruido(n, rng), 900, 5000)
     frote = np.abs(np.sin(2 * np.pi * 4.6 * _t(dur))) ** 1.2
     return _fundido(base * (0.25 + 0.75 * frote), 0.03, 0.06)
@@ -122,7 +128,7 @@ def borrador(dur: float, semilla: int = 0) -> np.ndarray:
 
 def papel(dur: float = 0.45, semilla: int = 0) -> np.ndarray:
     rng = np.random.default_rng(60 + semilla)
-    n = int(dur * SR)
+    n = muestras(dur)
     s = np.zeros(n)
     for _ in range(int(90 * dur / 0.45)):
         i = int(rng.beta(1.6, 1.6) * (n - 600))
@@ -151,7 +157,7 @@ def bola() -> np.ndarray:
 def suspiro(dur: float = 1.1) -> np.ndarray:
     """Exhalación sin voz: ruido de aire cuyo formante baja, con envolvente de suspiro."""
     rng = np.random.default_rng(90)
-    n = int(dur * SR)
+    n = muestras(dur)
     bloques = 14
     s = np.zeros(n)
     L = n // bloques
@@ -172,7 +178,7 @@ def suspiro(dur: float = 1.1) -> np.ndarray:
 def rebobinado(dur: float) -> np.ndarray:
     """Cinta rebobinando: chirrido que sube con vibrato rápido y siseo."""
     rng = np.random.default_rng(11)
-    n = int(dur * SR)
+    n = muestras(dur)
     t = np.arange(n) / SR
     u = t / dur
     f = 260 + 1300 * u ** 1.4 + 70 * np.sin(2 * np.pi * 23 * t)
@@ -196,7 +202,7 @@ def clavo_torcido() -> np.ndarray:
     """Clavo que se dobla: 'boing' metálico que cae de tono, con un rasguño al principio."""
     rng = np.random.default_rng(12)
     dur = 0.65
-    n = int(dur * SR)
+    n = muestras(dur)
     t = np.arange(n) / SR
     f = 820 * np.exp(-t * 1.6) + 260 + 26 * np.sin(2 * np.pi * 17 * t) * np.exp(-t * 3)
     fase = 2 * np.pi * np.cumsum(f) / SR
@@ -211,7 +217,7 @@ def regla(semilla: int = 0) -> np.ndarray:
     """Regla de plástico: deslizamiento corto y dos clics al apoyarla."""
     rng = np.random.default_rng(140 + semilla)
     dur = 0.4
-    n = int(dur * SR)
+    n = muestras(dur)
     s = np.zeros(n)
     m = int(0.16 * SR)
     s[:m] = _banda(_ruido(m, rng), 1800, 7000) * np.sin(np.linspace(0, np.pi, m)) * 0.45
@@ -243,7 +249,7 @@ def grieta(semilla: int = 0) -> np.ndarray:
     """La roca se agrieta: crujido seco con chasquidos y un retumbo grave."""
     rng = np.random.default_rng(170 + semilla)
     dur = 0.5
-    n = int(dur * SR)
+    n = muestras(dur)
     s = np.zeros(n)
     for _ in range(40):
         i = int(rng.beta(1.4, 2.6) * (n - 800))
@@ -258,7 +264,7 @@ def crac(semilla: int = 0) -> np.ndarray:
     """La roca se parte: chasquido fuerte, golpe grave y piedrecitas que caen."""
     rng = np.random.default_rng(180 + semilla)
     dur = 1.1
-    n = int(dur * SR)
+    n = muestras(dur)
     chasquido = _banda(_ruido(n, rng), 1500, 12000) * _decae(n, 0.018)
     boom = _seno_barrido(80, 35, dur) * _decae(n, 0.2)
     cuerpo = _banda(_ruido(n, rng), 150, 1500) * _decae(n, 0.08)

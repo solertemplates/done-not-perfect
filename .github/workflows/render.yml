@@ -1,28 +1,37 @@
 name: Render episodio
 
+# Se lanza solo:
+# - al subir o cambiar un archivo de episodios/ en main: renderiza SOLO esos episodios
+#   y guarda el MP4 y la miniatura en videos/ (o videos/ERRORES.txt si el JSON tiene errores);
+# - en los pull requests: pasa los tests y comprueba todos los episodios (sin publicar nada).
+# También se puede lanzar a mano desde Actions (vacío = todos los episodios).
 on:
+  push:
+    branches: [main]
+    paths: ["episodios/**"]
+  pull_request:
   workflow_dispatch:
     inputs:
       episodio:
-        description: "Episodio"
-        required: true
-        type: choice
-        default: "episodios/04_roca.json"
-        options:
-          - "episodios/ep01_la_silla.json"
-          - "episodios/ep02_la_escalera.json"
-          - "episodios/ep03_los_dos_martillos.json"
-          - "episodios/04_roca.json"
+        description: "Archivo del episodio, p. ej. episodios/04_roca.json (vacío = todos)"
+        required: false
+        default: ""
 
 permissions:
-  contents: write  # necesario para guardar el vídeo en main
+  contents: write  # para guardar los vídeos en main
+
+concurrency:
+  group: render-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   render:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -40,67 +49,61 @@ jobs:
       - name: Tests
         run: python -m pytest -q
 
-      - name: Renderizar y verificar
+      - name: Elegir episodios
         env:
-          EPISODIO: ${{ inputs.episodio }}
-        run: python -m dnp.render "$EPISODIO" --salida salida --capturas 0,8,16
-
-      - name: Guardar MP4 y miniatura en /videos de main
-        env:
-          EPISODIO: ${{ inputs.episodio }}
+          EVENTO: ${{ github.event_name }}
+          ANTES: ${{ github.event.before }}
+          ENTRADA: ${{ inputs.episodio }}
         run: |
-          read -r ID NUM < <(python -c "import json,sys; d=json.load(open(sys.argv[1], encoding='utf-8')); print(d['id'], d['episodio'])" "$EPISODIO")
+          if [ "$EVENTO" = "push" ] && [ -n "$ANTES" ] && [ "$ANTES" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only --diff-filter=AMR "$ANTES" "$GITHUB_SHA" -- 'episodios/*.json' > lista.txt
+          elif [ "$EVENTO" = "workflow_dispatch" ] && [ -n "$ENTRADA" ]; then
+            echo "$ENTRADA" > lista.txt
+          else
+            ls episodios/*.json > lista.txt
+          fi
+          echo "Episodios:"; cat lista.txt
+
+      - name: Renderizar y comprobar
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python -m dnp.publicar --solo-comprobar $(cat lista.txt)
+          else
+            python -m dnp.publicar --destino salida/videos $(cat lista.txt)
+          fi
+
+      - name: Guardar en videos/ de main
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          [ -d salida/videos ] || { echo "Nada que guardar."; exit 0; }
           read -r FECHA HORA < <(date -u '+%Y-%m-%d %H:%M')
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Siempre sobre la última main, aunque el workflow se lance desde otra rama.
           for intento in 1 2 3 4; do
             git fetch --quiet origin main
             git checkout --quiet -B publicar origin/main
             mkdir -p videos
-            cp "salida/${ID}.mp4" "videos/${ID}.mp4"
-            cp salida/miniatura.png "videos/${ID}_miniatura.png"
-            git add "videos/${ID}.mp4" "videos/${ID}_miniatura.png"
-            if git diff --cached --quiet; then
-              echo "El vídeo ya estaba guardado y no ha cambiado."
-              break
-            fi
-            git commit --quiet -m "Episodio ${NUM}: vídeo renderizado el ${FECHA} ${HORA} UTC" \
+            find salida/videos -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.png' -o -name 'ERRORES.txt' \) \
+              -exec cp {} videos/ \;
+            if [ -f salida/videos/.sin_errores ] && [ -f videos/ERRORES.txt ]; then git rm --quiet videos/ERRORES.txt; fi
+            git add -A videos
+            if git diff --cached --quiet; then echo "Los vídeos ya estaban al día."; break; fi
+            git commit --quiet -m "Vídeos renderizados el ${FECHA} ${HORA} UTC" \
               -m "Generado por el workflow Render episodio (ejecución ${GITHUB_RUN_ID}) desde ${GITHUB_SHA}."
-            if git push --quiet origin HEAD:main; then
-              break
-            fi
-            if [ "$intento" = 4 ]; then
-              echo "No se pudo guardar el vídeo en main." >&2
-              exit 1
-            fi
+            if git push --quiet origin HEAD:main; then break; fi
+            if [ "$intento" = 4 ]; then echo "No se pudo guardar en main." >&2; exit 1; fi
             sleep $((intento * 5))
           done
-          URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/raw/main/videos/${ID}.mp4"
-          {
-            echo
-            echo "**Descarga directa del MP4:** ${URL}"
-            echo
-            echo "Miniatura: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/raw/main/videos/${ID}_miniatura.png"
-          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Subir MP4 y miniatura
+      - name: Subir MP4, miniaturas y capturas
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: episodio
+          name: episodios
           path: |
-            salida/*.mp4
-            salida/miniatura.png
-            salida/informe.txt
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Subir capturas
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: capturas
-          path: salida/captura_*.png
+            salida/**/*.mp4
+            salida/**/*.png
+            salida/**/informe.txt
+            salida/videos/ERRORES.txt
           if-no-files-found: ignore
           retention-days: 30

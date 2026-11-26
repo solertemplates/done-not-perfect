@@ -20,12 +20,271 @@
     "cierre": "Done > Perfect",
     "marca": "Done, not perfect"
   },
-  "perfeccionista": {
-    "intentos": 3
-  },
-  "hacedor": {
-    "inclinacion_inicial_grados": 7,
-    "inclinacion_final_grados": 2.5
+  "guion": {
+    "formato": "pantalla_partida",
+    "gancho": "arriba",
+    "arriba": {
+      "escena": {
+        "tipo": "habitacion",
+        "ventana": {
+          "x": 86,
+          "y": 236,
+          "ancho": 230,
+          "alto": 234,
+          "semilla": 41,
+          "luna": {
+            "x": 250,
+            "y": 300,
+            "radio": 26
+          }
+        }
+      },
+      "objetos": [
+        {
+          "id": "madera",
+          "tipo": "pila_madera",
+          "x": 210,
+          "tablas": 6,
+          "cae_desde_s": 3.0,
+          "cae_hasta_s": 3.4
+        },
+        {
+          "tipo": "silla",
+          "inclinacion_inicial_grados": 7,
+          "inclinacion_final_grados": 2.5,
+          "se_tuerce_s": 8.2
+        },
+        {
+          "tipo": "marca_ok",
+          "x": 770,
+          "y": 520,
+          "aparece_s": 12.6
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "hacedor",
+          "herramienta": "martillo",
+          "paneo": -0.25,
+          "parpadeos_s": [
+            5.5,
+            10.0
+          ],
+          "acciones": [
+            {
+              "accion": "preparar",
+              "desde_s": 3.0,
+              "hasta_s": 4.0,
+              "x": 760
+            },
+            {
+              "accion": "construir",
+              "desde_s": 4.0,
+              "hasta_s": 8.25,
+              "objeto": "silla",
+              "madera": "madera",
+              "primer_golpe_s": 4.3,
+              "cada_s": 0.72
+            },
+            {
+              "accion": "sorprenderse",
+              "desde_s": 8.25,
+              "hasta_s": 8.8,
+              "x": 760
+            },
+            {
+              "accion": "sentarse",
+              "desde_s": 8.8,
+              "hasta_s": 9.35,
+              "objeto": "silla",
+              "x_inicio": 700
+            },
+            {
+              "accion": "tambalearse",
+              "desde_s": 9.35,
+              "hasta_s": 10.5,
+              "objeto": "silla"
+            },
+            {
+              "accion": "martillear",
+              "desde_s": 10.5,
+              "hasta_s": 11.9,
+              "arregla": "silla",
+              "golpes_s": [
+                11.15,
+                11.5
+              ],
+              "x": 770,
+              "agachado": 70,
+              "preparar_s": 0.45,
+              "levantarse_s": 0.3,
+              "mano_final": [
+                735,
+                650
+              ],
+              "mirada": [
+                -0.7,
+                0.6
+              ]
+            },
+            {
+              "accion": "sentarse",
+              "desde_s": 11.9,
+              "hasta_s": 12.5,
+              "objeto": "silla",
+              "x_inicio": 700
+            },
+            {
+              "accion": "celebrar",
+              "desde_s": 12.6,
+              "hasta_s": 13.6,
+              "estilo": "sentado",
+              "objeto": "silla"
+            }
+          ]
+        }
+      ]
+    },
+    "abajo": {
+      "escena": {
+        "tipo": "habitacion",
+        "lampara": {
+          "x": 190,
+          "cable": 120,
+          "semilla": 50
+        },
+        "cartel": {
+          "dibujo": "silla_ideal",
+          "x": 630,
+          "y": 210,
+          "ancho": 250,
+          "alto": 230,
+          "semilla": 60
+        }
+      },
+      "objetos": [
+        {
+          "id": "madera",
+          "tipo": "pila_madera",
+          "x": 880,
+          "tablas": 6,
+          "cae_desde_s": 3.0,
+          "cae_hasta_s": 3.4,
+          "sonido": false
+        },
+        {
+          "tipo": "plano",
+          "boceto": "silla"
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "perfeccionista",
+          "postura": "sentado_suelo",
+          "paneo": 0.25,
+          "parpadeos_s": [
+            4.6,
+            7.8
+          ],
+          "acciones": [
+            {
+              "accion": "esperar",
+              "desde_s": 3.0,
+              "hasta_s": 3.9
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 3.9,
+              "hasta_s": 4.615,
+              "plano": "plano"
+            },
+            {
+              "accion": "medir",
+              "desde_s": 4.615,
+              "hasta_s": 5.165,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 5.165,
+              "hasta_s": 5.8525,
+              "plano": "plano"
+            },
+            {
+              "accion": "arrugar",
+              "desde_s": 5.8525,
+              "hasta_s": 6.65,
+              "plano": "plano"
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 6.65,
+              "hasta_s": 7.365,
+              "plano": "plano"
+            },
+            {
+              "accion": "medir",
+              "desde_s": 7.365,
+              "hasta_s": 7.915,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 7.915,
+              "hasta_s": 8.6025,
+              "plano": "plano"
+            },
+            {
+              "accion": "arrugar",
+              "desde_s": 8.6025,
+              "hasta_s": 9.4,
+              "plano": "plano"
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 9.4,
+              "hasta_s": 10.115,
+              "plano": "plano"
+            },
+            {
+              "accion": "medir",
+              "desde_s": 10.115,
+              "hasta_s": 10.665,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 10.665,
+              "hasta_s": 11.3525,
+              "plano": "plano"
+            },
+            {
+              "accion": "arrugar",
+              "desde_s": 11.3525,
+              "hasta_s": 12.15,
+              "plano": "plano"
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 12.15,
+              "hasta_s": 12.6,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 12.6,
+              "hasta_s": 13.2,
+              "plano": "plano"
+            },
+            {
+              "accion": "suspirar",
+              "desde_s": 13.25,
+              "hasta_s": 14.0
+            }
+          ]
+        }
+      ]
+    }
   },
   "audio": {
     "musica": "auto",

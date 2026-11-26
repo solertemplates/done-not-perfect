@@ -17,25 +17,16 @@ from pathlib import Path
 
 from . import audio
 from .config import ErrorConfig, cargar
-from .ep01_silla import EpisodioSilla
-from .ep02_escalera import EpisodioEscalera
-from .ep03_martillos import EpisodioMartillos
 from .guion import EpisodioGuion
 from .verificar import informe, verificar
 
 RAIZ = Path(__file__).resolve().parent.parent
-ESCENAS = {1: EpisodioSilla, 2: EpisodioEscalera, 3: EpisodioMartillos}
 
 _escena = None
 
 
 def crear_escena(ep):
-    if "guion" in ep.datos:
-        return EpisodioGuion(ep)
-    clase = ESCENAS.get(ep["episodio"])
-    if clase is None:
-        raise SystemExit(f"Todavía no hay animación para el episodio {ep['episodio']}.")
-    return clase(ep)
+    return EpisodioGuion(ep)
 
 
 def _iniciar(ruta_json: str):

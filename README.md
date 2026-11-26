@@ -12,6 +12,7 @@ Todo se genera por código en GitHub Actions: dibujo, animación, música y efec
 4. Abre el enlace de descarga directa del episodio:
    - Ep. 1: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep01_la_silla.mp4
    - Ep. 2: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep02_la_escalera.mp4
+   - Ep. 3: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep03_los_dos_martillos.mp4
 
    También lo tienes en el resumen de la ejecución y en la carpeta [`videos/`](videos/). Pulsa compartir y elige **Guardar vídeo** para llevarlo a Fotos.
 5. La miniatura (el primer fotograma) está al lado, en `videos/<episodio>_miniatura.png`.
@@ -37,6 +38,11 @@ Cada episodio elige su fondo con el campo `"fondo"` del JSON. Solo se permiten e
 | `morado_oscuro` | #171222 |
 
 Las ventanas muestran estrellitas, algunas con un parpadeo muy suave. Las lámparas proyectan un cono de luz ámbar cálido: es luz de ambiente, no el amarillo de riesgo.
+
+## Personajes
+
+- **Muñequitos de palo** (episodios 1 y 2): pantalla partida, arriba el Hacedor y abajo el Perfeccionista.
+- **Objetos con vida** (desde el episodio 3): cualquier objeto puede ser un personaje, siempre blanco y con cara de puntos y sonrisa. Para crear uno nuevo se define su forma en `dnp/objetos.py` (el martillo sirve de ejemplo).
 
 ## Tu propia música
 

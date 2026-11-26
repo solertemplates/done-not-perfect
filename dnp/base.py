@@ -20,18 +20,16 @@ from __future__ import annotations
 import math
 import random
 
-import numpy as np
 from PIL import Image
 
 from . import decorado as dec
 from . import personajes as pj
 from .config import Episodio
-from .lienzo import (BLANCO, ESCALA, FONDOS, ROJO, VERDE, Lienzo, capa, fondo, fuente, mezcla, rotar, tenue,
-                     texto, usar_fondo)
+from .motor import EpisodioMotor
+from .lienzo import BLANCO, ESCALA, ROJO, Lienzo, fondo, mezcla, tenue
 from .personajes import Pose
 from .tiempo import entra, lerp, limitar, oscila, pulso, rebote, sale, suave, tramo
 
-A_FIN = 11.0  # duración de la acción en unidades internas
 ALTO_PANEL = 960
 SUELO = dec.SUELO
 
@@ -55,38 +53,24 @@ def _uv(u, v, plano=PLANO):
     return (top[0] + (bot[0] - top[0]) * v, top[1] + (bot[1] - top[1]) * v)
 
 
-class EpisodioBase:
-    POS_GANCHO = "arriba"  # "arriba" (texto sobre la escena) o "centro" (tarjeta en la línea central)
+class EpisodioBase(EpisodioMotor):
+    """Formato de pantalla partida con muñequitos: arriba el Hacedor, abajo el Perfeccionista."""
+
     N_TABLAS = 6
 
     def __init__(self, ep: Episodio):
-        self.ep = ep
-        t = ep["tiempos"]
-        self.g = float(t["gancho_fin_s"])
-        self.r = float(t["rebobinado_fin_s"])
-        self.A = float(t["accion_fin_s"])
-        self.D = ep.duracion
-        self.k = (self.A - self.r) / A_FIN  # segundos reales por unidad de acción
-        # El último fotograma (D - 1/fps) debe ser idéntico al primero.
-        self.periodo_bucle = self.D - 1.0 / ep.fps
-        self.ancho, self.alto = ep.tamano
-        self.textos = ep["textos"]
         self.intentos = ep["perfeccionista"]["intentos"]
         self.n_tablas = self.N_TABLAS
         h = ep["hacedor"]
         self.incl0 = float(h["inclinacion_inicial_grados"])
         self.incl1 = float(h["inclinacion_final_grados"])
-        self.color_fondo = FONDOS[ep["fondo"]]
-        usar_fondo(self.color_fondo)
-        self.estrellas: list[dec.Estrella] = []
+        super().__init__(ep)
+
+    def _preparar(self):
         self._preparar_hacedor()
         self._preparar_perfeccionista()
-        self._fondo = self._decorado()
 
     # --- a definir en cada episodio ----------------------------------------------
-    def _decorado(self) -> Image.Image:
-        raise NotImplementedError
-
     def _preparar_hacedor(self):
         raise NotImplementedError
 
@@ -104,34 +88,10 @@ class EpisodioBase:
         img = Image.new("RGB", (self.ancho * ESCALA, self.alto * ESCALA), fondo())
         return img, Lienzo(img, 0, 0), Lienzo(img, 0, ALTO_PANEL)
 
-    # ------------------------------------------------------------------ tiempo
-    def accion(self, t: float) -> float:
-        if t < self.g:
-            return A_FIN
-        if t < self.r:
-            u = tramo(t, self.g, self.r)
-            return A_FIN * (1 - (0.5 * u + 0.5 * suave(u)))
-        if t < self.A:
-            return (t - self.r) / self.k
-        return A_FIN
-
-    def real(self, a: float) -> float:
-        """Convierte un instante de la acción a segundos del vídeo (para el audio)."""
-        return self.r + a * self.k
-
     # ------------------------------------------------------------- utilidades
     @staticmethod
     def _tabla(lz: Lienzo, centro, largo, grosor, angulo, semilla, color=BLANCO):
-        hx, hy = largo / 2, grosor / 2
-        pts = [rotar((centro[0] + dx, centro[1] + dy), centro, angulo)
-               for dx, dy in ((-hx, -hy), (hx, -hy), (hx, hy), (-hx, hy))]
-        lz.poligono(pts, relleno=fondo(), borde=color, ancho=3)
-        rnd = random.Random(semilla)
-        for _ in range(2):
-            y = rnd.uniform(-hy * 0.4, hy * 0.4)
-            x0, x1 = rnd.uniform(-hx * 0.8, -hx * 0.2), rnd.uniform(hx * 0.1, hx * 0.8)
-            lz.linea([rotar((centro[0] + x0, centro[1] + y), centro, angulo),
-                      rotar((centro[0] + x1, centro[1] + y), centro, angulo)], 1.4, mezcla(color, fondo(), 0.5))
+        dec.tabla(lz, centro, largo, grosor, angulo, semilla, color)
 
     def _pila(self, lz: Lienzo, base, n, caida: float, quitar: int = 0):
         """Pila de tablas. `caida` 0 = en el suelo; >0 = desplazada hacia arriba."""
@@ -181,18 +141,7 @@ class EpisodioBase:
     @staticmethod
     def _check(lz: Lienzo, a: float, c, t0: float = 9.6):
         """Marca verde de 'conseguido' que aparece con un pequeño estallido."""
-        if a < t0:
-            return
-        s = rebote(tramo(a, t0, t0 + 0.3), 2.2)
-        pts = [(-34, 0), (-10, 26), (38, -30)]
-        lz.linea([(c[0] + x * s, c[1] + y * s) for x, y in pts], 12 * max(s, 0.1), VERDE)
-        u = tramo(a, t0, t0 + 0.45)
-        if u < 1:
-            for k in range(8):
-                ang = 2 * math.pi * k / 8
-                r0, r1 = 50 + 40 * u, 62 + 52 * u
-                lz.linea([(c[0] + math.cos(ang) * r0, c[1] + math.sin(ang) * r0),
-                          (c[0] + math.cos(ang) * r1, c[1] + math.sin(ang) * r1)], 4 * (1 - u) + 0.5, VERDE)
+        dec.marca_ok(lz, a, c, t0)
 
     def _tabla_volando(self, lz: Lienzo, a: float, t0: float, t1: float, i: int, destino, largo, grosor,
                        vertical: bool):
@@ -450,100 +399,8 @@ class EpisodioBase:
         e = pj.dibujar(lz, pose, perfeccionista=True, en_mano=en_mano)
         self._soplido(lz, a, e)
 
-    # ================================================================ TEXTOS
-    def _alfas(self, t: float):
-        D, A = self.D, self.A
-        gancho = 1.0 - tramo(t, self.g - 0.18, self.g)
-        if t > A:
-            gancho = max(gancho, tramo(t, D - 0.45, D - 0.12))
-        cierre_in = tramo(t, A + 0.45, A + 0.6)
-        cierre_out = 1 - tramo(t, D - 0.75, D - 0.45)
-        cierre = cierre_in * cierre_out if t > A else 0.0
-        return gancho, cierre
-
-    def _tarjeta(self, img: Image.Image, trozos, alfa: float, escala: float = 1.0, tam_max: float = 130.0,
-                 ancho_max: float = 860.0):
-        """Texto grande sobre un recuadro redondeado, centrado en la línea de la pantalla partida."""
-        if alfa <= 0:
-            return
-        s = ESCALA
-        cx, cy = self.ancho / 2, ALTO_PANEL
-        cadena = "".join(c for c, _ in trozos)
-        tam = min(tam_max, tam_max * ancho_max / (fuente(int(tam_max * s)).getlength(cadena) / s))
-        ancho_txt = fuente(int(tam * s)).getlength(cadena) / s
-        w, h = (ancho_txt + 110) * escala, tam * 1.75 * escala
-
-        def plato(d, x0, y0):
-            d.rounded_rectangle(
-                (cx * s - w * s / 2 - x0, cy * s - h * s / 2 - y0, cx * s + w * s / 2 - x0, cy * s + h * s / 2 - y0),
-                radius=int(40 * s * escala), fill=fondo() + (255,), outline=BLANCO + (255,), width=int(4 * s))
-
-        caja = (int((cx - w / 2) * s) - 8, int((cy - h / 2) * s) - 8, int((cx + w / 2) * s) + 8, int((cy + h / 2) * s) + 8)
-        capa(img, caja, plato, alfa)
-        texto(img, trozos, (cx, cy - 4), tam * escala, alfa)
-
-    def _cierre(self, img: Image.Image, t: float, alfa: float):
-        if alfa <= 0:
-            return
-        escala = max(0.3, rebote(tramo(t, self.A + 0.45, self.A + 0.8), 2.0))
-        partes = self.textos["cierre"].split(">")
-        if len(partes) == 2:
-            trozos = [(partes[0].rstrip() + " ", VERDE), (">", BLANCO), (" " + partes[1].lstrip(), ROJO)]
-        else:
-            trozos = [(self.textos["cierre"], BLANCO)]
-        self._tarjeta(img, trozos, alfa, escala)
-
-    def _gancho(self, img: Image.Image, alfa: float):
-        if self.POS_GANCHO == "centro":
-            self._tarjeta(img, [(self.textos["gancho"], BLANCO)], alfa, tam_max=74, ancho_max=820)
-        else:
-            texto(img, [(self.textos["gancho"], BLANCO)], (self.ancho / 2, 150), 66, alfa)
-
-    def _rebobinado(self, arr: np.ndarray, t: float):
-        """Efecto de cinta rebobinando: líneas desplazadas, bandas de ruido y franjas."""
-        u = tramo(t, self.g, self.r)
-        fuerza = min(1.0, tramo(t, self.g, self.g + 0.12)) * (1 - tramo(t, self.r - 0.18, self.r))
-        if fuerza <= 0:
-            return arr
-        rnd = np.random.default_rng(int(t * 1000))
-        alto = arr.shape[0]
-        for _ in range(5):
-            y0 = int(rnd.integers(0, alto - 60))
-            hh = int(rnd.integers(8, 50))
-            arr[y0:y0 + hh] = np.roll(arr[y0:y0 + hh], int(rnd.integers(-40, 40) * fuerza), axis=1)
-        banda = int((u * 3.3 % 1) * alto)
-        hb = 34
-        seg = arr[banda:banda + hb].astype(np.int16)
-        ruido = rnd.integers(0, 200, size=seg.shape[:2], dtype=np.int16)[..., None]
-        seg = np.clip(seg + (ruido * fuerza * (ruido > 170)).astype(np.int16), 0, 255)
-        arr[banda:banda + hb] = seg.astype(np.uint8)
-        arr[::4] = (arr[::4].astype(np.float32) * (1 - 0.22 * fuerza)
-                    + np.array(fondo(), np.float32) * 0.22 * fuerza).astype(np.uint8)
-        return arr
-
-    def _icono_rebobinar(self, img: Image.Image, t: float):
-        if not (self.g <= t < self.r):
-            return
-        alfa = tramo(t, self.g, self.g + 0.1) * (1 - tramo(t, self.r - 0.15, self.r))
-        parpadeo = 0.75 + 0.25 * (1 if int(t * 6) % 2 else 0)
-        cx, cy, s = self.ancho / 2, ALTO_PANEL, ESCALA
-
-        def dib(d, x0, y0):
-            d.ellipse(((cx - 70) * s - x0, (cy - 70) * s - y0, (cx + 70) * s - x0, (cy + 70) * s - y0),
-                      fill=fondo() + (255,), outline=BLANCO + (255,), width=4 * s)
-            for dx in (-34, 6):
-                d.polygon([((cx + dx + 34) * s - x0, (cy - 30) * s - y0), ((cx + dx) * s - x0, cy * s - y0),
-                           ((cx + dx + 34) * s - x0, (cy + 30) * s - y0)], fill=BLANCO + (255,))
-
-        capa(img, (int((cx - 76) * s), int((cy - 76) * s), int((cx + 76) * s), int((cy + 76) * s)), dib,
-             alfa * parpadeo)
-
     # ============================================================== FOTOGRAMA
-    def fotograma(self, t: float) -> Image.Image:
-        usar_fondo(self.color_fondo)
-        a = self.accion(t)
-        fase_bucle = (t / self.periodo_bucle) % 1.0
-        img = self._fondo.copy()
+    def _dibujar(self, img: Image.Image, a: float, fase_bucle: float):
         # Cada panel se dibuja recortado, para que nada invada la otra mitad.
         for i, dibujar_panel in enumerate((self._panel_hacedor, self._panel_perfeccionista)):
             caja = (0, i * ALTO_PANEL * ESCALA, self.ancho * ESCALA, (i + 1) * ALTO_PANEL * ESCALA)
@@ -554,22 +411,12 @@ class EpisodioBase:
             img.paste(panel, caja[:2])
         # Separación de la pantalla partida.
         Lienzo(img).boceto((0, ALTO_PANEL), (self.ancho, ALTO_PANEL), 3.2, tenue(0.85), semilla=999, amp=1.0)
-        gancho, cierre = self._alfas(t)
-        self._gancho(img, gancho)
-        self._cierre(img, t, cierre)
-        self._icono_rebobinar(img, t)
-        texto(img, [(self.textos["marca"], tenue(0.75))], (44, 62), 26, 1.0, ancla="lm")
-        img = img.reduce(ESCALA)
-        if self.g <= t < self.r:
-            arr = self._rebobinado(np.array(img), t)
-            img = Image.fromarray(arr)
-        return img
 
     # ================================================================== AUDIO
-    def eventos_audio(self):
-        """Lista de (segundo, efecto, ganancia, paneo, parámetros)."""
+    def eventos_episodio(self):
+        """Efectos del formato de pantalla partida: madera, Hacedor y Perfeccionista."""
         R = self.real
-        ev = [(self.g, "rebobinado", 0.8, 0.0, {"dur": self.r - self.g}), (R(0.4), "golpe_madera", 0.9, 0.0, {})]
+        ev = [(R(0.4), "golpe_madera", 0.9, 0.0, {})]
         ev += self.eventos_hacedor()
         ciclos, final = self.tiempos_ciclo()
         for k, c in enumerate(ciclos):
@@ -583,5 +430,4 @@ class EpisodioBase:
         ev.append((R(final["dibuja"][0]), "lapiz", 0.5, 0.25, {"dur": 0.45 * self.k}))
         ev.append((R(final["borra"][0]), "borrador", 0.75, 0.25, {"dur": 0.6 * self.k}))
         ev.append((R(final["suspira"][0]), "suspiro", 0.9, 0.2, {"dur": 1.1}))
-        ev.append((self.A + 0.45, "titulo", 0.8, 0.0, {}))
         return ev

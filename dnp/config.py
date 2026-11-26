@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .lienzo import FONDOS
+
 
 class ErrorConfig(Exception):
     """El JSON del episodio no es válido. `errores` contiene cada problema."""
@@ -33,6 +35,7 @@ ESQUEMA: dict[str, Any] = {
     "episodio": {"tipo": int, "min": 1, "max": 999},
     "id": {"tipo": str, "patron_id": True, "max_len": 60},
     "titulo": {"tipo": str, "max_len": 60},
+    "fondo": {"tipo": str, "opciones": list(FONDOS)},
     "video": {
         "tipo": dict,
         "campos": {
@@ -135,6 +138,12 @@ def _validar_valor(valor: Any, regla: dict, nombre: str, errores: list[str]) -> 
         return
     if tipo is dict:
         _validar_objeto(valor, regla["campos"], f"{nombre}.", errores)
+        return
+    if "opciones" in regla and valor not in regla["opciones"]:
+        sugerencia = difflib.get_close_matches(str(valor), regla["opciones"], n=1, cutoff=0.5)
+        extra = f" ¿Querías decir \"{sugerencia[0]}\"?" if sugerencia else ""
+        opciones = ", ".join(f'"{o}"' for o in regla["opciones"])
+        errores.append(f"'{nombre}' vale \"{valor}\", que no está permitido.{extra} Opciones: {opciones}.")
         return
     if "igual" in regla and valor != regla["igual"]:
         errores.append(

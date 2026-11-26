@@ -15,14 +15,34 @@ from PIL import Image, ImageDraw, ImageFont
 
 ESCALA = 2
 
-# Paleta fija de la serie. Los colores solo se usan como concepto.
-FONDO = (14, 15, 18)  # #0E0F12
+# Fondos permitidos: siempre MUY oscuros para que los personajes blancos resalten.
+FONDOS = {
+    "negro": (0x0E, 0x0F, 0x12),  # #0E0F12
+    "azul_noche": (0x0D, 0x14, 0x24),  # #0D1424
+    "marron_cafe": (0x1A, 0x13, 0x0E),  # #1A130E
+    "gris_pizarra": (0x15, 0x18, 0x1C),  # #15181C
+    "morado_oscuro": (0x17, 0x12, 0x22),  # #171222
+}
+FONDO = FONDOS["negro"]  # fondo por defecto (episodio 1)
+_fondo_actual = [FONDO]
+
+
+def fondo():
+    """Color de fondo del episodio que se está dibujando."""
+    return _fondo_actual[0]
+
+
+def usar_fondo(color) -> None:
+    _fondo_actual[0] = tuple(color)
+
+
 BLANCO = (245, 245, 240)
 VERDE = (64, 214, 128)  # logro / ahorro
 ROJO = (236, 78, 78)  # fracaso / deuda
 AMARILLO = (244, 196, 64)  # riesgo
 AZUL = (80, 160, 255)  # IA
-TINTA = FONDO  # rasgos oscuros sobre la cabeza blanca
+LUZ_LAMPARA = (0xFF, 0xC8, 0x73)  # ámbar cálido de ambiente (no es el amarillo de riesgo)
+TINTA = (14, 15, 18)  # rasgos de la cara: iguales en todos los episodios
 
 
 def mezcla(c1, c2, t: float):
@@ -32,7 +52,7 @@ def mezcla(c1, c2, t: float):
 
 def tenue(alfa: float, color=BLANCO):
     """Color 'semitransparente' sobre el fondo (sin coste de alfa real)."""
-    return mezcla(FONDO, color, alfa)
+    return mezcla(fondo(), color, alfa)
 
 
 def rotar(p, centro, grados: float):
@@ -113,7 +133,7 @@ class Lienzo:
             a0 = (p0[0] - (p1[0] - p0[0]) * ext, p0[1] - (p1[1] - p0[1]) * ext)
             sub = trazo(amp * 1.4)
             sub[0] = a0
-            self.linea(sub, ancho * 0.6, mezcla(color, FONDO, 0.55))
+            self.linea(sub, ancho * 0.6, mezcla(color, fondo(), 0.55))
 
     def boceto_poli(self, pts, ancho: float = 2.2, color=BLANCO, semilla: int = 0, cerrado: bool = False, amp=1.6):
         pares = list(zip(pts, pts[1:] + ([pts[0]] if cerrado else [])))

@@ -3,6 +3,7 @@
   "episodio": 1,
   "id": "ep01_la_silla",
   "titulo": "La silla",
+  "fondo": "negro",
   "video": {
     "ancho": 1080,
     "alto": 1920,

@@ -11,7 +11,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field, replace
 
-from .lienzo import BLANCO, FONDO, TINTA, Lienzo
+from .lienzo import BLANCO, TINTA, Lienzo, fondo
 
 R_CABEZA = 80
 TORSO = 150
@@ -176,9 +176,9 @@ def _lapiz_oreja(lz: Lienzo, e, p: Pose):
         (base[0] + nx, base[1] + ny), (cuerpo_fin[0] + nx, cuerpo_fin[1] + ny),
         (cuerpo_fin[0] - nx, cuerpo_fin[1] - ny), (base[0] - nx, base[1] - ny),
     ]
-    lz.poligono(cuerpo, relleno=FONDO, borde=BLANCO, ancho=4)
+    lz.poligono(cuerpo, relleno=fondo(), borde=BLANCO, ancho=4)
     lz.poligono([(cuerpo_fin[0] + nx, cuerpo_fin[1] + ny), punta, (cuerpo_fin[0] - nx, cuerpo_fin[1] - ny)],
-                relleno=FONDO, borde=BLANCO, ancho=4)
+                relleno=fondo(), borde=BLANCO, ancho=4)
     mina = (base[0] + ux * (L - 8), base[1] + uy * (L - 8))
     lz.linea([mina, punta], 5, BLANCO)
     goma = (base[0] + ux * 14, base[1] + uy * 14)

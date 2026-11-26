@@ -102,3 +102,42 @@ def test_no_modifica_entrada(datos):
     copia = copy.deepcopy(datos)
     validar(datos)
     assert datos == copia
+
+
+def test_fondo_valido_por_nombre(datos):
+    for nombre in ("negro", "azul_noche", "marron_cafe", "gris_pizarra", "morado_oscuro"):
+        datos["fondo"] = nombre
+        validar(datos)
+
+
+def test_fondo_no_permitido(datos):
+    datos["fondo"] = "rojo"
+    (e,) = errores(datos)
+    assert "'fondo' vale \"rojo\", que no está permitido" in e
+    assert '"marron_cafe"' in e
+
+
+def test_fondo_sugerencia(datos):
+    datos["fondo"] = "marron"
+    assert "¿Querías decir \"marron_cafe\"?" in errores(datos)[0]
+
+
+def test_falta_fondo(datos):
+    del datos["fondo"]
+    assert errores(datos) == ["Falta el campo obligatorio 'fondo'."]
+
+
+def test_fondos_muy_oscuros_y_distintos_de_los_colores_de_concepto():
+    from dnp.lienzo import AMARILLO, AZUL, FONDOS, ROJO, VERDE
+
+    for nombre, (r, g, b) in FONDOS.items():
+        assert 0.2126 * r + 0.7152 * g + 0.0722 * b < 25, nombre  # tan oscuro como el negro de la serie
+        for concepto in (VERDE, ROJO, AMARILLO, AZUL):
+            assert sum(abs(x - y) for x, y in zip((r, g, b), concepto)) > 250, nombre
+
+
+def test_episodio_2_es_valido():
+    from tests.conftest import EP2
+
+    ep = cargar(EP2)
+    assert ep["fondo"] == "marron_cafe"

@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       episodio:
-        description: "JSON del episodio"
+        description: "Episodio"
         required: true
-        default: "episodios/ep01_la_silla.json"
+        type: choice
+        default: "episodios/ep02_la_escalera.json"
+        options:
+          - "episodios/ep01_la_silla.json"
+          - "episodios/ep02_la_escalera.json"
 
 permissions:
   contents: write  # necesario para guardar el vídeo en main

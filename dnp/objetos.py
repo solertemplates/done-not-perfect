@@ -207,12 +207,12 @@ class PistaObjeto:
     def en(self, a: float) -> EstadoObjeto:
         c = self.claves
         if a <= c[0].t:
-            return c[0].estado
+            return replace(c[0].estado)  # siempre una copia: quien la use puede modificarla sin estropear la pista
         for k0, k1 in zip(c, c[1:]):
             if a <= k1.t:
                 u = 0.0 if k1.t == k0.t else (a - k0.t) / (k1.t - k0.t)
                 return mezclar_estado(k0.estado, k1.estado, _CURVAS[k1.curva](min(1.0, max(0.0, u))), k1.salto)
-        return c[-1].estado
+        return replace(c[-1].estado)
 
 
 # --- Catálogo de objetos -------------------------------------------------------

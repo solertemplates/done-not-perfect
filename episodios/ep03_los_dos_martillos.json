@@ -20,11 +20,268 @@
     "cierre": "Done > Perfect",
     "marca": "Done, not perfect"
   },
-  "perfeccionista": {
-    "intentos": 3
-  },
-  "hacedor": {
-    "inclinacion_tapa_grados": 2.5
+  "guion": {
+    "formato": "escena_unica",
+    "gancho": "arriba",
+    "cierre_y": 1515,
+    "escena": {
+      "tipo": "taller",
+      "ventana": {
+        "x": 96,
+        "y": 262,
+        "ancho": 170,
+        "alto": 140,
+        "semilla": 130,
+        "estrellas": 1.8
+      },
+      "lampara": {
+        "x": 540,
+        "cable": 330,
+        "semilla": 120,
+        "techo": 205,
+        "luz_hasta_y": 1250,
+        "ancho_luz": 860
+      }
+    },
+    "objetos": [
+      {
+        "tipo": "caja",
+        "inclinacion_tapa_grados": 2.5
+      },
+      {
+        "tipo": "tabla",
+        "x": 600,
+        "y": 1250,
+        "ancho": 280,
+        "clavos_tumbados": [
+          632,
+          668,
+          798,
+          832,
+          862
+        ],
+        "clavo_x": 740
+      },
+      {
+        "tipo": "aro_rojo",
+        "x": 740,
+        "y": 1208,
+        "aparece_s": 12.0
+      },
+      {
+        "tipo": "marca_ok",
+        "x": 262,
+        "y": 1056,
+        "aparece_s": 9.8,
+        "paneo": -0.2
+      }
+    ],
+    "personajes": [
+      {
+        "tipo": "martillo_perfeccionista",
+        "x": 905,
+        "y": 1250,
+        "espejo": true,
+        "paneo": 0.3,
+        "parpadeos_s": [
+          5.0,
+          9.4
+        ],
+        "acciones": [
+          {
+            "accion": "esperar",
+            "desde_s": 3.0,
+            "hasta_s": 3.3
+          },
+          {
+            "accion": "colocar_clavo",
+            "desde_s": 3.3,
+            "hasta_s": 3.6,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "medir",
+            "desde_s": 3.6,
+            "hasta_s": 4.216,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "sacar_clavo",
+            "desde_s": 4.216,
+            "hasta_s": 4.59,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "medir",
+            "desde_s": 4.59,
+            "hasta_s": 5.14,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "poner_clavo",
+            "desde_s": 5.14,
+            "hasta_s": 5.8,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "medir",
+            "desde_s": 5.8,
+            "hasta_s": 6.416,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "sacar_clavo",
+            "desde_s": 6.416,
+            "hasta_s": 6.79,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "medir",
+            "desde_s": 6.79,
+            "hasta_s": 7.34,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "poner_clavo",
+            "desde_s": 7.34,
+            "hasta_s": 8.0,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "medir",
+            "desde_s": 8.0,
+            "hasta_s": 8.616,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "sacar_clavo",
+            "desde_s": 8.616,
+            "hasta_s": 8.99,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "medir",
+            "desde_s": 8.99,
+            "hasta_s": 9.54,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "poner_clavo",
+            "desde_s": 9.54,
+            "hasta_s": 10.2,
+            "objeto": "tabla"
+          },
+          {
+            "accion": "dudar",
+            "desde_s": 10.2,
+            "hasta_s": 11.6
+          },
+          {
+            "accion": "suspirar",
+            "desde_s": 11.8,
+            "hasta_s": 12.8
+          },
+          {
+            "accion": "medir",
+            "desde_s": 12.8,
+            "hasta_s": 13.4,
+            "objeto": "tabla"
+          }
+        ]
+      },
+      {
+        "tipo": "martillo_hacedor",
+        "x": 478,
+        "y": 1250,
+        "espejo": true,
+        "paneo": -0.3,
+        "parpadeos_s": [
+          5.3,
+          8.9
+        ],
+        "acciones": [
+          {
+            "accion": "preparar",
+            "desde_s": 3.0,
+            "hasta_s": 3.45
+          },
+          {
+            "accion": "construir",
+            "desde_s": 3.45,
+            "hasta_s": 8.7,
+            "objeto": "caja",
+            "partes": [
+              {
+                "aparece_s": 3.6,
+                "tocs_s": [
+                  3.85,
+                  4.0,
+                  4.15
+                ]
+              },
+              {
+                "aparece_s": 4.5,
+                "tocs_s": [
+                  4.75,
+                  4.9,
+                  5.05
+                ]
+              },
+              {
+                "aparece_s": 5.4,
+                "tocs_s": [
+                  5.65,
+                  5.8,
+                  5.95
+                ]
+              },
+              {
+                "aparece_s": 6.3,
+                "tocs_s": [
+                  6.55,
+                  6.7,
+                  7.6,
+                  7.75
+                ]
+              },
+              {
+                "aparece_s": 8.1,
+                "tocs_s": [
+                  8.35,
+                  8.5,
+                  8.65
+                ]
+              }
+            ],
+            "clavo_torcido": {
+              "parte": 3,
+              "toc": 2,
+              "sorpresa_hasta_s": 7.15,
+              "endereza_s": 7.35
+            }
+          },
+          {
+            "accion": "caminar",
+            "desde_s": 8.7,
+            "hasta_s": 9.3,
+            "x": 478,
+            "angulo": -9,
+            "espejo": true,
+            "salto": 70
+          },
+          {
+            "accion": "celebrar",
+            "desde_s": 9.3,
+            "hasta_s": 10.5
+          },
+          {
+            "accion": "mirar",
+            "desde_s": 11.2,
+            "hasta_s": 12.8
+          }
+        ]
+      }
+    ]
   },
   "audio": {
     "musica": "auto",

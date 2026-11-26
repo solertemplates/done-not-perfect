@@ -13,11 +13,6 @@ EP4 = RAIZ / "episodios" / "04_roca.json"
 EPISODIOS = [EP1, EP2, EP3, EP4]
 
 
-@pytest.fixture
-def datos():
-    return json.loads(EP1.read_text(encoding="utf-8"))
-
-
 def _crear(ruta):
     from dnp.config import cargar
     from dnp.render import crear_escena
@@ -25,15 +20,33 @@ def _crear(ruta):
     return crear_escena(cargar(ruta))
 
 
+def _leer(ruta):
+    return json.loads(ruta.read_text(encoding="utf-8"))
+
+
+@pytest.fixture
+def datos():
+    return _leer(EP1)
+
+
+@pytest.fixture
+def datos_roca():
+    return _leer(EP4)
+
+
+@pytest.fixture
+def datos_martillos():
+    return _leer(EP3)
+
+
 @pytest.fixture(scope="session")
 def escena():
-    """Episodio 1 (se mantiene por compatibilidad con los tests de audio)."""
     return _crear(EP1)
 
 
-@pytest.fixture(scope="session", params=EPISODIOS, ids=lambda p: p.stem)
-def cada_escena(request):
-    return _crear(request.param)
+@pytest.fixture(scope="session")
+def escalera():
+    return _crear(EP2)
 
 
 @pytest.fixture(scope="session")
@@ -46,6 +59,6 @@ def roca():
     return _crear(EP4)
 
 
-@pytest.fixture
-def datos_roca():
-    return json.loads(EP4.read_text(encoding="utf-8"))
+@pytest.fixture(scope="session", params=EPISODIOS, ids=lambda p: p.stem)
+def cada_escena(request):
+    return _crear(request.param)

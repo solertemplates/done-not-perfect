@@ -1,10 +1,10 @@
+"""Reglas comunes a todos los episodios (bucle, cero negros, fondo, estrellas, luz)."""
 import numpy as np
 import pytest
 
 from dnp.lienzo import FONDOS
 
-# Umbral de blackdetect (pix_th=0.10) en luma de rango completo: ~25.5.
-UMBRAL_LUMA = 26
+UMBRAL_LUMA = 26  # umbral de blackdetect (pix_th=0.10) en luma de rango completo
 
 
 def luma(img):
@@ -16,7 +16,7 @@ def test_tamano_y_fondo(cada_escena):
     img = cada_escena.fotograma(0)
     assert img.size == (1080, 1920)
     colores, cuentas = np.unique(np.asarray(img).reshape(-1, 3), axis=0, return_counts=True)
-    assert tuple(colores[cuentas.argmax()]) == FONDOS[cada_escena.ep["fondo"]]  # el fondo es lo que más hay
+    assert tuple(colores[cuentas.argmax()]) == FONDOS[cada_escena.ep["fondo"]]
 
 
 def test_ultimo_fotograma_empalma_con_el_primero(cada_escena):
@@ -45,52 +45,30 @@ def test_nunca_negro(cada_escena, seg):
     assert claros > 0.04, f"segundo {seg}: solo {claros:.1%} de píxeles claros"
 
 
-def test_perfeccionista_nunca_termina(cada_escena):
-    e = cada_escena
-    if not hasattr(e, "tiempos_ciclo"):
-        pytest.skip("formato de muñequitos")
-    assert e._fases(11)[0] == "fin"
-    assert len(e.tiempos_ciclo()[0]) == e.intentos == 3
-
-
 def test_eventos_de_audio_dentro_del_video(cada_escena):
     ev = cada_escena.eventos_audio()
     nombres = {e[1] for e in ev}
     assert {"suspiro", "ding", "rebobinado", "titulo"} <= nombres
-    assert nombres & {"martillo", "mandarria"}  # siempre hay golpes
+    assert nombres & {"martillo", "mandarria"}
     assert all(0 <= e[0] < cada_escena.D for e in ev)
-    if cada_escena.ep["episodio"] in (1, 2):
-        assert {"borrador", "papel"} <= nombres
-        assert sum(1 for e in ev if e[1] == "papel") == 3
 
 
 def test_hay_estrellas_que_parpadean(cada_escena):
     e = cada_escena
     assert len(e.estrellas) >= 3
-    # Parpadean de verdad durante el vídeo...
     brillos = [[s.brillo_en(f) for f in np.linspace(0, 1, 9)] for s in e.estrellas]
     assert any(max(b) - min(b) > 0.1 for b in brillos)
-    # ...pero empiezan y acaban igual (bucle perfecto).
     for s in e.estrellas:
         assert s.brillo_en(0.0) == pytest.approx(s.brillo_en(1.0))
 
 
 def test_luz_de_lampara_ambar_y_suave(cada_escena):
-    """Bajo la lámpara el fondo se calienta (más rojo que azul) pero sigue siendo oscuro."""
-    if "guion" in cada_escena.ep.datos:
-        pytest.skip("la cantera de noche no tiene lámpara")
+    conf = cada_escena.ep["guion"]
+    escenas = [conf[z]["escena"] for z in ("arriba", "abajo")] if "arriba" in conf else [conf["escena"]]
+    if not any("lampara" in e for e in escenas):
+        pytest.skip("este episodio no tiene lámpara")
     arr = np.asarray(cada_escena._fondo.reduce(2)).astype(int)
-    abajo = arr
     fondo = np.array(FONDOS[cada_escena.ep["fondo"]])
-    calidos = (abajo[..., 0] - abajo[..., 2] > fondo[0] - fondo[2] + 8) & (abajo.sum(-1) < 300)
-    assert calidos.mean() > 0.02  # hay un cono de luz visible
-    assert abajo[calidos].max() < 200  # y es tenue: nunca compite con los personajes blancos
-
-
-def test_escalera_se_arregla(cada_escena):
-    e = cada_escena
-    if e.ep["episodio"] != 2:
-        pytest.skip("solo episodio 2")
-    assert e._torcido(11) == pytest.approx(e.incl1)
-    assert e._torcido(11) < e._torcido(6.0)
-    assert e._balanceo(11) == 0
+    calidos = (arr[..., 0] - arr[..., 2] > fondo[0] - fondo[2] + 8) & (arr.sum(-1) < 300)
+    assert calidos.mean() > 0.02
+    assert arr[calidos].max() < 200

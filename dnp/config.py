@@ -61,11 +61,7 @@ ESQUEMA: dict[str, Any] = {
             "marca": {"tipo": str, "max_len": 30},
         },
     },
-    "perfeccionista": {
-        "tipo": dict,
-        "campos": {"intentos": {"tipo": int, "min": 1, "max": 4}},
-    },
-    "hacedor": {"tipo": dict, "campos": None},  # depende del episodio: ver HACEDOR_POR_EPISODIO
+    "guion": {"tipo": dict, "campos": None},  # se valida aparte (dnp/guion.py)
     "audio": {
         "tipo": dict,
         "campos": {
@@ -75,17 +71,6 @@ ESQUEMA: dict[str, Any] = {
             "bpm_aproximado": {"tipo": _NUM, "min": 50, "max": 160},
         },
     },
-}
-
-# Ajustes del Hacedor de cada episodio (cada historia tiene los suyos).
-_HACEDOR_MUNECOS = {
-    "inclinacion_inicial_grados": {"tipo": _NUM, "min": 2, "max": 15},
-    "inclinacion_final_grados": {"tipo": _NUM, "min": 0, "max": 10},
-}
-HACEDOR_POR_EPISODIO = {
-    1: _HACEDOR_MUNECOS,
-    2: _HACEDOR_MUNECOS,
-    3: {"inclinacion_tapa_grados": {"tipo": _NUM, "min": 0, "max": 8}},
 }
 
 _NOMBRE_TIPO = {
@@ -142,6 +127,13 @@ def _validar_valor(valor: Any, regla: dict, nombre: str, errores: list[str]) -> 
             f"'{nombre}' debe ser {_tipo_esperado(tipo)}, pero es {_tipo_de(valor)} ({json.dumps(valor, ensure_ascii=False)})."
         )
         return
+    if tipo is list and "elemento" in regla:
+        for j, x in enumerate(valor):
+            if not _cumple_tipo(x, regla["elemento"]):
+                errores.append(f"'{nombre}[{j}]' debe ser {_tipo_esperado(regla['elemento'])}, pero es {_tipo_de(x)}.")
+        if "largo" in regla and len(valor) != regla["largo"]:
+            errores.append(f"'{nombre}' debe tener {regla['largo']} valores, pero tiene {len(valor)}.")
+        return
     if tipo is dict:
         if regla["campos"] is not None:  # None = no se puede comprobar por dentro (episodio desconocido)
             _validar_objeto(valor, regla["campos"], f"{nombre}.", errores)
@@ -193,12 +185,6 @@ def _validar_coherencia(d: dict, errores: list[str]) -> None:
         errores.append(
             f"'video.duracion_s' ({dur}) por 'video.fps' ({v['fps']}) debe dar un número entero de fotogramas."
         )
-    h = d.get("hacedor", {})
-    if "inclinacion_final_grados" in h and h["inclinacion_final_grados"] >= h["inclinacion_inicial_grados"]:
-        errores.append(
-            "'hacedor.inclinacion_final_grados' debe ser menor que 'hacedor.inclinacion_inicial_grados': "
-            "al arreglarla, la silla tiene que quedar mejor."
-        )
     musica = d["audio"]["musica"]
     if musica not in ("auto", "generada") and not musica.startswith("audio/"):
         errores.append(
@@ -238,21 +224,8 @@ def validar(datos: Any, archivo: str | None = None) -> Episodio:
     if not isinstance(datos, dict):
         raise ErrorConfig([f"El contenido principal debe ser un objeto {{ }}, pero es {_tipo_de(datos)}."], archivo)
     esquema = dict(ESQUEMA)
-    num = datos.get("episodio")
-    con_guion = "guion" in datos
-    if con_guion:
-        # Episodio hecho solo con JSON: no usa los bloques de los episodios programados a mano.
-        del esquema["hacedor"], esquema["perfeccionista"]
-        esquema["guion"] = {"tipo": dict, "campos": None}
-    elif isinstance(num, int) and not isinstance(num, bool) and num in HACEDOR_POR_EPISODIO:
-        esquema["hacedor"] = {"tipo": dict, "campos": HACEDOR_POR_EPISODIO[num]}
-    else:
-        esquema["hacedor"] = {"tipo": dict, "campos": None}
-        if isinstance(num, int) and not isinstance(num, bool) and 1 <= num <= 999:
-            disponibles = ", ".join(str(n) for n in sorted(HACEDOR_POR_EPISODIO))
-            errores.append(f"Todavía no hay animación para el episodio {num}. Episodios disponibles: {disponibles}.")
     _validar_objeto(datos, esquema, "", errores)
-    if con_guion and isinstance(datos.get("guion"), dict):
+    if isinstance(datos.get("guion"), dict):
         from .guion import validar_guion  # aquí para evitar una importación circular
 
         validar_guion(datos, errores)

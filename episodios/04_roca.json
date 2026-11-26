@@ -22,27 +22,90 @@
   },
   "guion": {
     "formato": "pantalla_partida",
-    "escena": "cantera_noche",
     "gancho": "centro",
     "arriba": {
-      "personaje": "hacedor",
-      "herramienta": "mandarria",
-      "objeto": { "tipo": "roca", "golpes_para_partir": 100, "brillo": "verde" },
-      "contador": { "color_final": "verde" },
-      "acciones": [
-        { "accion": "golpear", "desde_s": 3.0, "hasta_s": 13.0, "golpes": 99, "velocidad": "rapida" },
-        { "accion": "golpear", "desde_s": 13.4, "hasta_s": 14.0, "golpes": 1, "velocidad": "lenta" },
-        { "accion": "celebrar", "desde_s": 14.15, "hasta_s": 15.0 }
+      "escena": {
+        "tipo": "cantera_noche"
+      },
+      "objetos": [
+        {
+          "tipo": "roca",
+          "golpes_para_partir": 100,
+          "brillo": "verde"
+        },
+        {
+          "tipo": "contador",
+          "de": "hacedor",
+          "color_final": "verde"
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "hacedor",
+          "herramienta": "mandarria",
+          "paneo": -0.2,
+          "acciones": [
+            {
+              "accion": "golpear",
+              "desde_s": 3.0,
+              "hasta_s": 13.0,
+              "golpes": 99,
+              "velocidad": "rapida",
+              "objeto": "roca"
+            },
+            {
+              "accion": "golpear",
+              "desde_s": 13.4,
+              "hasta_s": 14.0,
+              "golpes": 1,
+              "velocidad": "lenta",
+              "objeto": "roca"
+            },
+            {
+              "accion": "celebrar",
+              "desde_s": 14.15,
+              "hasta_s": 15.0
+            }
+          ]
+        }
       ]
     },
     "abajo": {
-      "personaje": "perfeccionista",
-      "herramienta": "mandarria",
-      "objeto": { "tipo": "roca", "golpes_para_partir": 100 },
-      "contador": { "color_final": "rojo" },
-      "acciones": [
-        { "accion": "golpear", "desde_s": 3.0, "hasta_s": 13.0, "golpes": 99, "velocidad": "rapida" },
-        { "accion": "rendirse", "desde_s": 13.0, "hasta_s": 15.0 }
+      "escena": {
+        "tipo": "cantera_noche"
+      },
+      "objetos": [
+        {
+          "tipo": "roca",
+          "golpes_para_partir": 100
+        },
+        {
+          "tipo": "contador",
+          "de": "perfeccionista",
+          "color_final": "rojo"
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "perfeccionista",
+          "herramienta": "mandarria",
+          "paneo": 0.2,
+          "acciones": [
+            {
+              "accion": "golpear",
+              "desde_s": 3.0,
+              "hasta_s": 13.0,
+              "golpes": 99,
+              "velocidad": "rapida",
+              "objeto": "roca"
+            },
+            {
+              "accion": "rendirse",
+              "desde_s": 13.0,
+              "hasta_s": 15.0
+            }
+          ]
+        }
       ]
     }
   },

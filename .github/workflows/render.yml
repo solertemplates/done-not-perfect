@@ -9,7 +9,7 @@ on:
         default: "episodios/ep01_la_silla.json"
 
 permissions:
-  contents: read
+  contents: write  # necesario para publicar la Release
 
 jobs:
   render:
@@ -38,6 +38,30 @@ jobs:
         env:
           EPISODIO: ${{ inputs.episodio }}
         run: python -m dnp.render "$EPISODIO" --salida salida --capturas 0,8,16
+
+      - name: Publicar en Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EPISODIO: ${{ inputs.episodio }}
+        run: |
+          read -r ID NUM TITULO < <(python -c "import json,sys; d=json.load(open(sys.argv[1], encoding='utf-8')); print(d['id'], d['episodio'], d['titulo'])" "$EPISODIO")
+          read -r FECHA HORA HORA_TXT < <(date -u '+%Y-%m-%d %H%M %H:%M')
+          TAG="${ID}-${FECHA}-${HORA}"
+          {
+            echo "Episodio ${NUM}: ${TITULO}"
+            echo
+            echo "Descarga el MP4 y la miniatura en **Assets**, aquí debajo."
+            echo
+            echo '```'
+            cat salida/informe.txt
+            echo '```'
+          } > salida/notas.md
+          gh release create "$TAG" "salida/${ID}.mp4" salida/miniatura.png \
+            --target "$GITHUB_SHA" \
+            --title "Ep. ${NUM} · ${TITULO} · ${FECHA} ${HORA_TXT} UTC" \
+            --notes-file salida/notas.md \
+            --latest
+          echo "Release publicada: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Subir MP4 y miniatura
         if: always()

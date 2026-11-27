@@ -1,0 +1,12 @@
+Hay que corregir algo antes de poder hacer el vídeo.
+
+Archivo: episodios/06_limonada.json
+  1. El JSON está mal escrito en la línea 2, columna 1. Falta un valor, o hay una coma de más antes de ']' o '}'. (detalle técnico: Expecting value)
+
+Cómo arreglarlo:
+  1. En github.com abre el archivo de arriba y pulsa el lápiz (Editar).
+  2. Corrige lo que dice cada punto. Los nombres entre comillas son los campos del JSON.
+  3. Guarda (Commit changes). El vídeo se volverá a hacer solo en unos minutos.
+  Truco: si escribes desde el iPhone, desactiva 'Puntuación inteligente' para que las comillas sean rectas.
+
+(Comprobado el 2026-11-27 08:34 UTC. Este archivo se borra solo cuando todo está bien.)

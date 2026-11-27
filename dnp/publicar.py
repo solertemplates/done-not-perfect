@@ -21,6 +21,8 @@ import json
 
 from .config import ErrorConfig, cargar, validar
 from .textos import generar as generar_textos
+from .plantillas import id_de_archivo
+from .textos import producto_anterior
 
 RAIZ = Path(__file__).resolve().parent.parent
 SIN_ERRORES = ".sin_errores"  # aviso para que el workflow borre videos/ERRORES.txt
@@ -59,9 +61,11 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, render=_r
     """Devuelve el número de archivos con problemas."""
     problemas: list[tuple[str, list[str]]] = []
     publicados = []
+    usados: dict[str, str] = {}  # id del vídeo -> archivo que lo usa
     for ruta in archivos:
         nombre = os.path.relpath(ruta, RAIZ) if ruta.is_absolute() else str(ruta)
         try:
+            original = ruta
             if ruta.suffix == ".txt":  # guion corto: se convierte en el JSON completo
                 from .plantillas import convertir
 
@@ -72,12 +76,27 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, render=_r
                 generado.write_text(json.dumps(datos, ensure_ascii=False, indent=1), encoding="utf-8")
                 ruta = generado
             else:
-                cargar(ruta)
+                datos = cargar(ruta).datos
+            otro = usados.get(datos["id"]) or _otro_con_id(datos["id"], original)
+            if otro:
+                raise ErrorConfig([f"El vídeo se llamaría '{datos['id']}', igual que el de '{otro}'. Cambia el número "
+                                   "del nombre del archivo (por ejemplo al siguiente libre) o pon otro 'id:'."])
+            usados[datos["id"]] = nombre
         except ErrorConfig as e:
             problemas.append((nombre, e.errores))
             print(f"❌ {nombre}: {len(e.errores)} error(es)")
             continue
-        ep, mp4, mini, resultados = render(ruta, salida / Path(nombre).stem)
+        try:  # si un episodio falla al renderizar, los demás siguen
+            ep, mp4, mini, resultados = render(ruta, salida / Path(nombre).stem)
+            textos_pub = generar_textos(ep.datos, anterior=producto_anterior(original))
+        except Exception as e:  # noqa: BLE001
+            import traceback
+
+            traceback.print_exc()
+            problemas.append((nombre, [f"No se pudo hacer el vídeo ({type(e).__name__}: {e}). Revisa este episodio; "
+                                       "los demás se publican igual."]))
+            print(f"❌ {nombre}: falló el render")
+            continue
         fallos = [f"El vídeo no pasó la comprobación '{r.nombre}': {r.detalle}" for r in resultados if not r.ok]
         if fallos:
             problemas.append((nombre, fallos))
@@ -88,7 +107,7 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, render=_r
             destino.mkdir(parents=True, exist_ok=True)
             shutil.copy(mp4, destino / f"{ep['id']}.mp4")
             shutil.copy(mini, destino / f"{ep['id']}_miniatura.png")
-            (destino / f"{ep['id']}_textos.txt").write_text(generar_textos(ep.datos), encoding="utf-8")
+            (destino / f"{ep['id']}_textos.txt").write_text(textos_pub, encoding="utf-8")
             publicados.append(ep["id"])
     if destino is not None:
         destino.mkdir(parents=True, exist_ok=True)
@@ -106,6 +125,17 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, render=_r
     return len(problemas)
 
 
+def _otro_con_id(ident: str, ruta: Path) -> str | None:
+    """Otro archivo de la misma carpeta que daría el mismo vídeo (mismo id), o None."""
+    carpeta = ruta.parent
+    if not carpeta.is_dir():
+        return None
+    for otro in sorted(list(carpeta.glob("*.json")) + list(carpeta.glob("*.txt"))):
+        if otro.resolve() != ruta.resolve() and otro.stem < ruta.stem and id_de_archivo(otro) == ident:
+            return otro.name
+    return None
+
+
 def ident_de(ruta: Path) -> str | None:
     """id del vídeo de un episodio (JSON o .txt), o None si el archivo tiene errores."""
     try:
@@ -114,7 +144,7 @@ def ident_de(ruta: Path) -> str | None:
 
             return convertir(ruta.read_text(encoding="utf-8"), ruta)["id"]
         return cargar(ruta)["id"]
-    except ErrorConfig:
+    except (ErrorConfig, OSError, ValueError, KeyError):
         return None
 
 

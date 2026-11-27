@@ -8,12 +8,12 @@ from dnp.config import ErrorConfig, validar
 from dnp.plantillas import PROPIOS, convertir, ejemplo
 from tests.test_publicar import falso_render
 
-TXT = Path("episodios/07_kioscos.txt")
+TXT = Path("/no_existe/07_kioscos.txt")
 
 
 @pytest.mark.parametrize("plantilla", list(PROPIOS))
 def test_cada_plantilla_da_un_episodio_valido(plantilla):
-    d = convertir(ejemplo(plantilla), Path(f"episodios/09_{plantilla}.txt"))
+    d = convertir(ejemplo(plantilla), Path(f"/no_existe/09_{plantilla}.txt"))
     validar(d)
     assert d["episodio"] == 9 and d["id"] == f"ep09_{plantilla}"
 
@@ -38,14 +38,14 @@ def test_caro_sin_flecha_no_cambia_precio():
 
 
 def test_roca_golpes():
-    d = convertir("plantilla: roca\ngolpes: 30\ngancho: 30 hits.", Path("episodios/08_roca.txt"))
+    d = convertir("plantilla: roca\ngolpes: 30\ngancho: 30 hits.", Path("/no_existe/08_roca.txt"))
     validar(d)
     rocas = [o for z in ("arriba", "abajo") for o in d["guion"][z]["objetos"] if o["tipo"] == "roca"]
     assert {r["golpes_para_partir"] for r in rocas} == {31}
 
 
 def test_construir_escalera():
-    d = convertir("Plantilla: Construir\nobjeto: Escalera", Path("episodios/10_escalera.txt"))
+    d = convertir("Plantilla: Construir\nobjeto: Escalera", Path("/no_existe/10_escalera.txt"))
     validar(d)
     assert "escalera" in str(d["guion"])
 

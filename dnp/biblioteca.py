@@ -32,7 +32,7 @@ def cantera_noche(lz: Lienzo, panel: int, luna: bool, semilla: int = 0) -> list:
     parpadean = []
     zonas_libres = [(800, 40, 1080, 250)]  # sin estrellas detrás del contador
     if luna:
-        zonas_libres.append((90, 90, 260, 260))
+        zonas_libres.append((540, 130, 700, 290))
     from . import variedad
 
     for _ in range(int(46 * variedad.actual().estrellas)):
@@ -46,7 +46,7 @@ def cantera_noche(lz: Lienzo, panel: int, luna: bool, semilla: int = 0) -> list:
         else:
             lz.circulo((x, y), r, relleno=tenue(brillo))
     if luna:
-        c, r = (172, 172), 46
+        c, r = (620, 210), 46  # arriba a la izquierda queda sitio para la etiqueta
         cielo = color_cielo(lz, (c[0] + 20, c[1] - 12))  # antes de pintar la luna
         lz.circulo(c, r, relleno=decor(0.88))
         lz.circulo((c[0] + 20, c[1] - 12), r * 0.92, relleno=cielo)  # creciente

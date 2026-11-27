@@ -14,7 +14,7 @@ sys.path.insert(0, str(RAIZ))
 from dnp.config import cargar  # noqa: E402
 from dnp.render import crear_escena  # noqa: E402
 
-EPISODIOS = ["ep01_la_silla", "ep02_la_escalera", "ep03_los_dos_martillos", "04_roca"]
+EPISODIOS = ["ep01_la_silla", "ep02_la_escalera", "ep03_los_dos_martillos", "04_roca", "09_paneles"]
 _e = None
 
 
@@ -28,7 +28,7 @@ def huella(i):
 
 
 def huellas(nombre):
-    ruta = RAIZ / "episodios" / f"{nombre}.json"
+    ruta = RAIZ / "tests" / "datos" / "episodios" / f"{nombre}.json"
     n = cargar(ruta).num_fotogramas
     with Pool(initializer=_ini, initargs=(ruta,)) as p:
         return p.map(huella, range(n), chunksize=8)

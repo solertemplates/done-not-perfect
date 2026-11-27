@@ -9,7 +9,7 @@ from dnp.config import cargar
 from dnp.plantillas import convertir, ejemplo
 from tests.test_publicar import falso_render
 
-EPISODIOS = sorted(Path("episodios").glob("*.json"))
+EPISODIOS = sorted(Path("tests/datos/episodios").glob("*.json")) + sorted(Path("dnp/plantillas").glob("*.json"))
 EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿]")
 
 
@@ -20,13 +20,19 @@ def test_formato_de_los_textos(ruta):
     assert fb.startswith("FACEBOOK\n")
     lineas_fb = fb.strip().splitlines()[1:]
     assert 2 <= len(EMOJI.findall(fb)) <= 3
-    assert len(re.findall(r"#\w+", lineas_fb[-1])) == 5
+    tags = [x for x in lineas_fb if x.startswith("#")]
+    assert len(tags) == 1 and len(re.findall(r"#\w+", tags[0])) == 5
     titulo = re.search(r"^Title: (.*)$", yt, re.M).group(1)
     assert len(titulo) <= 60 and "#shorts" in titulo
     desc = yt.split("Description:\n")[1].split("\nHashtags:")[0]
     assert len(desc.strip().splitlines()) == 2
     hashtags = re.search(r"^Hashtags: (.*)$", yt, re.M).group(1)
     assert len(hashtags.split()) == 5 and len(set(hashtags.split())) == 5
+    # Amazon al final de las dos partes, con el aviso obligatorio
+    for parte in (fb, yt):
+        lineas = parte.strip().splitlines()
+        assert lineas[-1] == "As an Amazon Associate I earn from qualifying purchases."
+        assert re.fullmatch(r"https://www\.amazon\.com/s\?k=[\w+]+&tag=styleesencial-20", lineas[-2])
 
 
 def test_tema_segun_el_episodio():
@@ -82,3 +88,42 @@ def test_faltan_videos(tmp_path, monkeypatch):
     (tmp_path / "videos" / "ep07_roca.mp4").write_bytes(b"x")
     monkeypatch.setattr(publicar, "RAIZ", tmp_path)
     assert [p.name for p in publicar.sin_video(tmp_path / "videos")] == ["08_roca.txt"]
+
+
+@pytest.mark.parametrize("plantilla,producto", [
+    ("roca", {"Atomic Habits", "habit tracker"}), ("paneles", {"Atomic Habits", "habit tracker"}),
+    ("construir", {"goal planner"}), ("kioscos", {"The Psychology of Money"}), ("martillos", {"The Compound Effect"}),
+])
+def test_producto_segun_la_leccion(plantilla, producto):
+    d = convertir(ejemplo(plantilla), Path(f"/no_existe/09_{plantilla}.txt"))
+    assert any(f"k={p.replace(' ', '+')}&" in textos.generar(d) for p in producto)
+
+
+def test_silla_lleva_pomodoro():
+    d = convertir("plantilla: construir\nobjeto: silla", Path("/no_existe/09_silla.txt"))
+    assert "k=Pomodoro+timer&" in textos.generar(d)
+
+
+def test_nunca_el_mismo_producto_dos_episodios_seguidos(tmp_path):
+    guiones = ["roca", "roca", "construir\nobjeto: silla", "construir\nobjeto: silla", "kioscos", "kioscos",
+               "martillos", "roca", "martillos", "paneles\npaneles: A, B, C"]
+    productos = []
+    for n, g in enumerate(guiones, 1):
+        f = tmp_path / f"{n:02d}_ep.txt"
+        f.write_text(f"plantilla: {g}\n", encoding="utf-8")
+    for n in range(1, len(guiones) + 1):
+        f = tmp_path / f"{n:02d}_ep.txt"
+        t = textos.generar(convertir(f.read_text(), f), anterior=textos.producto_anterior(f))
+        productos.append(re.search(r"s\?k=([\w+]+)&", t).group(1))
+    assert all(a != b for a, b in zip(productos, productos[1:])), productos
+
+
+def test_sin_config_de_amazon_no_hay_bloque(monkeypatch, tmp_path):
+    monkeypatch.setattr(textos, "AMAZON", tmp_path / "no.txt")
+    t = textos.generar(convertir(ejemplo("roca"), Path("/no_existe/09_roca.txt")))
+    assert "amazon" not in t.lower()
+
+
+def test_config_amazon():
+    conf = textos.amazon()
+    assert conf["tienda"] == "amazon.com" and conf["id"] == "styleesencial-20"

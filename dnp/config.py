@@ -59,6 +59,7 @@ ESQUEMA: dict[str, Any] = {
             "gancho": {"tipo": str, "max_len": 40},
             "cierre": {"tipo": str, "max_len": 24},
             "marca": {"tipo": str, "max_len": 30},
+            "leccion": {"tipo": str, "max_len": 50, "opcional": True},  # frase fija arriba todo el vídeo
         },
     },
     "guion": {"tipo": dict, "campos": None},  # se valida aparte (dnp/guion.py)

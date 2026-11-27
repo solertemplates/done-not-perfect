@@ -17,10 +17,15 @@ from dataclasses import dataclass
 import numpy as np
 from PIL import Image
 
-from .lienzo import BLANCO, ESCALA, LUZ_LAMPARA, VERDE, Lienzo, fondo, mezcla, rotar, tenue
+from .lienzo import BLANCO, ESCALA, INDIGO, LUZ_LAMPARA, NARANJA, VERDE, Lienzo, fondo, mezcla, rotar, tenue
 from .tiempo import rebote, tramo
 
 SUELO = 800
+
+
+def decor(alfa: float):
+    """Color de las líneas del decorado: un poco más brillantes que un simple `tenue`."""
+    return tenue(min(1.0, alfa * 1.18 + 0.05))
 
 
 @dataclass(frozen=True)
@@ -40,11 +45,11 @@ class Estrella:
 
 
 def suelo(lz: Lienzo, semilla: int):
-    linea, suave_c = tenue(0.72), tenue(0.38)
+    linea, suave_c = decor(0.72), decor(0.38)
     lz.boceto((36, SUELO), (1044, SUELO), 2.6, linea, semilla=10 + semilla)
     lz.boceto((36, SUELO - 22), (1044, SUELO - 22), 1.6, suave_c, semilla=20 + semilla, doble=False)
     for j, x in enumerate((120, 300, 520, 760, 960)):
-        lz.boceto((x, SUELO + 26), (x - 40 + j * 20, SUELO + 120), 1.4, tenue(0.25), semilla=30 + semilla * 9 + j,
+        lz.boceto((x, SUELO + 26), (x - 40 + j * 20, SUELO + 120), 1.4, decor(0.25), semilla=30 + semilla * 9 + j,
                   doble=False)
 
 
@@ -52,6 +57,7 @@ def ventana(lz: Lienzo, rect, panel: int, semilla: int, luna=None, densidad: flo
     """Ventana de boceto con estrellas detrás. Devuelve las estrellas que parpadean."""
     x0, y0, x1, y1 = rect
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    cielo_en_rect(lz, rect)
     rnd = random.Random(semilla)
     parpadean: list[Estrella] = []
     n = int((x1 - x0) * (y1 - y0) / 1700 * densidad)
@@ -67,13 +73,13 @@ def ventana(lz: Lienzo, rect, panel: int, semilla: int, luna=None, densidad: flo
             parpadean.append(Estrella(panel, x, y, r, brillo, rnd.choice((1, 2, 3)), rnd.random()))
         else:
             lz.circulo((x, y), r, relleno=tenue(brillo))
-    linea = tenue(0.72)
+    linea = decor(0.72)
     lz.boceto_poli([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 2.4, linea, semilla=semilla + 1, cerrado=True)
     lz.boceto((cx, y0), (cx, y1), 1.8, linea, semilla=semilla + 2)
     lz.boceto((x0, cy), (x1, cy), 1.8, linea, semilla=semilla + 3)
     lz.boceto((x0 - 14, y1 + 8), (x1 + 14, y1 + 8), 2.2, linea, semilla=semilla + 4)
     if luna:
-        lz.arco(luna[:2], luna[2], 110, 330, 2.0, tenue(0.38))
+        lz.arco(luna[:2], luna[2], 110, 330, 2.0, decor(0.38))
     return parpadean
 
 
@@ -125,7 +131,7 @@ def lampara(img: Image.Image, lz: Lienzo, x: float, cable: float, oy: float, sem
     if luz:
         cono_luz(img, x, boca, oy, **luz_kw)
         lz = Lienzo(img, lz.ox, lz.oy)
-    linea = tenue(0.72)
+    linea = decor(0.72)
     lz.boceto((x, techo), (x, cable), 1.8, linea, semilla=semilla)
     lz.boceto_poli([(x - 40, boca), (x + 40, boca), (x + 20, cable), (x - 20, cable)], 2.2, linea,
                    semilla=semilla + 1, cerrado=True)
@@ -135,7 +141,7 @@ def lampara(img: Image.Image, lz: Lienzo, x: float, cable: float, oy: float, sem
 
 def cartel(lz: Lienzo, rect, trazos, cotas, semilla: int):
     """Cartel colgado con un dibujo 'ideal' dentro (trazos) y líneas de cota."""
-    linea, suave_c = tenue(0.72), tenue(0.38)
+    linea, suave_c = decor(0.72), decor(0.38)
     x0, y0, x1, y1 = rect
     lz.boceto_poli([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 2.4, linea, semilla=semilla, cerrado=True)
     lz.circulo(((x0 + x1) / 2, y0 + 6), 5, relleno=linea)
@@ -175,3 +181,34 @@ def marca_ok(lz: Lienzo, a: float, c, t0: float):
             r0, r1 = 50 + 40 * u, 62 + 52 * u
             lz.linea([(c[0] + math.cos(ang) * r0, c[1] + math.sin(ang) * r0),
                       (c[0] + math.cos(ang) * r1, c[1] + math.sin(ang) * r1)], 4 * (1 - u) + 0.5, VERDE)
+
+
+def cielo_en_rect(lz: Lienzo, rect):
+    """Cielo de noche dentro de un rectángulo (ventanas): índigo arriba y un resplandor naranja abajo."""
+    s = lz.s
+    x0, y0, x1, y1 = rect
+    X0, X1 = int((x0 + lz.ox) * s), int((x1 + lz.ox) * s)
+    Y0, Y1 = int((y0 + lz.oy) * s), int((y1 + lz.oy) * s)
+    arr = np.asarray(lz.img).astype(np.float32)
+    v = np.linspace(0, 1, max(1, Y1 - Y0))[:, None]
+    base = np.array(fondo(), np.float32)
+    arriba = base + (np.array(INDIGO, np.float32) - base) * 0.42
+    abajo = base + (np.array(NARANJA, np.float32) - base) * 0.20
+    fila = arriba * (1 - v) ** 1.2 + abajo * (1 - (1 - v) ** 1.2)
+    arr[Y0:Y1, X0:X1] = fila[:, None, :]
+    lz.img.paste(Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)))
+
+
+def farola(img: Image.Image, lz: Lienzo, x: float, oy: float, semilla: int, alto: float = 430, luz: bool = True):
+    """Farola de calle con luz ámbar (#FFC873) que cae hasta el suelo."""
+    cabeza = (x + 46, SUELO - alto + 22)
+    if luz:
+        cono_luz(img, cabeza[0], cabeza[1] + 10, oy, ancho_boca=36, ancho_suelo=380, alfa_max=0.17)
+        lz = Lienzo(img, lz.ox, lz.oy, escala=lz.s)
+    linea = decor(0.8)
+    lz.boceto((x, SUELO), (x, SUELO - alto), 3.0, linea, semilla=semilla)
+    lz.linea([(x, SUELO - alto), (x + 20, SUELO - alto - 14), (x + 46, SUELO - alto - 6)], 3.0, linea)
+    lz.poligono([(cabeza[0] - 20, cabeza[1]), (cabeza[0] + 20, cabeza[1]), (cabeza[0] + 12, cabeza[1] - 18),
+                 (cabeza[0] - 12, cabeza[1] - 18)], relleno=fondo(), borde=linea, ancho=2.4)
+    lz.boceto((x - 16, SUELO), (x + 16, SUELO), 3.0, linea, semilla=semilla + 1)
+    return lz

@@ -1,0 +1,195 @@
+{
+ "serie": "Done, not perfect",
+ "episodio": 4,
+ "id": "demo_limonada",
+ "titulo": "La limonada",
+ "fondo": "azul_noche",
+ "video": {
+  "ancho": 1080,
+  "alto": 1920,
+  "fps": 30,
+  "duracion_s": 18
+ },
+ "tiempos": {
+  "gancho_fin_s": 1,
+  "rebobinado_fin_s": 3,
+  "accion_fin_s": 14
+ },
+ "textos": {
+  "gancho": "Same street. Same lemons.",
+  "cierre": "Done > Perfect",
+  "marca": "Done, not perfect"
+ },
+ "guion": {
+  "formato": "escena_unica",
+  "gancho": "arriba",
+  "cierre_y": 1650,
+  "escena": {
+   "tipo": "calle_mercado",
+   "farolas": [
+    540
+   ]
+  },
+  "objetos": [
+   {
+    "id": "kh",
+    "tipo": "kiosco",
+    "x": 250,
+    "toldo": "naranja_blanco",
+    "cola": "derecha"
+   },
+   {
+    "id": "kp",
+    "tipo": "kiosco",
+    "x": 830,
+    "toldo": "violeta_blanco",
+    "cola": "izquierda"
+   },
+   {
+    "id": "limo_h",
+    "tipo": "limonada",
+    "kiosco": "kh",
+    "stock": 4,
+    "reponer": [
+     {
+      "desde_s": 9.5,
+      "cantidad": 3
+     }
+    ]
+   },
+   {
+    "id": "limo_p",
+    "tipo": "limonada",
+    "kiosco": "kp",
+    "stock": 6
+   },
+   {
+    "id": "precio_h",
+    "tipo": "cartel_precio",
+    "x": 250,
+    "y": 170,
+    "precio": "$1",
+    "borde": "naranja"
+   },
+   {
+    "id": "precio_p",
+    "tipo": "cartel_precio",
+    "x": 830,
+    "y": 170,
+    "precio": "$5",
+    "borde": "violeta",
+    "tachado_s": 12.0
+   },
+   {
+    "id": "bolsa_h",
+    "tipo": "bolsa_dinero",
+    "kiosco": "kh",
+    "x": 60,
+    "monedas": 1,
+    "detalle": {
+     "color": "verde",
+     "aparece_s": 11.6
+    }
+   },
+   {
+    "id": "bolsa_p",
+    "tipo": "bolsa_dinero",
+    "kiosco": "kp",
+    "x": 1020,
+    "monedas": 1,
+    "detalle": {
+     "color": "rojo",
+     "aparece_s": 12.2
+    }
+   },
+   {
+    "id": "gente",
+    "tipo": "clientes",
+    "kiosco": "kp",
+    "cantidad": 3,
+    "movimientos": [
+     {
+      "desde_s": 5.6,
+      "kiosco": "kh"
+     }
+    ]
+   }
+  ],
+  "personajes": [
+   {
+    "tipo": "perfeccionista",
+    "x": 830,
+    "mira": "izquierda",
+    "paneo": 0.25,
+    "acciones": [
+     {
+      "accion": "cruzar_brazos",
+      "desde_s": 3.0,
+      "hasta_s": 4.2
+     },
+     {
+      "accion": "burlarse",
+      "desde_s": 4.2,
+      "hasta_s": 5.4,
+      "hacia": "izquierda"
+     },
+     {
+      "accion": "encogerse",
+      "desde_s": 8.0,
+      "hasta_s": 9.5
+     },
+     {
+      "accion": "cambiar_precio",
+      "desde_s": 10.0,
+      "hasta_s": 11.0,
+      "cartel": "precio_p",
+      "precio": "$3"
+     },
+     {
+      "accion": "suspirar",
+      "desde_s": 12.2,
+      "hasta_s": 13.4
+     }
+    ]
+   },
+   {
+    "tipo": "hacedor",
+    "x": 250,
+    "mira": "derecha",
+    "paneo": -0.25,
+    "acciones": [
+     {
+      "accion": "vender",
+      "desde_s": 6.6,
+      "hasta_s": 9.3,
+      "kiosco": "kh",
+      "veces": 3
+     },
+     {
+      "accion": "contar_dinero",
+      "desde_s": 10.0,
+      "hasta_s": 11.4
+     },
+     {
+      "accion": "celebrar",
+      "desde_s": 11.6,
+      "hasta_s": 12.6,
+      "estilo": "brazos"
+     },
+     {
+      "accion": "comprar_todo",
+      "desde_s": 12.7,
+      "hasta_s": 13.9,
+      "kiosco": "kp"
+     }
+    ]
+   }
+  ]
+ },
+ "audio": {
+  "musica": "auto",
+  "volumen_musica": 0.35,
+  "volumen_efectos": 0.9,
+  "bpm_aproximado": 80
+ }
+}

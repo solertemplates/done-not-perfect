@@ -12,11 +12,17 @@ def luma(img):
     return 0.2126 * a[..., 0] + 0.7152 * a[..., 1] + 0.0722 * a[..., 2]
 
 
-def test_tamano_y_fondo(cada_escena):
+def test_tamano_y_fondo_en_degradado(cada_escena):
+    """El fondo nunca es plano: más claro arriba, más oscuro abajo, y siempre muy oscuro."""
     img = cada_escena.fotograma(0)
     assert img.size == (1080, 1920)
-    colores, cuentas = np.unique(np.asarray(img).reshape(-1, 3), axis=0, return_counts=True)
-    assert tuple(colores[cuentas.argmax()]) == FONDOS[cada_escena.ep["fondo"]]
+    fondo = cada_escena._fondo.reduce(2)
+    base = np.array(FONDOS[cada_escena.ep["fondo"]])
+    arriba = np.array(fondo.getpixel((1076, 4)))
+    abajo = np.array(fondo.getpixel((1076, 1915)))
+    assert luma(np.array([[arriba]])).item() > luma(np.array([[abajo]])).item()
+    assert luma(np.array([[arriba]])).item() < 60  # muy oscuro: los personajes blancos mandan
+    assert abs(luma(np.array([[base]])).item() - luma(np.array([[abajo]])).item()) < 12
 
 
 def test_ultimo_fotograma_empalma_con_el_primero(cada_escena):
@@ -68,7 +74,8 @@ def test_luz_de_lampara_ambar_y_suave(cada_escena):
     if not any("lampara" in e for e in escenas):
         pytest.skip("este episodio no tiene lámpara")
     arr = np.asarray(cada_escena._fondo.reduce(2)).astype(int)
-    fondo = np.array(FONDOS[cada_escena.ep["fondo"]])
-    calidos = (arr[..., 0] - arr[..., 2] > fondo[0] - fondo[2] + 8) & (arr.sum(-1) < 300)
+    rb = arr[..., 0] - arr[..., 2]
+    tipico = np.median(rb, axis=1, keepdims=True)  # el fondo (con su degradado) de cada fila
+    calidos = (rb > tipico + 8) & (arr.sum(-1) < 300)
     assert calidos.mean() > 0.02
     assert arr[calidos].max() < 200

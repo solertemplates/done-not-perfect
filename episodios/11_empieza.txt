@@ -1,0 +1,3 @@
+plantilla: martillos
+gancho: Same nails. Same day.
+cierre: Start > Wait

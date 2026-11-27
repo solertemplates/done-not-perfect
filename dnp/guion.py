@@ -3,6 +3,10 @@
 Formatos:
 * "pantalla_partida": dos zonas, "arriba" y "abajo" (1080x960 cada una).
 * "escena_unica": una sola zona con los dos personajes juntos.
+* "franjas": de 3 a 6 franjas apiladas ("franjas": [zona, zona, ...]), cada una con su muñeco.
+
+Los personajes pueden llevar una "etiqueta" (palabra grande, p. ej. DONE) y cada zona
+puede tener "marcadores" (una línea con números que cambian, p. ej. "HITS {g} · DONE {d}").
 
 Cada zona tiene una "escena" (fondo y ambiente), "objetos" y "personajes"
 (cada uno con sus "acciones" en segundos del vídeo). Este módulo valida el
@@ -18,12 +22,14 @@ from . import actores as act
 from . import decorado as dec
 from . import escena as esc
 from . import piezas as pz
+from . import rotulos as rot
 from .config import _NUM, _validar_objeto
 from .lienzo import ESCALA, Lienzo, fondo, tenue
 from .motor import EpisodioMotor
 
 ALTO_PANEL = 960
-FORMATOS = ["pantalla_partida", "escena_unica"]
+FORMATOS = ["pantalla_partida", "escena_unica", "franjas"]
+VISTA_FRANJA = (230, 930)  # parte de la zona (en y) que se ve en cada franja
 COLORES = ["verde", "rojo", "amarillo", "azul"]
 _PUNTO = {"tipo": list, "elemento": _NUM, "largo": 2}
 
@@ -116,6 +122,12 @@ _PERSONAJE = {
     "parpadeos_s": {"tipo": list, "elemento": _NUM, "opcional": True},
     "paneo": {"tipo": _NUM, "min": -1, "max": 1, "opcional": True},
     "dx": {"tipo": _NUM, "min": -1000, "max": 1000, "opcional": True},
+    "etiqueta": {"tipo": dict, "opcional": True, "campos": {
+        "texto": {"tipo": str, "max_len": 14},
+        "color_final": {"tipo": str, "opciones": COLORES, "opcional": True},
+        "desde_s": {"tipo": _NUM, "opcional": True},
+        "x": {"tipo": _NUM, "opcional": True}, "y": {"tipo": _NUM, "opcional": True},
+        "tamano": {"tipo": _NUM, "min": 30, "max": 160, "opcional": True}}},
     "acciones": {"tipo": list},
 }
 
@@ -201,7 +213,16 @@ _ZONA = {
     "escena": {"tipo": dict, "campos": _ESCENA},
     "objetos": {"tipo": list, "opcional": True},
     "personajes": {"tipo": list},
+    "marcadores": {"tipo": list, "opcional": True},
 }
+_MARCADOR = {"texto": {"tipo": str, "max_len": 40}, "valores": {"tipo": dict, "opcional": True, "campos": None},
+             "x": {"tipo": _NUM, "opcional": True}, "y": {"tipo": _NUM, "opcional": True},
+             "tamano": {"tipo": _NUM, "min": 20, "max": 80, "opcional": True}}
+_VALOR = {"de": {"tipo": str, "opcional": True}, "golpes": {"tipo": bool, "opcional": True},
+          "ventas": {"tipo": bool, "opcional": True}, "dinero": {"tipo": bool, "opcional": True},
+          "cuenta": {"tipo": list, "elemento": str, "opcional": True}, "fijo": {"tipo": int, "opcional": True},
+          "max": {"tipo": int, "min": 0, "opcional": True},
+          "color": {"tipo": str, "opciones": COLORES, "opcional": True}}
 _GUION = {
     "formato": {"tipo": str, "opciones": FORMATOS},
     "gancho": {"tipo": str, "opciones": ["arriba", "centro"], "opcional": True},
@@ -225,14 +246,27 @@ def validar_guion(datos: dict, errores: list[str]) -> None:
         esquema["abajo"] = {"tipo": dict, "campos": None}
     elif formato == "escena_unica":
         esquema.update(_ZONA)
+    else:
+        esquema["franjas"] = {"tipo": list}
     n0 = len(errores)
     _validar_objeto(g, esquema, "guion.", errores)
     if len(errores) > n0:
         return
     t = datos.get("tiempos", {})
     limites = (t.get("rebobinado_fin_s"), t.get("accion_fin_s"))
-    if formato == "pantalla_partida":
-        zonas = [("guion.arriba", g["arriba"]), ("guion.abajo", g["abajo"])]
+    if formato in ("pantalla_partida", "franjas"):
+        if formato == "pantalla_partida":
+            zonas = [("guion.arriba", g["arriba"]), ("guion.abajo", g["abajo"])]
+        else:
+            if not 3 <= len(g["franjas"]) <= 6:
+                errores.append(f"'guion.franjas' debe tener de 3 a 6 franjas, y tiene {len(g['franjas'])}.")
+                return
+            zonas = [(f"guion.franjas[{i}]", z) for i, z in enumerate(g["franjas"])]
+            for ruta, z in zonas:
+                if not isinstance(z, dict):
+                    errores.append(f"'{ruta}' debe ser un objeto {{ }} con \"escena\" y \"personajes\".")
+            if len(errores) > n0:
+                return
         for ruta, z in zonas:
             m0 = len(errores)
             _validar_objeto(z, _ZONA, ruta + ".", errores)
@@ -299,6 +333,29 @@ def _validar_zona(z, ruta, limites, errores, pantalla_partida):
             continue
         personajes.append(p.get("id", p["tipo"]))
         _validar_acciones(p, r, objetos, limites, errores)
+    for i, m in enumerate(z.get("marcadores", [])):
+        r = f"{ruta}.marcadores[{i}]"
+        if not isinstance(m, dict):
+            errores.append(f"'{r}' debe ser un objeto {{ }} con \"texto\".")
+            continue
+        m0 = len(errores)
+        _validar_objeto(m, _MARCADOR, r + ".", errores)
+        if len(errores) > m0:
+            continue
+        valores = m.get("valores", {})
+        import re
+
+        for nombre in re.findall(r"\{(\w+)\}", m["texto"]):
+            if nombre not in valores:
+                errores.append(f"'{r}.texto' usa {{{nombre}}}, pero no está en 'valores'.")
+        for nombre, v in valores.items():
+            if not isinstance(v, dict):
+                errores.append(f"'{r}.valores.{nombre}' debe ser un objeto {{ }}.")
+                continue
+            _validar_objeto(v, _VALOR, f"{r}.valores.{nombre}.", errores)
+            if "fijo" not in v and v.get("de") not in set(personajes) | set(objetos):
+                errores.append(f"'{r}.valores.{nombre}.de' es \"{v.get('de')}\", pero no hay ningún personaje "
+                               "ni objeto con ese id en la zona.")
     for i, o in enumerate(z.get("objetos", [])):
         if isinstance(o, dict) and o.get("tipo") == "contador" and o.get("de") not in personajes:
             errores.append(f"'{ruta}.objetos[{i}].de' es \"{o.get('de')}\", pero en esa zona no hay ningún personaje "
@@ -378,10 +435,18 @@ class EpisodioGuion(EpisodioMotor):
         self.formato = g["formato"]
         self.POS_GANCHO = g.get("gancho", "centro" if self.formato == "pantalla_partida" else "arriba")
         self.Y_TARJETA = g.get("cierre_y", 960)
+        self.leccion = self.textos.get("leccion")
+        self.margen = rot.ALTO_LECCION if self.leccion else 0  # franja de arriba para la lección
         if self.formato == "pantalla_partida":
             confs = [g["arriba"], g["abajo"]]
             self.oy_decorado = [0, ALTO_PANEL]
             self.oy_dibujo = [0, 0]  # cada panel se dibuja recortado
+        elif self.formato == "franjas":
+            confs = g["franjas"]
+            n = len(confs)
+            alto = (self.alto - self.margen) / n
+            self.regiones = [(self.margen + i * alto, self.margen + (i + 1) * alto) for i in range(n)]
+            self.oy_decorado = self.oy_dibujo = [0] * n
         else:
             confs = [g]
             oy = 0 if g["escena"]["tipo"] == "taller" else 700  # suelo en y=1500: el cielo llena la parte de arriba
@@ -396,10 +461,22 @@ class EpisodioGuion(EpisodioMotor):
             for o in objetos.values():
                 o.enlazar(objetos)
             actores = [act.TIPOS[pc["tipo"]](pc, indice, objetos) for pc in conf["personajes"]]
+            if indice == 0 and self.formato == "pantalla_partida" and self.margen:
+                for o in objetos.values():  # el contador baja para dejar sitio a la lección
+                    if isinstance(o, pz.Contador) and o.y < 300:
+                        o.y += self.margen - 40
             self.zonas.append((conf, objetos, actores))
+        self.marcadores = [[rot.Marcador(m, objetos, actores) for m in conf.get("marcadores", [])]
+                           for conf, objetos, actores in self.zonas]
 
     def _decorado(self) -> Image.Image:
         img = Image.new("RGB", (self.ancho * ESCALA, self.alto * ESCALA), fondo())
+        if self.formato == "franjas":
+            self.estrellas = []
+            for i, (y0, y1) in enumerate(self.regiones):
+                lz = self._lienzo_franja(img, i)
+                self.estrellas += _decorado_franja(lz, i, self._ancho_logico(i), self.ox_franja(i))
+            return img
         if self.formato == "pantalla_partida":
             regiones = [(0, ALTO_PANEL), (ALTO_PANEL, 2 * ALTO_PANEL)]
         else:
@@ -408,7 +485,28 @@ class EpisodioGuion(EpisodioMotor):
                                              for i, (conf, _, _) in enumerate(self.zonas)])
         return img
 
+    # ---------------------------------------------------------------- franjas
+    def _k(self, i):
+        """Escala de la franja: cabe la acción a lo alto y la roca no se sale por la derecha."""
+        y0, y1 = self.regiones[i]
+        return min((y1 - y0) / (VISTA_FRANJA[1] - VISTA_FRANJA[0]), 0.58)
+
+    def _ancho_logico(self, i):
+        return self.ancho / self._k(i)
+
+    def ox_franja(self, i):
+        """Desplazamiento para que la acción (muñeco y roca) quede a la derecha de la etiqueta."""
+        return 690 / self._k(i) - 280  # el muñeco (x≈280) queda en x=690 de la pantalla
+
+    def _lienzo_franja(self, img, i):
+        y0, y1 = self.regiones[i]
+        k = self._k(i)
+        centro = (VISTA_FRANJA[0] + VISTA_FRANJA[1]) / 2
+        return Lienzo(img, self.ox_franja(i), (y0 + y1) / 2 / k - centro, escala=ESCALA * k)
+
     def _zonas_color(self):
+        if self.formato == "franjas":
+            return [(y0, y1, None) for y0, y1 in self.regiones]
         if self.formato == "pantalla_partida":
             regiones = [(0, ALTO_PANEL), (ALTO_PANEL, 2 * ALTO_PANEL)]
         else:
@@ -432,6 +530,23 @@ class EpisodioGuion(EpisodioMotor):
 
     def _dibujar(self, img: Image.Image, a: float, fase_bucle: float):
         ts = self.real(a)
+        if self.formato == "franjas":
+            for i, (y0, y1) in enumerate(self.regiones):
+                caja = (0, int(y0 * ESCALA), self.ancho * ESCALA, int(y1 * ESCALA))
+                sub = img.crop(caja)
+                lz = self._lienzo_franja(sub, i)
+                lz.oy -= y0 / self._k(i)
+                self._dibujar_zona(lz, i, ts, fase_bucle)
+                img.paste(sub, caja[:2])
+                h = y1 - y0
+                for a_ in self.zonas[i][2]:
+                    if "etiqueta" in a_.conf:
+                        rot.etiqueta(img, a_.conf["etiqueta"], ts, (40, y0 + h * 0.3), min(88, h * 0.2), "lm", 480)
+                for m in self.marcadores[i]:
+                    m.dibujar(img, ts, (40, y0 + h * 0.62), min(40, h * 0.1), "lm")
+                if i:
+                    Lienzo(img).boceto((0, y0), (self.ancho, y0), 2.4, tenue(0.7), semilla=990 + i, amp=1.0)
+            return
         if self.formato == "pantalla_partida":
             for i in range(2):
                 caja = (0, i * ALTO_PANEL * ESCALA, self.ancho * ESCALA, (i + 1) * ALTO_PANEL * ESCALA)
@@ -440,12 +555,36 @@ class EpisodioGuion(EpisodioMotor):
                 img.paste(sub, caja[:2])
                 for o in self.zonas[i][1].values():
                     o.texto(img, ts, i * ALTO_PANEL)
+                self._rotulos(img, i, ts, i * ALTO_PANEL)
             Lienzo(img).boceto((0, ALTO_PANEL), (self.ancho, ALTO_PANEL), 3.2, tenue(0.85), semilla=999, amp=1.0)
         else:
             oy = self.oy_dibujo[0]
             self._dibujar_zona(Lienzo(img, 0, oy), 0, ts, fase_bucle)
             for o in self.zonas[0][1].values():
                 o.texto(img, ts, oy)
+            self._rotulos(img, 0, ts, oy)
+
+    def _rotulos(self, img, i, ts, oy):
+        """Etiquetas de los personajes y marcadores de la zona (en coordenadas de zona + oy)."""
+        partida = self.formato == "pantalla_partida"
+        for a_ in self.zonas[i][2]:
+            e = a_.conf.get("etiqueta")
+            if not e:
+                continue
+            if partida:
+                # abajo, un poco más baja para que no la tape la tarjeta del centro (gancho y cierre)
+                pos = (e.get("x", 50), e.get("y", 110 + (self.margen - 20 if i == 0 else 65)) + oy)
+                rot.etiqueta(img, e, ts, pos, e.get("tamano", 104), "lm", 640)
+            else:
+                tam = e.get("tamano", 84)
+                tam = min(tam, tam * 520 / max(1.0, rot.ancho_texto(e["texto"], tam)))
+                medio = rot.ancho_texto(e["texto"], tam) / 2
+                x = min(max(e.get("x", getattr(a_, "x", 540)), 30 + medio), self.ancho - 30 - medio)
+                rot.etiqueta(img, e, ts, (x, e.get("y", 120) + oy), tam, "mm", 520)
+        for m in self.marcadores[i]:
+            c = m.conf
+            pos = (c.get("x", 540), c.get("y", 885) + oy)
+            m.dibujar(img, ts, pos, c.get("tamano", 40))
 
     def eventos_episodio(self):
         ev = []
@@ -454,6 +593,9 @@ class EpisodioGuion(EpisodioMotor):
                 ev += o.eventos()
             for a in actores:
                 ev += a.eventos()
+        if self.formato == "franjas":  # muchas rocas a la vez: los golpes, más bajos para no saturar
+            f = len(self.zonas) ** -0.5
+            ev = [(t, n, g * f if n in ("mandarria", "grieta") else g, p, x) for t, n, g, p, x in ev]
         return ev
 
     # Para los tests
@@ -462,3 +604,31 @@ class EpisodioGuion(EpisodioMotor):
 
     def objeto(self, zona: int, ident: str):
         return self.zonas[zona][1][ident]
+
+
+def _decorado_franja(lz, indice, ancho_logico, ox):
+    """Fondo sencillo de una franja: suelo de boceto de lado a lado, grava y estrellas."""
+    import random
+
+    from .decorado import SUELO, Estrella, decor
+    from .variedad import actual
+
+    rnd = random.Random(4000 + indice * 31 + actual().semilla)
+    x0, x1 = -ox, ancho_logico - ox
+    lz.boceto((x0 + 10, SUELO), (x1 - 10, SUELO), 2.6, decor(0.75), semilla=4100 + indice)
+    for j in range(int((x1 - x0) / 60)):
+        x = rnd.uniform(x0, x1)
+        y = rnd.uniform(SUELO + 18, SUELO + 110)
+        w = rnd.uniform(4, 11)
+        lz.poligono([(x - w, y), (x - w * 0.3, y - w * 0.7), (x + w, y - w * 0.2), (x + w * 0.6, y + w * 0.4)],
+                    borde=decor(0.4), ancho=1.4)
+    parpadean = []
+    for _ in range(int((x1 - x0) / 45 * actual().estrellas)):
+        x, y = rnd.uniform(x0 + 20, x1 - 20), rnd.uniform(250, 640)
+        r = rnd.choice((1.4, 1.8, 2.2, 2.8))
+        brillo = rnd.uniform(0.45, 0.95)
+        if rnd.random() < 0.35:
+            parpadean.append(Estrella(indice, x, y, r, brillo, rnd.choice((1, 2, 3)), rnd.random()))
+        else:
+            lz.circulo((x, y), r, relleno=decor(brillo * 0.8))
+    return parpadean

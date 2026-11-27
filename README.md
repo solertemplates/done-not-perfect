@@ -18,7 +18,7 @@ Todo se genera por código en GitHub Actions: dibujo, animación, música y efec
    Pulsa compartir y elige **Guardar vídeo** para llevarlo a Fotos.
 4. **Si el JSON tiene un error**, en vez del vídeo aparece `videos/ERRORES.txt`, que explica en español qué corregir. Al corregirlo y guardar, el vídeo se hace solo y `ERRORES.txt` desaparece.
 
-**Lo más rápido:** un guion corto `.txt` de 5 a 8 líneas con una plantilla (roca, kioscos, construir o martillos), por ejemplo `episodios/07_kioscos.txt`:
+**Lo más rápido:** un guion corto `.txt` de 5 a 8 líneas con una plantilla (roca, kioscos, construir, martillos o paneles), por ejemplo `episodios/07_kioscos.txt`:
 
 ```
 plantilla: kioscos
@@ -59,7 +59,7 @@ Cada episodio varía solo las estrellas, la ciudad, las luces, el degradado y la
 
 Con el atajo **Nuevo episodio** copias el guion corto, tocas el atajo y te devuelve el enlace al vídeo y a sus textos. Cómo montarlo: [ATAJO_IPHONE.md](ATAJO_IPHONE.md).
 
-Junto a cada vídeo aparece `videos/<id>_textos.txt`, con el texto para Facebook y el título, la descripción y los hashtags para YouTube, en inglés.
+Junto a cada vídeo aparece `videos/<id>_textos.txt`, con el texto para Facebook y el título, la descripción y los hashtags para YouTube, en inglés. Al final de cada parte va un producto de Amazon según la lección (tienda e ID en [`config/amazon.txt`](config/amazon.txt)), con el aviso de afiliado.
 
 ## Personajes
 

@@ -28,14 +28,27 @@ fondo: azul_noche
 | `kioscos` | `barato: $1`, `caro: $3` o `caro: $3 -> $5` (sube el precio) y `clientes: 1-8` |
 | `construir` | `objeto: silla` o `objeto: escalera` |
 | `martillos` | ninguno |
+| `paneles` | `paneles: MOTIVATION, TALENT, EGO, DISCIPLINE`: de 3 a 6 franjas apiladas, una por palabra, cada una con un muñeco que golpea su roca. Solo el último la rompe (su palabra se pone verde); los demás se rinden en momentos distintos (su palabra se pone roja). |
 
 Campos comunes (todos opcionales menos `plantilla`):
+- `leccion`: frase fija arriba durante todo el vídeo, máximo 50 letras;
+- `etiqueta_arriba` y `etiqueta_abajo`: palabra grande en negrita del Hacedor y del Perfeccionista, máximo 14 letras (por defecto DONE y PERFECT). Al final se pone verde la del que lo consigue y roja la del que no (no se usan en `paneles`);
 - `gancho`: máximo 40 letras;
 - `cierre`: máximo 24 letras; con `>` sale en verde > rojo;
 - `fondo`: uno de los 11 fondos (ver «Fondos»). Si no lo pones, se elige solo uno distinto al de los últimos 6 episodios;
 - `titulo`, `episodio` e `id`.
 
-Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo está mal, `videos/ERRORES.txt` lo explica.
+Cada plantilla pone sola un **marcador** bajo cada lado, con números que cambian durante el vídeo:
+
+| Plantilla | Marcador |
+|---|---|
+| `roca` | HITS 99 · DONE 1 |
+| `paneles` | HITS 37 · QUIT (y HITS 100 · DONE 1 el último) |
+| `construir` | NAILS 9 · DONE 1 / SKETCHES 4 · DONE 0 |
+| `kioscos` | SALES 5 · $12 |
+| `martillos` | NAILS 17 · DONE 1 / MEASURES 6 · DONE 0 |
+
+Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo está mal, `videos/ERRORES.txt` lo explica. Un episodio con errores (o con el mismo nombre de vídeo que otro) no bloquea a los demás: los demás se publican igual.
 
 ---
 
@@ -109,6 +122,18 @@ Junto a cada vídeo se crea `videos/<id>_textos.txt`, en inglés:
 - **FACEBOOK:** texto con gancho, 2-3 emojis y 5 hashtags.
 - **YOUTUBE:** título (máx. 60 letras, con #shorts), descripción de 2 líneas y 5 hashtags.
 
+Al final de cada parte va un producto de Amazon según la lección: una frase que lo une con la lección, el enlace `https://www.<tienda>/s?k=<producto>&tag=<id>` y el aviso *As an Amazon Associate I earn from qualifying purchases.* La tienda y el ID están en `config/amazon.txt`.
+
+| Lección | Producto |
+|---|---|
+| roca, paneles (constancia) | Atomic Habits o habit tracker |
+| silla | Pomodoro timer |
+| escalera | goal planner |
+| kioscos (dinero) | The Psychology of Money |
+| martillos | The Compound Effect |
+
+Nunca se repite el mismo producto en dos episodios seguidos: si toca el mismo, se usa la alternativa (habit tracker, visual timer, daily planner, budget planner o Atomic Habits).
+
 ## 2. Estructura del JSON
 
 | Campo | Valores |
@@ -130,13 +155,31 @@ Todos los tiempos de las acciones van en **segundos del vídeo**, entre `rebobin
 
 | Campo | Valores |
 |---|---|
-| `formato` | `"pantalla_partida"` (zonas `arriba` y `abajo`, 1080x960 cada una) o `"escena_unica"` (una zona con los dos personajes juntos) |
+| `formato` | `"pantalla_partida"` (zonas `arriba` y `abajo`, 1080x960 cada una), `"escena_unica"` (una zona con los dos personajes juntos) o `"franjas"` (de 3 a 6 zonas apiladas en `"franjas": [ ... ]`, cada una con un muñeco más pequeño; la usa la plantilla `paneles`) |
 | `gancho` *(opcional)* | `"arriba"` (texto sobre la escena) o `"centro"` (tarjeta en el centro) |
 | `cierre_y` *(opcional)* | altura de la tarjeta final (por defecto 960). Úsala para no tapar a los personajes |
 | `arriba` / `abajo` | en pantalla partida, una **zona** cada una |
 | `escena`, `objetos`, `personajes` | en escena única, directamente dentro de `guion` |
 
-Una **zona** tiene `"escena"` (obligatoria), `"objetos"` (lista, opcional) y `"personajes"` (lista). Los objetos se dibujan detrás de los personajes; en la lista de personajes, los últimos quedan delante.
+Una **zona** tiene `"escena"` (obligatoria), `"objetos"` (lista, opcional), `"personajes"` (lista) y `"marcadores"` (lista, opcional). Los objetos se dibujan detrás de los personajes; en la lista de personajes, los últimos quedan delante.
+
+**Marcadores** (`"marcadores"`): una línea con números que cambian bajo cada lado, por ejemplo:
+
+```
+{ "texto": "HITS {g} · DONE {d}", "x": 540, "y": 885,
+  "valores": { "g": { "golpes": true, "de": "hacedor" },
+               "d": { "cuenta": ["crac"], "de": "roca", "max": 1, "color": "verde" } } }
+```
+
+Cada `{nombre}` del texto sale de `valores`:
+- `"golpes": true` cuenta los golpes de un personaje;
+- `"cuenta": [sonidos]` cuenta los sonidos de un personaje u objeto (por ejemplo `martillo`, `hoja`, `regla`, `crac` o `ding`);
+- `"ventas": true` y `"dinero": true` leen un `kiosco`;
+- `"fijo": 0` es un número que no cambia.
+
+Opciones: `"max"` pone un tope y `"color"` (verde, rojo, amarillo o azul) colorea el número cuando es mayor que 0. Por defecto `x`=540 e `y`=885 (bajo el suelo de la zona).
+
+**Lección** (`"textos": {"leccion": "..."}`, máximo 50 letras): frase fija arriba durante todo el vídeo. La marca "Done, not perfect" baja a la esquina de abajo.
 
 **Coordenadas:** en pantalla partida, cada zona mide 1080x960 y el suelo está en y=800. En escena única con `taller`, se usa la pantalla entera (la mesa está en y=1250). En escena única con `habitacion`, `cantera_noche` o `calle_mercado`, se usan las mismas coordenadas (suelo en y=800), que en pantalla quedan con el suelo abajo (y=1500) y el cielo llenando la parte de arriba.
 
@@ -207,6 +250,7 @@ Herramientas y accesorios que salen solos con las acciones: **martillo**, **mand
 | `paneo` | dónde suena: -1 izquierda, 1 derecha |
 | `dx` | mueve al personaje en horizontal. Usa el mismo `dx` que los objetos con los que trabaja |
 | `id` | por defecto, el tipo |
+| `etiqueta` | palabra grande en negrita: `{"texto": "DONE", "color_final": "verde", "desde_s": 14}`. Se pone del color final en ese segundo. Opcionales: `x`, `y` y `tamano`. En pantalla partida va arriba a la izquierda de su zona |
 | `acciones` | lista de acciones, en orden y sin solaparse |
 
 Entre dos acciones, el personaje ya está en la postura con la que empieza la siguiente. Después de la última, se queda como acabó.

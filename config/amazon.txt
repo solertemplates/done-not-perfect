@@ -1,0 +1,2 @@
+tienda: amazon.com
+id: styleesencial-20

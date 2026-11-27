@@ -39,7 +39,7 @@ def test_los_personajes_siguen_blancos(cada_escena):
     assert (out[:60, :60] == BLANCO).all() and (out[-60:, -60:] == BLANCO).all()
 
 
-def test_colores_de_concepto_intactos_con_halo(cada_escena):
+def test_colores_de_concepto_intactos_con_brillo(cada_escena):
     from PIL import Image
 
     from dnp.lienzo import ROJO
@@ -50,9 +50,8 @@ def test_colores_de_concepto_intactos_con_halo(cada_escena):
     img.paste(ROJO, (500, cy - 40, 580, cy + 40))
     out = np.asarray(cada_escena._componer(img)).astype(int)
     assert (out[cy - 30:cy + 30, 510:570] == ROJO).all()
-    fuera = out[cy, 588]  # justo al lado: fondo oscurecido (halo)
-    lejos = out[cy, 640]
-    assert fuera.sum() < lejos.sum()
+    sin = np.asarray(cada_escena._componer(Image.new("RGB", (1080, 1920), FONDOS[cada_escena.ep["fondo"]])))
+    assert out[cy, 600, 0] > int(sin[cy, 600, 0]) + 8  # al lado: resplandor rojo
 
 
 def test_ultimo_fotograma_empalma_con_el_primero(cada_escena):
@@ -102,7 +101,10 @@ def test_luz_de_lampara_ambar_y_suave(cada_escena):
     from dnp.lienzo import LUZ_LAMPARA
 
     conf = cada_escena.ep["guion"]
-    escenas = [conf[z]["escena"] for z in ("arriba", "abajo")] if "arriba" in conf else [conf["escena"]]
+    if "franjas" in conf:
+        escenas = [z["escena"] for z in conf["franjas"]]
+    else:
+        escenas = [conf[z]["escena"] for z in ("arriba", "abajo")] if "arriba" in conf else [conf["escena"]]
     if not any("lampara" in e for e in escenas):
         pytest.skip("este episodio no tiene lámpara")
     arr = np.asarray(cada_escena._fondo.reduce(2)).astype(np.float32)

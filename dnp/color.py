@@ -8,6 +8,7 @@ cada fotograma, cada píxel se vuelve a componer sobre el degradado radial:
   (sombras) se recompone con la misma mezcla sobre el degradado;
 * lo que tiene color propio (personajes blancos, colores de concepto, luces)
   se queda exactamente igual;
+* lo blanco y lo de color propio desprenden un brillo suave sobre el fondo (sin tocar la cara);
 * alrededor de los colores de concepto (verde, rojo, amarillo, azul) el fondo se
   oscurece un poco (halo), para que destaquen sobre cualquier fondo de color.
 
@@ -20,6 +21,7 @@ from PIL import Image, ImageFilter
 
 from .lienzo import AMARILLO, AZUL, BLANCO, ROJO, VERDE
 
+BRILLO = 0.5  # intensidad del resplandor de personajes y objetos
 CONCEPTOS = np.array([VERDE, ROJO, AMARILLO, AZUL], np.float32)
 
 
@@ -105,5 +107,16 @@ class Componedor:
                 halo = 1 - 0.6 * np.asarray(m, np.float32) / 255 * fondo_visible[y0:y1, x0:x1]
                 for c in range(3):
                     out[c][y0:y1, x0:x1] *= halo
+        # Brillo suave: lo blanco (personajes) y lo de color propio desprenden un resplandor sobre el
+        # fondo. Solo se suma donde se ve fondo, así nunca tapa la cara ni los rasgos.
+        lum = 0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]
+        fuente_brillo = ((lum > 170) & ((a > 0.85) | (propio > 0.5))) | saturados  # blanco opaco o color propio
+        if fuente_brillo.any():
+            src = Image.fromarray(np.where(fuente_brillo[..., None], arr, 0).astype(np.uint8))
+            alto, ancho = arr.shape[:2]
+            g = src.reduce(4).filter(ImageFilter.GaussianBlur(5)).resize((ancho, alto), Image.BILINEAR)
+            g = np.asarray(g, np.float32)
+            for c in range(3):
+                out[c] += BRILLO * g[..., c] * fondo_visible
         res = np.stack(out, axis=-1)
         return Image.fromarray(np.clip(res + 0.5, 0, 255).astype(np.uint8))

@@ -6,11 +6,12 @@ import pytest
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
-EP1 = RAIZ / "episodios" / "ep01_la_silla.json"
-EP2 = RAIZ / "episodios" / "ep02_la_escalera.json"
-EP3 = RAIZ / "episodios" / "ep03_los_dos_martillos.json"
-EP4 = RAIZ / "episodios" / "04_roca.json"
-EPISODIOS = [EP1, EP2, EP3, EP4]
+EP1 = RAIZ / "tests" / "datos" / "episodios" / "ep01_la_silla.json"
+EP2 = RAIZ / "tests" / "datos" / "episodios" / "ep02_la_escalera.json"
+EP3 = RAIZ / "tests" / "datos" / "episodios" / "ep03_los_dos_martillos.json"
+EP4 = RAIZ / "tests" / "datos" / "episodios" / "04_roca.json"
+EP9 = RAIZ / "tests" / "datos" / "episodios" / "09_paneles.json"  # plantilla paneles (franjas) con lección
+EPISODIOS = [EP1, EP2, EP3, EP4, EP9]
 
 
 def _crear(ruta):

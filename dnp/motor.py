@@ -20,6 +20,7 @@ from PIL import Image
 
 from .config import Episodio
 from . import color, variedad
+from . import rotulos as rot
 from .lienzo import BLANCO, ESCALA, FONDOS, ROJO, VERDE, capa, fondo, fuente, tenue, texto, usar_fondo
 from .tiempo import rebote, suave, tramo
 
@@ -131,7 +132,8 @@ class EpisodioMotor:
         if self.POS_GANCHO == "centro":
             self._tarjeta(img, [(self.textos["gancho"], BLANCO)], alfa, tam_max=74, ancho_max=820)
         else:
-            texto(img, [(self.textos["gancho"], BLANCO)], (self.ancho / 2, 150), 66, alfa)
+            y = 150 + (rot.ALTO_LECCION if self.textos.get("leccion") else 0)
+            texto(img, [(self.textos["gancho"], BLANCO)], (self.ancho / 2, y), 66, alfa)
 
     def _rebobinado(self, arr: np.ndarray, t: float):
         """Efecto de cinta rebobinando: líneas desplazadas, bandas de ruido y franjas."""
@@ -184,7 +186,11 @@ class EpisodioMotor:
         self._gancho(img, gancho)
         self._cierre(img, t, cierre)
         self._icono_rebobinar(img, t)
-        texto(img, [(self.textos["marca"], tenue(0.75))], (44, 62), 26, 1.0, ancla="lm")
+        if self.textos.get("leccion"):  # la lección ocupa la parte de arriba: la marca baja a la esquina
+            rot.leccion(img, self.textos["leccion"], self.ancho)
+            texto(img, [(self.textos["marca"], tenue(0.75))], (44, self.alto - 40), 26, 1.0, ancla="lm")
+        else:
+            texto(img, [(self.textos["marca"], tenue(0.75))], (44, 62), 26, 1.0, ancla="lm")
         img = self._componer(img.reduce(ESCALA))
         if self.g <= t < self.r:
             arr = self._rebobinado(np.array(img), t)

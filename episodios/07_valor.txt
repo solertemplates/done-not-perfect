@@ -1,0 +1,7 @@
+plantilla: kioscos
+barato: $2
+caro: $4 -> $8
+clientes: 6
+gancho: Cheap sells. Smart wins.
+cierre: Value > Price
+fondo: morado_oscuro

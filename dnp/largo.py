@@ -727,7 +727,9 @@ def renderizar(ruta: str, carpeta: Path, procesos: int | None = None, segundos: 
     with tempfile.TemporaryDirectory() as tmp:
         wav = Path(tmp) / "audio.wav"
         audio.guardar_wav(wav, pista)
-        proc = subprocess.Popen(comando_ffmpeg(mp4, wav, ANCHO, ALTO, FPS), stdin=subprocess.PIPE)
+        # CRF 23: unos 50 MB para 8:30 (GitHub no acepta archivos de más de 100 MB)
+        proc = subprocess.Popen(comando_ffmpeg(mp4, wav, ANCHO, ALTO, FPS, crf=23, preset="medium"),
+                                stdin=subprocess.PIPE)
         t0 = time.time()
         procesos = procesos or max(1, os.cpu_count() or 2)
         with mp.get_context("fork" if sys.platform != "win32" else "spawn").Pool(
@@ -746,8 +748,13 @@ def renderizar(ruta: str, carpeta: Path, procesos: int | None = None, segundos: 
 def comprobar(mp4: Path, mini: Path, duracion: float = DURACION):
     from .verificar import verificar
 
-    return verificar(mp4, mini, ANCHO, ALTO, FPS, duracion, rango=(duracion, duracion), tam_miniatura=(1280, 720),
-                     silencio=True)
+    from .verificar import Resultado
+
+    res = verificar(mp4, mini, ANCHO, ALTO, FPS, duracion, rango=(duracion, duracion), tam_miniatura=(1280, 720),
+                    silencio=True, tolerancia_bucle=2.0)  # CRF 23: algo más de ruido de compresión
+    mb = mp4.stat().st_size / 1e6 if mp4.exists() else 0
+    res.append(Resultado("Tamaño menor de 95 MB (GitHub no acepta más de 100 MB)", 0 < mb < 95, f"{mb:.1f} MB"))
+    return res
 
 
 # ============================================================ PUBLICAR

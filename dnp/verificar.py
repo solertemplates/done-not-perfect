@@ -95,7 +95,7 @@ def silencios(ruta: Path, umbral_db: float = -45, minimo: float = 0.5) -> list[s
 
 def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int, duracion: float,
               rango: tuple[float, float] = (15, 20), tam_miniatura: tuple[int, int] | None = None,
-              silencio: bool = False) -> list[Resultado]:
+              silencio: bool = False, tolerancia_bucle: float = 1.0) -> list[Resultado]:
     res: list[Resultado] = []
 
     def chk(nombre, ok, detalle):
@@ -145,7 +145,8 @@ def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int
         primero = _fotograma(mp4, 0, ancho, alto).astype(np.int16)
         ultimo = _fotograma(mp4, esperados - 1, ancho, alto).astype(np.int16)
         dif = float(np.mean(np.abs(primero - ultimo)))
-        chk("Bucle: último fotograma = primero", dif < 1.0, f"diferencia media {dif:.3f} (máx. 1.0)")
+        chk("Bucle: último fotograma = primero", dif < tolerancia_bucle,
+            f"diferencia media {dif:.3f} (máx. {tolerancia_bucle:g})")
     if miniatura is not None:
         if miniatura.exists():
             with Image.open(miniatura) as im:

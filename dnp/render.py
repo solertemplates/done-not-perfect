@@ -38,14 +38,15 @@ def _render(i: int) -> bytes:
     return _escena.fotograma(i / _escena.ep.fps).tobytes()
 
 
-def comando_ffmpeg(salida: Path, wav: Path, ancho: int, alto: int, fps: int) -> list[str]:
+def comando_ffmpeg(salida: Path, wav: Path, ancho: int, alto: int, fps: int, crf: int = 18,
+                   preset: str = "slow") -> list[str]:
     return [
         "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
         "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{ancho}x{alto}", "-framerate", str(fps), "-i", "-",
         "-i", str(wav),
         "-map", "0:v:0", "-map", "1:a:0",
         "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p",
-        "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p",
+        "-c:v", "libx264", "-profile:v", "high", "-preset", preset, "-crf", str(crf), "-pix_fmt", "yuv420p",
         "-g", str(fps * 2), "-r", str(fps), "-fps_mode", "cfr",
         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
         "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",

@@ -94,7 +94,7 @@ def test_nunca_negro_y_tamano(video, t):
 def test_el_ultimo_fotograma_es_el_primero(video):
     primero = np.asarray(video.fotograma(0)).astype(int)
     ultimo = np.asarray(video.fotograma((largo.N_FOTOGRAMAS - 1) / largo.FPS)).astype(int)
-    assert np.mean(np.abs(primero - ultimo)) < 1.0
+    assert np.array_equal(primero, ultimo)  # idénticos antes de comprimir
 
 
 def test_personajes_siempre_blancos(video):

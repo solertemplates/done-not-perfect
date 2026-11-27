@@ -1,0 +1,4 @@
+plantilla: roca
+golpes: 99
+gancho: One more hit.
+cierre: Don't quit at 99

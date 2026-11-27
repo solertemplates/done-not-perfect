@@ -1,0 +1,4 @@
+plantilla: construir
+objeto: silla
+gancho: Same wood. Same time.
+cierre: Done > Perfect

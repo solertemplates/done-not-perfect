@@ -69,7 +69,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             python -m dnp.publicar --solo-comprobar $(cat lista.txt)
           else
-            python -m dnp.publicar --destino salida/videos $(cat lista.txt)
+            python -m dnp.publicar --destino salida/videos --faltan $(cat lista.txt)
           fi
 
       - name: Guardar en videos/ de main
@@ -83,7 +83,7 @@ jobs:
             git fetch --quiet origin main
             git checkout --quiet -B publicar origin/main
             mkdir -p videos
-            find salida/videos -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.png' -o -name 'ERRORES.txt' \) \
+            find salida/videos -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.png' -o -name '*_textos.txt' -o -name 'ERRORES.txt' \) \
               -exec cp {} videos/ \;
             if [ -f salida/videos/.sin_errores ] && [ -f videos/ERRORES.txt ]; then git rm --quiet videos/ERRORES.txt; fi
             git add -A videos
@@ -105,5 +105,6 @@ jobs:
             salida/**/*.png
             salida/**/informe.txt
             salida/videos/ERRORES.txt
+            salida/videos/*_textos.txt
           if-no-files-found: ignore
           retention-days: 30

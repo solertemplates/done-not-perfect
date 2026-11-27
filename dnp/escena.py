@@ -26,7 +26,8 @@ from PIL import Image
 from . import biblioteca as bib
 from . import decorado as dec
 from .decorado import decor
-from .lienzo import AMBIENTE, INDIGO, NARANJA, Lienzo, fondo, mezcla
+from . import variedad
+from .lienzo import AMBIENTE, Lienzo, fondo, mezcla
 
 MESA = 1250  # tablero de la mesa del taller (escena única)
 TECHO = 205
@@ -54,25 +55,15 @@ def _mover(trazos, x0, y0):
     return [((a[0] + x0, a[1] + y0), (b[0] + x0, b[1] + y0)) for a, b in trazos]
 
 
-def degradado(img: Image.Image, y0: float, y1: float, horizonte: float, exterior: bool, resplandor=None):
-    """Fondo nunca plano: más claro y violeta/índigo arriba, el color del fondo en el horizonte
-    y más oscuro abajo. En exteriores, un resplandor naranja suave sobre el horizonte."""
+def degradado(img: Image.Image, y0: float, y1: float, *_args, **_kw):
+    """Pinta la zona con el color plano del fondo. El degradado RADIAL (centro vivo, bordes
+    oscuros) y el resplandor del horizonte se aplican en cada fotograma (dnp/color.py)."""
     from .lienzo import ESCALA
 
     s = ESCALA
-    arr = np.asarray(img).astype(np.float32)
-    ys = (np.arange(int(y0 * s), int(y1 * s)) / s)[:, None]
-    base = np.array(fondo(), np.float32)
-    tinte = np.array(INDIGO, np.float32) - base
-    arriba = np.clip((horizonte - ys) / max(1.0, horizonte - y0), 0, 1) ** 1.15
-    abajo = np.clip((ys - horizonte) / max(1.0, y1 - horizonte), 0, 1)
-    fila = base + tinte * arriba * (0.40 if exterior else 0.24)
-    fila = fila * (1 - 0.30 * abajo)
-    if exterior and resplandor is not None:
-        g = np.exp(-(((ys - resplandor) / 120.0) ** 2)) * (ys <= horizonte + 40)
-        fila = fila + (np.array(NARANJA, np.float32) - fila) * (0.13 * g)
-    arr[int(y0 * s):int(y1 * s)] = fila[:, None, :]
-    img.paste(Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)))
+    arr = np.asarray(img).copy()
+    arr[int(y0 * s):int(y1 * s)] = np.array(fondo(), np.uint8)
+    img.paste(Image.fromarray(arr))
 
 
 def construir(img: Image.Image, zonas: list) -> list:
@@ -82,11 +73,12 @@ def construir(img: Image.Image, zonas: list) -> list:
     Devuelve las estrellas que parpadean (se dibujan en cada fotograma).
     """
     estrellas = []
+    var = variedad.actual()
     for conf, oy, indice, (y0, y1) in zonas:
+        conf = dict(conf)
+        conf["semilla"] = conf.get("semilla", indice) + var.semilla  # estrellas, ciudad y siluetas propias
         tipo = conf["tipo"]
-        suelo_local = MESA if tipo == "taller" else dec.SUELO
-        res = _RESPLANDOR.get(tipo)
-        degradado(img, y0, y1, oy + suelo_local, tipo in EXTERIORES, None if res is None else oy + res)
+        degradado(img, y0, y1)
         lz = Lienzo(img, 0, oy)
         # 1) Luz de las lámparas (primero, para que las líneas queden encima).
         lamp = conf.get("lampara")
@@ -114,15 +106,16 @@ def construir(img: Image.Image, zonas: list) -> list:
                                        cielo_desde=y0 - oy, farolas=conf.get("farolas", [150, 930]))
         # 2b) Siluetas de fondo (sierra, ciudad o bancales), muy tenues.
         if conf.get("siluetas", "ninguna") != "ninguna":
-            siluetas(lz, conf["siluetas"], conf.get("siluetas_y", 520 if tipo != "taller" else 1000), indice)
+            siluetas(lz, conf["siluetas"], conf.get("siluetas_y", 520 if tipo != "taller" else 1000),
+                     indice + var.semilla)
         # 3) Ventana con estrellas (y luna, si se pide).
         v = conf.get("ventana")
         if v:
             luna = v.get("luna")
             luna_t = (luna["x"], luna["y"], luna["radio"]) if luna else None
             estrellas += dec.ventana(lz, (v["x"], v["y"], v["x"] + v["ancho"], v["y"] + v["alto"]), panel=indice,
-                                     semilla=v.get("semilla", 41), luna=luna_t,
-                                     densidad=v.get("estrellas", 1.0))
+                                     semilla=v.get("semilla", 41) + var.semilla, luna=luna_t,
+                                     densidad=v.get("estrellas", 1.0) * var.estrellas)
         # 4) Cartel (máximo uno por zona).
         c = conf.get("cartel")
         if c:
@@ -179,7 +172,7 @@ def siluetas(lz: Lienzo, tipo: str, y: float, semilla: int = 0):
 def ciudad(lz: Lienzo, base_y: float, rnd: random.Random, alfa_linea: float = 0.4, altura=(60, 220)):
     """Siluetas de edificios con ventanas encendidas en colores de ambiente (ámbar, naranja, rosa, violeta)."""
     colores = list(AMBIENTE.values())
-    pesos = [0.55, 0.2, 0.12, 0.13]
+    pesos = list(variedad.actual().pesos_ventanas)
     x = -10
     while x < 1090:
         w = rnd.uniform(70, 140)
@@ -203,7 +196,7 @@ def calle_mercado(lz: Lienzo, panel: int, luna: bool, semilla: int, cielo_desde:
     rnd = random.Random(1000 + semilla * 17 + panel)
     parpadean = []
     alto_cielo = 470 - cielo_desde
-    for _ in range(int(40 * alto_cielo / 450)):
+    for _ in range(int(40 * alto_cielo / 450 * variedad.actual().estrellas)):
         x, y = rnd.uniform(20, 1060), rnd.uniform(cielo_desde + 20, 470)
         if luna and (x - 900) ** 2 + (y - ((cielo_desde + 470) / 2 - 60)) ** 2 < 70 ** 2:
             continue
@@ -230,3 +223,9 @@ def calle_mercado(lz: Lienzo, panel: int, luna: bool, semilla: int, cielo_desde:
     for j, x in enumerate(range(60, 1080, 120)):
         lz.boceto((x, dec.SUELO), (x - 10, dec.SUELO + 22), 1.2, decor(0.3), semilla=1320 + j, doble=False)
     return parpadean
+
+
+def horizonte(conf: dict, oy: float):
+    """Altura del resplandor del horizonte en pantalla (solo exteriores)."""
+    res = _RESPLANDOR.get(conf["tipo"])
+    return None if res is None else oy + res

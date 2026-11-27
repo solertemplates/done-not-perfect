@@ -82,9 +82,8 @@ def test_json_mal_escrito(tmp_path):
 def test_comillas_del_iphone(tmp_path, datos):
     p = tmp_path / "ep.json"
     p.write_text(json.dumps(datos).replace('"titulo"', "“titulo”"), encoding="utf-8")
-    with pytest.raises(ErrorConfig) as e:
-        cargar(p)
-    assert "comillas tipográficas" in str(e.value)
+    ep = cargar(p)  # las comillas curvas del iPhone se aceptan
+    assert ep["titulo"] == datos["titulo"]
 
 
 def test_archivo_inexistente(tmp_path):

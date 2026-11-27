@@ -1,6 +1,6 @@
 # Guía de guiones — "Done, not perfect"
 
-Todos los episodios se escriben **solo con un archivo JSON** en la carpeta `episodios/`. No hay que programar ni tocar el workflow.
+Todos los episodios se escriben en la carpeta `episodios/`: con un **guion corto `.txt`** de 5 a 8 líneas (plantillas, abajo) o con un **JSON completo** (secciones 1-8). No hay que programar ni tocar el workflow.
 
 ## Publicar
 
@@ -8,6 +8,34 @@ Todos los episodios se escriben **solo con un archivo JSON** en la carpeta `epis
 2. El workflow se lanza solo y renderiza **solo los episodios que has subido o cambiado**.
 3. En unos 3 minutos el vídeo está en `videos/<id>.mp4` y la portada en `videos/<id>_miniatura.png`. Enlace directo: `https://github.com/solertemplates/done-not-perfect/raw/main/videos/<id>.mp4`.
 4. Si el JSON tiene errores, en lugar del vídeo aparece **`videos/ERRORES.txt`**, que explica en español qué corregir. Cuando lo corriges y guardas, el vídeo se hace solo y `ERRORES.txt` desaparece.
+
+## Guiones cortos con plantillas (.txt)
+
+La forma más rápida: un `.txt` de 5 a 8 líneas en `episodios/`, por ejemplo `episodios/07_kioscos.txt`. El workflow lo convierte en el JSON completo y lo renderiza. El número y el `id` salen del nombre del archivo (`07_kioscos.txt` → `ep07_kioscos`). Las comillas curvas del iPhone, la flecha `→` y las mayúsculas se aceptan.
+
+```
+plantilla: kioscos
+barato: $1
+caro: $3 -> $5
+gancho: Same lemonade.
+cierre: Smart > Cheap
+fondo: azul_noche
+```
+
+| Plantilla | Campos propios |
+|---|---|
+| `roca` | `golpes: 99`: los golpes del que se rinde. El Hacedor da uno más y la parte. |
+| `kioscos` | `barato: $1`, `caro: $3` o `caro: $3 -> $5` (sube el precio) y `clientes: 1-8` |
+| `construir` | `objeto: silla` o `objeto: escalera` |
+| `martillos` | ninguno |
+
+Campos comunes (todos opcionales menos `plantilla`):
+- `gancho`: máximo 40 letras;
+- `cierre`: máximo 24 letras; con `>` sale en verde > rojo;
+- `fondo`: negro, azul_noche, marron_cafe, gris_pizarra o morado_oscuro;
+- `titulo`, `episodio` e `id`.
+
+Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo está mal, `videos/ERRORES.txt` lo explica.
 
 ---
 

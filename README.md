@@ -13,15 +13,27 @@ Todo se genera por código en GitHub Actions: dibujo, animación, música y efec
    - Ep. 2: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep02_la_escalera.mp4
    - Ep. 3: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep03_los_dos_martillos.mp4
    - Ep. 4: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep04_la_roca.mp4
+   - Ep. 6: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep06_limonada.mp4
 
    Pulsa compartir y elige **Guardar vídeo** para llevarlo a Fotos.
 4. **Si el JSON tiene un error**, en vez del vídeo aparece `videos/ERRORES.txt`, que explica en español qué corregir. Al corregirlo y guardar, el vídeo se hace solo y `ERRORES.txt` desaparece.
 
-Cómo escribir un episodio (escenas, personajes, objetos, acciones, colores y un ejemplo completo): [GUIA_GUIONES.md](GUIA_GUIONES.md).
+**Lo más rápido:** un guion corto `.txt` de 5 a 8 líneas con una plantilla (roca, kioscos, construir o martillos), por ejemplo `episodios/07_kioscos.txt`:
+
+```
+plantilla: kioscos
+barato: $1
+caro: $3 -> $5
+gancho: Same lemonade.
+cierre: Smart > Cheap
+fondo: azul_noche
+```
+
+Cómo escribir un episodio (plantillas, escenas, personajes, objetos, acciones, colores y un ejemplo completo): [GUIA_GUIONES.md](GUIA_GUIONES.md).
 
 Cada vídeo pasa siempre las mismas comprobaciones (30 fps, cero negros, bucle y miniatura). Si alguna falla, no se publica y el motivo aparece en `ERRORES.txt`.
 
-> Truco: el teclado del iPhone cambia `"` por `“ ”`, y eso rompe el JSON. Para evitarlo, desactiva **Ajustes > General > Teclado > Puntuación inteligente** mientras editas.
+> Las comillas curvas `“ ”` que pone el teclado del iPhone se aceptan, tanto en los `.txt` como en los JSON.
 
 ## Fondos
 

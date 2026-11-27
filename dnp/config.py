@@ -240,21 +240,14 @@ def cargar(ruta: str | Path) -> Episodio:
     ruta = Path(ruta)
     if not ruta.exists():
         raise ErrorConfig([f"No existe el archivo '{ruta}'. Revisa el nombre y la carpeta."], str(ruta))
+    # El teclado del iPhone pone comillas curvas solas: se aceptan como si fueran rectas.
     texto = ruta.read_text(encoding="utf-8")
+    for curva in ("“", "”", "„"):
+        texto = texto.replace(curva, '"')
     try:
         datos = json.loads(texto)
     except json.JSONDecodeError as e:
         pista = ""
-        for curva in ("“", "”"):
-            if curva in texto:
-                linea = texto[: texto.index(curva)].count("\n") + 1
-                raise ErrorConfig(
-                    [
-                        f"La línea {linea} tiene comillas tipográficas ({curva}). El teclado del iPhone las pone solas: "
-                        "usa comillas rectas (\") o desactiva 'Puntuación inteligente' en Ajustes > General > Teclado."
-                    ],
-                    str(ruta),
-                ) from None
         if "trailing comma" in e.msg:
             pista = " Sobra una coma de más antes de '}' o ']'."
         elif "Expecting property name" in e.msg:

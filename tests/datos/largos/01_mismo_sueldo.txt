@@ -1,0 +1,10 @@
+id: largo01_mismo_sueldo
+gancho: Same salary. 10 years later.
+capitulos:
+- Savings
+- Debt
+- Habits
+- Decisions
+- Business
+mensaje: Not in a day. Not in a month. But with consistency and discipline, it happens.
+siguiente: Same age. Different choices.

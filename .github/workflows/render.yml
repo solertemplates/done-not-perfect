@@ -1,19 +1,20 @@
 name: Render episodio
 
 # Se lanza solo:
-# - al subir o cambiar un archivo de episodios/ en main: renderiza SOLO esos episodios
-#   y guarda el MP4 y la miniatura en videos/ (o videos/ERRORES.txt si el JSON tiene errores);
-# - en los pull requests: pasa los tests y comprueba todos los episodios (sin publicar nada).
-# También se puede lanzar a mano desde Actions (vacío = todos los episodios).
+# - al subir o cambiar un archivo de episodios/ (Shorts) o de episodios_largos/ (vídeos largos) en main:
+#   renderiza SOLO esos y guarda el MP4, la miniatura y los textos en videos/
+#   (o videos/ERRORES.txt si algo está mal; cada tipo tiene su apartado y no bloquea al otro);
+# - en los pull requests: pasa los tests y comprueba todo (sin publicar nada).
+# También se puede lanzar a mano desde Actions (vacío = todos los Shorts y los largos que falten).
 on:
   push:
     branches: [main]
-    paths: ["episodios/**"]
+    paths: ["episodios/**", "episodios_largos/**"]
   pull_request:
   workflow_dispatch:
     inputs:
       episodio:
-        description: "Archivo del episodio, p. ej. episodios/04_roca.json o episodios/07_kioscos.txt (vacío = todos)"
+        description: "Archivo, p. ej. episodios/07_kioscos.txt o episodios_largos/01_mismo_sueldo.txt (vacío = todos los Shorts)"
         required: false
         default: ""
 
@@ -61,7 +62,8 @@ jobs:
           if [ "$EVENTO" = "push" ] && [ -n "$ANTES" ] && [ "$ANTES" != "0000000000000000000000000000000000000000" ]; then
             git diff --name-only --diff-filter=AMR "$ANTES" "$GITHUB_SHA" -- 'episodios/*.json' 'episodios/*.txt' > lista.txt
           elif [ "$EVENTO" = "workflow_dispatch" ] && [ -n "$ENTRADA" ]; then
-            echo "$ENTRADA" > lista.txt
+            echo "$ENTRADA" | grep '^episodios/' > lista.txt || true
+            [ -s lista.txt ] || echo "--ninguno" > lista.txt  # se pidió un vídeo largo: los Shorts no se tocan
           else
             ls episodios/*.json episodios/*.txt 2>/dev/null > lista.txt || true
           fi
@@ -71,6 +73,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             python -m dnp.publicar --solo-comprobar $(cat lista.txt)
+          elif grep -q -- '--ninguno' lista.txt; then
+            echo "Solo se pidió un vídeo largo."
           else
             python -m dnp.publicar --destino salida/videos --faltan $(cat lista.txt)
           fi
@@ -86,9 +90,9 @@ jobs:
             git fetch --quiet origin main
             git checkout --quiet -B publicar origin/main
             mkdir -p videos
-            find salida/videos -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.png' -o -name '*_textos.txt' -o -name 'ERRORES.txt' \) \
+            find salida/videos -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.png' -o -name '*_textos.txt' \) \
               -exec cp {} videos/ \;
-            if [ -f salida/videos/.sin_errores ] && [ -f videos/ERRORES.txt ]; then git rm --quiet videos/ERRORES.txt; fi
+            python -m dnp.errores fusionar salida/videos videos  # solo el apartado SHORTS de ERRORES.txt
             git add -A videos
             if git diff --cached --quiet; then echo "Los vídeos ya estaban al día."; break; fi
             git commit --quiet -m "Vídeos renderizados el ${FECHA} ${HORA} UTC" \
@@ -109,5 +113,90 @@ jobs:
             salida/**/informe.txt
             salida/videos/ERRORES.txt
             salida/videos/*_textos.txt
+          if-no-files-found: ignore
+          retention-days: 30
+
+  largos:
+    # Vídeos largos (1920x1080, 8:30). Van aparte y en paralelo: si un largo falla, los Shorts siguen.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Instalar ffmpeg y fuentes
+        run: |
+          sudo grep -rlE 'packages\.microsoft\.com' /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
+          sudo apt-get update -qq || echo "::warning::apt-get update falló en algún repositorio; se sigue con lo que hay."
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+
+      - name: Instalar dependencias de Python
+        run: pip install -r requirements.txt
+
+      - name: Tests de los vídeos largos
+        run: python -m pytest -q tests/test_largo.py
+
+      - name: Elegir vídeos largos
+        env:
+          EVENTO: ${{ github.event_name }}
+          ANTES: ${{ github.event.before }}
+          ENTRADA: ${{ inputs.episodio }}
+        run: |
+          if [ "$EVENTO" = "push" ] && [ -n "$ANTES" ] && [ "$ANTES" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only --diff-filter=AMR "$ANTES" "$GITHUB_SHA" -- 'episodios_largos/*.txt' > largos.txt
+          elif [ "$EVENTO" = "workflow_dispatch" ] && [ -n "$ENTRADA" ]; then
+            echo "$ENTRADA" | grep '^episodios_largos/' > largos.txt || true
+          else
+            : > largos.txt  # sin nada concreto: solo los que aún no tienen vídeo (--faltan)
+          fi
+          echo "Vídeos largos:"; cat largos.txt
+
+      - name: Renderizar y comprobar
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python -m dnp.largo --todos --solo-comprobar
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.episodio }}" ] && [ ! -s largos.txt ]; then
+            echo "Se pidió un Short: los vídeos largos no se tocan."
+          else
+            python -m dnp.largo --destino salida/largos_videos --faltan $(cat largos.txt)
+          fi
+
+      - name: Guardar en videos/ de main
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          [ -d salida/largos_videos ] || { echo "Nada que guardar."; exit 0; }
+          read -r FECHA HORA < <(date -u '+%Y-%m-%d %H:%M')
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for intento in 1 2 3 4 5 6; do
+            git fetch --quiet origin main
+            git checkout --quiet -B publicar-largos origin/main
+            mkdir -p videos
+            find salida/largos_videos -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.png' -o -name '*_textos.txt' \) \
+              -exec cp {} videos/ \;
+            python -m dnp.errores fusionar salida/largos_videos videos  # solo el apartado LARGOS de ERRORES.txt
+            git add -A videos
+            if git diff --cached --quiet; then echo "Los vídeos ya estaban al día."; break; fi
+            git commit --quiet -m "Vídeo largo renderizado el ${FECHA} ${HORA} UTC" \
+              -m "Generado por el workflow Render episodio (ejecución ${GITHUB_RUN_ID}) desde ${GITHUB_SHA}."
+            if git push --quiet origin HEAD:main; then break; fi
+            if [ "$intento" = 6 ]; then echo "No se pudo guardar en main." >&2; exit 1; fi
+            sleep $((intento * 10))
+          done
+
+      - name: Subir el vídeo largo y sus capturas
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: largos
+          path: |
+            salida/largos/**/*.png
+            salida/largos_videos/*
           if-no-files-found: ignore
           retention-days: 30

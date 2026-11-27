@@ -1,0 +1,323 @@
+{
+  "serie": "Done, not perfect",
+  "episodio": 2,
+  "id": "ep02_la_escalera",
+  "titulo": "La escalera",
+  "fondo": "marron_cafe",
+  "video": {
+    "ancho": 1080,
+    "alto": 1920,
+    "fps": 30,
+    "duracion_s": 18
+  },
+  "tiempos": {
+    "gancho_fin_s": 1,
+    "rebobinado_fin_s": 3,
+    "accion_fin_s": 14
+  },
+  "textos": {
+    "gancho": "Same wood. Same time.",
+    "cierre": "Done > Perfect",
+    "marca": "Done, not perfect"
+  },
+  "guion": {
+    "formato": "pantalla_partida",
+    "gancho": "centro",
+    "arriba": {
+      "escena": {
+        "tipo": "habitacion",
+        "ventana": {
+          "x": 600,
+          "y": 50,
+          "ancho": 260,
+          "alto": 212,
+          "semilla": 91,
+          "estrellas": 1.3
+        }
+      },
+      "objetos": [
+        {
+          "id": "madera",
+          "tipo": "pila_madera",
+          "x": 210,
+          "tablas": 7,
+          "cae_desde_s": 3.0,
+          "cae_hasta_s": 3.4
+        },
+        {
+          "tipo": "escalera",
+          "inclinacion_inicial_grados": 7,
+          "inclinacion_final_grados": 2.5
+        },
+        {
+          "tipo": "marca_ok",
+          "x": 960,
+          "y": 330,
+          "aparece_s": 12.6
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "hacedor",
+          "herramienta": "martillo",
+          "paneo": -0.25,
+          "parpadeos_s": [
+            5.6
+          ],
+          "acciones": [
+            {
+              "accion": "preparar",
+              "desde_s": 3.0,
+              "hasta_s": 4.0,
+              "x": 720
+            },
+            {
+              "accion": "construir",
+              "desde_s": 4.0,
+              "hasta_s": 8.25,
+              "objeto": "escalera",
+              "madera": "madera",
+              "primer_golpe_s": 4.3,
+              "cada_s": 0.6,
+              "subida_s": 0.3,
+              "rebote_s": 0.11,
+              "paso_s": [
+                0.45,
+                0.28
+              ],
+              "x_min": 640,
+              "x_max": 760,
+              "mano_final": [
+                650,
+                650
+              ],
+              "x_final": 720,
+              "mirada": [
+                -0.6,
+                0.0
+              ],
+              "vuelo_s": 0.45
+            },
+            {
+              "accion": "mirar",
+              "desde_s": 8.25,
+              "hasta_s": 8.8,
+              "x": 720
+            },
+            {
+              "accion": "subir",
+              "desde_s": 8.8,
+              "hasta_s": 9.8,
+              "objeto": "escalera",
+              "nivel": 3,
+              "acercarse_s": 0.35,
+              "x_inicio": 700,
+              "deja_herramienta": true
+            },
+            {
+              "accion": "tambalearse",
+              "desde_s": 9.8,
+              "hasta_s": 10.5,
+              "objeto": "escalera"
+            },
+            {
+              "accion": "subir",
+              "desde_s": 10.5,
+              "hasta_s": 10.75,
+              "objeto": "escalera",
+              "nivel": 0
+            },
+            {
+              "accion": "martillear",
+              "desde_s": 10.75,
+              "hasta_s": 11.6,
+              "arregla": "escalera",
+              "golpes_s": [
+                11.1,
+                11.4
+              ],
+              "x": 650,
+              "agachado": 36,
+              "preparar_s": 0.2,
+              "levantarse_s": 0.15,
+              "mano_final": [
+                620,
+                660
+              ],
+              "mirada": [
+                -0.7,
+                0.2
+              ]
+            },
+            {
+              "accion": "subir",
+              "desde_s": 11.6,
+              "hasta_s": 12.45,
+              "objeto": "escalera",
+              "nivel": 4,
+              "acercarse_s": 0.25,
+              "x_inicio": 650,
+              "deja_herramienta": true
+            },
+            {
+              "accion": "celebrar",
+              "desde_s": 12.6,
+              "hasta_s": 13.2,
+              "estilo": "señalar",
+              "punto": [
+                650,
+                170
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "abajo": {
+      "escena": {
+        "tipo": "habitacion",
+        "lampara": {
+          "x": 560,
+          "cable": 150,
+          "semilla": 80
+        },
+        "cartel": {
+          "dibujo": "escalera_ideal",
+          "x": 740,
+          "y": 216,
+          "ancho": 190,
+          "alto": 240,
+          "semilla": 100
+        }
+      },
+      "objetos": [
+        {
+          "id": "madera",
+          "tipo": "pila_madera",
+          "x": 880,
+          "tablas": 7,
+          "cae_desde_s": 3.0,
+          "cae_hasta_s": 3.4,
+          "sonido": false
+        },
+        {
+          "tipo": "plano",
+          "boceto": "escalera"
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "perfeccionista",
+          "postura": "sentado_suelo",
+          "paneo": 0.25,
+          "parpadeos_s": [
+            4.6,
+            7.8
+          ],
+          "acciones": [
+            {
+              "accion": "esperar",
+              "desde_s": 3.0,
+              "hasta_s": 3.9
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 3.9,
+              "hasta_s": 4.615,
+              "plano": "plano"
+            },
+            {
+              "accion": "medir",
+              "desde_s": 4.615,
+              "hasta_s": 5.165,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 5.165,
+              "hasta_s": 5.8525,
+              "plano": "plano"
+            },
+            {
+              "accion": "arrugar",
+              "desde_s": 5.8525,
+              "hasta_s": 6.65,
+              "plano": "plano"
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 6.65,
+              "hasta_s": 7.365,
+              "plano": "plano"
+            },
+            {
+              "accion": "medir",
+              "desde_s": 7.365,
+              "hasta_s": 7.915,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 7.915,
+              "hasta_s": 8.6025,
+              "plano": "plano"
+            },
+            {
+              "accion": "arrugar",
+              "desde_s": 8.6025,
+              "hasta_s": 9.4,
+              "plano": "plano"
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 9.4,
+              "hasta_s": 10.115,
+              "plano": "plano"
+            },
+            {
+              "accion": "medir",
+              "desde_s": 10.115,
+              "hasta_s": 10.665,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 10.665,
+              "hasta_s": 11.3525,
+              "plano": "plano"
+            },
+            {
+              "accion": "arrugar",
+              "desde_s": 11.3525,
+              "hasta_s": 12.15,
+              "plano": "plano"
+            },
+            {
+              "accion": "dibujar",
+              "desde_s": 12.15,
+              "hasta_s": 12.6,
+              "plano": "plano"
+            },
+            {
+              "accion": "borrar",
+              "desde_s": 12.6,
+              "hasta_s": 13.2,
+              "plano": "plano"
+            },
+            {
+              "accion": "suspirar",
+              "desde_s": 13.25,
+              "hasta_s": 14.0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "audio": {
+    "musica": "auto",
+    "volumen_musica": 0.35,
+    "volumen_efectos": 0.9,
+    "bpm_aproximado": 80
+  }
+}

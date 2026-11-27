@@ -1,0 +1,118 @@
+{
+  "serie": "Done, not perfect",
+  "episodio": 4,
+  "id": "ep04_la_roca",
+  "titulo": "La roca",
+  "fondo": "azul_noche",
+  "video": {
+    "ancho": 1080,
+    "alto": 1920,
+    "fps": 30,
+    "duracion_s": 18
+  },
+  "tiempos": {
+    "gancho_fin_s": 1,
+    "rebobinado_fin_s": 3,
+    "accion_fin_s": 15
+  },
+  "textos": {
+    "gancho": "99 hits. Same rock.",
+    "cierre": "Don't quit at 99",
+    "marca": "Done, not perfect"
+  },
+  "guion": {
+    "formato": "pantalla_partida",
+    "gancho": "centro",
+    "arriba": {
+      "escena": {
+        "tipo": "cantera_noche"
+      },
+      "objetos": [
+        {
+          "tipo": "roca",
+          "golpes_para_partir": 100,
+          "brillo": "verde"
+        },
+        {
+          "tipo": "contador",
+          "de": "hacedor",
+          "color_final": "verde"
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "hacedor",
+          "herramienta": "mandarria",
+          "paneo": -0.2,
+          "acciones": [
+            {
+              "accion": "golpear",
+              "desde_s": 3.0,
+              "hasta_s": 13.0,
+              "golpes": 99,
+              "velocidad": "rapida",
+              "objeto": "roca"
+            },
+            {
+              "accion": "golpear",
+              "desde_s": 13.4,
+              "hasta_s": 14.0,
+              "golpes": 1,
+              "velocidad": "lenta",
+              "objeto": "roca"
+            },
+            {
+              "accion": "celebrar",
+              "desde_s": 14.15,
+              "hasta_s": 15.0
+            }
+          ]
+        }
+      ]
+    },
+    "abajo": {
+      "escena": {
+        "tipo": "cantera_noche"
+      },
+      "objetos": [
+        {
+          "tipo": "roca",
+          "golpes_para_partir": 100
+        },
+        {
+          "tipo": "contador",
+          "de": "perfeccionista",
+          "color_final": "rojo"
+        }
+      ],
+      "personajes": [
+        {
+          "tipo": "perfeccionista",
+          "herramienta": "mandarria",
+          "paneo": 0.2,
+          "acciones": [
+            {
+              "accion": "golpear",
+              "desde_s": 3.0,
+              "hasta_s": 13.0,
+              "golpes": 99,
+              "velocidad": "rapida",
+              "objeto": "roca"
+            },
+            {
+              "accion": "rendirse",
+              "desde_s": 13.0,
+              "hasta_s": 15.0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "audio": {
+    "musica": "auto",
+    "volumen_musica": 0.35,
+    "volumen_efectos": 0.9,
+    "bpm_aproximado": 80
+  }
+}

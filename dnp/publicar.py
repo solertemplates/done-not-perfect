@@ -17,7 +17,9 @@ import shutil
 import sys
 from pathlib import Path
 
-from .config import ErrorConfig, cargar
+import json
+
+from .config import ErrorConfig, cargar, validar
 
 RAIZ = Path(__file__).resolve().parent.parent
 SIN_ERRORES = ".sin_errores"  # aviso para que el workflow borre videos/ERRORES.txt
@@ -43,9 +45,9 @@ def texto_errores(problemas: list[tuple[str, list[str]]]) -> str:
     lineas += [
         "Cómo arreglarlo:",
         "  1. En github.com abre el archivo de arriba y pulsa el lápiz (Editar).",
-        "  2. Corrige lo que dice cada punto. Los nombres entre comillas son los campos del JSON.",
+        "  2. Corrige lo que dice cada punto. Los nombres entre comillas son los campos del JSON o del .txt.",
         "  3. Guarda (Commit changes). El vídeo se volverá a hacer solo en unos minutos.",
-        "  Truco: si escribes desde el iPhone, desactiva 'Puntuación inteligente' para que las comillas sean rectas.",
+        "  Las comillas curvas del iPhone (“ ”) se aceptan; no hace falta cambiarlas.",
         "",
         f"(Comprobado el {fecha}. Este archivo se borra solo cuando todo está bien.)",
     ]
@@ -59,12 +61,22 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, render=_r
     for ruta in archivos:
         nombre = os.path.relpath(ruta, RAIZ) if ruta.is_absolute() else str(ruta)
         try:
-            cargar(ruta)
+            if ruta.suffix == ".txt":  # guion corto: se convierte en el JSON completo
+                from .plantillas import convertir
+
+                datos = convertir(ruta.read_text(encoding="utf-8"), ruta)
+                validar(datos, str(ruta))
+                generado = salida / ruta.stem / f"{ruta.stem}.json"
+                generado.parent.mkdir(parents=True, exist_ok=True)
+                generado.write_text(json.dumps(datos, ensure_ascii=False, indent=1), encoding="utf-8")
+                ruta = generado
+            else:
+                cargar(ruta)
         except ErrorConfig as e:
             problemas.append((nombre, e.errores))
-            print(f"❌ {nombre}: {len(e.errores)} error(es) en el JSON")
+            print(f"❌ {nombre}: {len(e.errores)} error(es)")
             continue
-        ep, mp4, mini, resultados = render(ruta, salida / ruta.stem)
+        ep, mp4, mini, resultados = render(ruta, salida / Path(nombre).stem)
         fallos = [f"El vídeo no pasó la comprobación '{r.nombre}': {r.detalle}" for r in resultados if not r.ok]
         if fallos:
             problemas.append((nombre, fallos))
@@ -102,8 +114,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     archivos = [Path(a) for a in args.archivos if a.strip()]
     if args.todos or not archivos:
-        archivos = sorted((RAIZ / "episodios").glob("*.json"))
-    archivos = [a for a in archivos if a.suffix == ".json" and a.exists()]
+        archivos = sorted(list((RAIZ / "episodios").glob("*.json")) + list((RAIZ / "episodios").glob("*.txt")))
+    archivos = [a for a in archivos if a.suffix in (".json", ".txt") and a.exists()]
     if not archivos:
         print("No hay episodios que procesar.")
         return 0

@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       episodio:
-        description: "Archivo del episodio, p. ej. episodios/04_roca.json (vacío = todos)"
+        description: "Archivo del episodio, p. ej. episodios/04_roca.json o episodios/07_kioscos.txt (vacío = todos)"
         required: false
         default: ""
 
@@ -56,11 +56,11 @@ jobs:
           ENTRADA: ${{ inputs.episodio }}
         run: |
           if [ "$EVENTO" = "push" ] && [ -n "$ANTES" ] && [ "$ANTES" != "0000000000000000000000000000000000000000" ]; then
-            git diff --name-only --diff-filter=AMR "$ANTES" "$GITHUB_SHA" -- 'episodios/*.json' > lista.txt
+            git diff --name-only --diff-filter=AMR "$ANTES" "$GITHUB_SHA" -- 'episodios/*.json' 'episodios/*.txt' > lista.txt
           elif [ "$EVENTO" = "workflow_dispatch" ] && [ -n "$ENTRADA" ]; then
             echo "$ENTRADA" > lista.txt
           else
-            ls episodios/*.json > lista.txt
+            ls episodios/*.json episodios/*.txt 2>/dev/null > lista.txt || true
           fi
           echo "Episodios:"; cat lista.txt
 

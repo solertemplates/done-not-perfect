@@ -1,0 +1,6 @@
+plantilla: kioscos
+barato: $1
+caro: $2 -> $4
+clientes: 8
+gancho: Price is a choice.
+cierre: Value > Cheap

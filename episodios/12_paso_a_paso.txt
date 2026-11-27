@@ -1,0 +1,4 @@
+plantilla: construir
+objeto: escalera
+gancho: Step by step.
+cierre: Progress > Perfect

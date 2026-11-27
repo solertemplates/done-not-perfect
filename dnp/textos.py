@@ -27,7 +27,7 @@ PRODUCTOS = {
     "constancia": ["sledgehammer", "Atomic Habits"],
     "silla": ["desk chair"],
     "escalera": ["step ladder"],
-    "dinero": ["lemonade dispenser"],
+    "dinero": ["lemonade dispenser", "lemonade stand"],  # el puesto también se ve
     "martillos": ["home tool kit"],
 }
 LAMPARA, PORTATIL = "desk lamp", "laptop"

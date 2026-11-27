@@ -97,7 +97,7 @@ def test_faltan_videos(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("plantilla,productos", [
     ("roca", {"sledgehammer", "Atomic Habits"}), ("paneles", {"sledgehammer", "Atomic Habits"}),
-    ("construir", {"step ladder"}), ("kioscos", {"lemonade dispenser"}), ("martillos", {"home tool kit"}),
+    ("construir", {"step ladder"}), ("kioscos", {"lemonade dispenser", "lemonade stand"}), ("martillos", {"home tool kit"}),
 ])
 def test_producto_que_se_ve_en_el_video(plantilla, productos):
     d = convertir(ejemplo(plantilla), Path(f"/no_existe/09_{plantilla}.txt"))
@@ -151,8 +151,9 @@ def test_episodios_seguidos_nunca_repiten_ninguna_parte():
 
 
 def test_nunca_el_mismo_producto_dos_episodios_seguidos(tmp_path):
-    guiones = ["roca", "roca", "construir\nobjeto: silla", "construir\nobjeto: silla", "kioscos",
-               "martillos", "martillos", "roca", "construir\nobjeto: escalera", "paneles\npaneles: A, B, C"]
+    guiones = ["roca", "roca", "construir\nobjeto: silla", "construir\nobjeto: silla", "kioscos", "kioscos",
+               "kioscos", "martillos", "martillos", "roca", "construir\nobjeto: escalera",
+               "construir\nobjeto: escalera", "paneles\npaneles: A, B, C", "paneles\npaneles: A, B, C"]
     productos = []
     for n, g in enumerate(guiones, 1):
         f = tmp_path / f"{n:02d}_ep.txt"

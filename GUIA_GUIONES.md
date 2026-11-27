@@ -144,7 +144,7 @@ La tienda y el ID están en `config/amazon.txt`.
 | roca, paneles | sledgehammer o Atomic Habits (alternando) |
 | silla | desk chair |
 | escalera | step ladder |
-| kioscos | lemonade dispenser |
+| kioscos | lemonade dispenser (o lemonade stand si el anterior ya lo llevaba) |
 | martillos | home tool kit |
 | lámpara | desk lamp |
 | portátil | laptop |

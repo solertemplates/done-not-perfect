@@ -52,6 +52,63 @@ Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo
 
 ---
 
+## Vídeos largos para YouTube (episodios_largos/)
+
+Un `.txt` en `episodios_largos/`, por ejemplo `episodios_largos/01_mismo_sueldo.txt`. Al subirlo, el workflow hace solo el vídeo (tarda unos 25 minutos).
+
+```
+id: largo01_mismo_sueldo
+gancho: Same salary. 10 years later.
+capitulos:
+- Savings
+- Debt
+- Habits
+- Decisions
+- Business
+mensaje: Not in a day. Not in a month. But with consistency and discipline, it happens.
+siguiente: Same age. Different choices.
+```
+
+- **capitulos**: 5 líneas, cada una de estas: Savings, Debt, Habits, Decisions o Business (también en español: Ahorro, Deuda, Hábitos, Decisiones, Negocio). También vale en una línea separada por comas.
+- **gancho** (máx. 40 letras), **mensaje** (máx. 110) y **siguiente** (máx. 40). Si no pones `id`, sale del nombre del archivo (`01_mismo_sueldo.txt` → `largo01_mismo_sueldo`).
+
+**Cómo es siempre el vídeo:** 1920x1080, 30 fps y 8:30 exactos, sin voz.
+
+| Minuto | Qué pasa |
+|---|---|
+| 0:00 | **Gancho** (20 s): se ve el final (el Hacedor tranquilo en verde, el Perfeccionista agobiado en rojo) y rebobina hasta "Year 1" |
+| 0:20 | **5 capítulos** de 1:32, de 2 años cada uno: contador de años arriba ("Year 3", "Month 5"…), marcador verde/rojo abajo y progreso que empieza lento y luego sube (efecto compuesto) |
+| 2:00, 4:00, 6:00, 8:00 | **Minigancho** de 3 s con texto grande |
+| varias veces | **Mensaje central** |
+| 8:00 | **Final** (30 s): vuelve la escena del gancho, "Done > Perfect" y "Next: …" con flecha y "Watch next ▶". El último fotograma es igual que el primero |
+
+**Qué pasa en cada capítulo:**
+- **Savings:** el Hacedor guarda una moneda cada mes y su hucha crece; el Perfeccionista espera "el momento perfecto".
+- **Debt:** compras pequeñas que se acumulan en rojo frente a facturas pagadas primero en verde.
+- **Habits:** un calendario lleno de marcas verdes frente a uno que empieza y se deja.
+- **Decisions:** el Hacedor avanza por el camino "TODAY"; el otro duda en el cruce.
+- **Business:** un puesto de limonada que empieza pequeño y mejora, frente a planes y bolas de papel.
+
+**Música:** generada por código, con un estilo distinto en cada capítulo y fundidos entre ellos, para que nunca se quede en silencio.
+
+**Lo que sale en `videos/`:**
+- `<id>.mp4`;
+- `<id>_miniatura.png` (1280x720, con el gancho en grande y verde frente a rojo);
+- `<id>_textos.txt`, con título, descripción, capítulos con sus minutos, hashtags, producto de Amazon (piggy bank o Atomic Habits) y PRIMER COMENTARIO.
+
+**Comprobaciones:**
+- dura exactamente 8:30 a 30 fps;
+- H.264 High y yuv420p;
+- audio AAC 48 kHz estéreo y +faststart;
+- cero fotogramas negros;
+- nunca en silencio;
+- la última imagen es la primera;
+- miniatura de 1280x720.
+
+Si algo falla, va al apartado LARGOS de `videos/ERRORES.txt` y no bloquea los Shorts.
+
+---
+
 ## 1. Reglas fijas de la serie
 
 | Regla | Valor |

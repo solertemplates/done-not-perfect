@@ -85,7 +85,17 @@ def _fotograma(ruta: Path, indice: int, ancho: int, alto: int) -> np.ndarray:
     return np.frombuffer(r.stdout, np.uint8).reshape(alto, ancho, 3)
 
 
-def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int, duracion: float) -> list[Resultado]:
+def silencios(ruta: Path, umbral_db: float = -45, minimo: float = 0.5) -> list[str]:
+    """Tramos en silencio (silencedetect)."""
+    r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(ruta), "-map", "0:a:0", "-af",
+                        f"silencedetect=noise={umbral_db}dB:d={minimo}", "-f", "null", "-"],
+                       capture_output=True, text=True)
+    return re.findall(r"silence_start: ([\d.]+)", r.stderr)
+
+
+def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int, duracion: float,
+              rango: tuple[float, float] = (15, 20), tam_miniatura: tuple[int, int] | None = None,
+              silencio: bool = False, tolerancia_bucle: float = 1.0) -> list[Resultado]:
     res: list[Resultado] = []
 
     def chk(nombre, ok, detalle):
@@ -109,7 +119,9 @@ def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int
         n = int(v.get("nb_read_packets") or v.get("nb_frames") or 0)
         chk("Número de fotogramas", n == esperados, f"{n} (esperados {esperados})")
         dur_v = float(v.get("duration", 0))
-        chk("Duración 15-20 s", 15 <= dur_v <= 20 and abs(dur_v - duracion) < 1.5 / fps, f"{dur_v:.3f} s")
+        nombre_dur = f"Duración {rango[0]:g}-{rango[1]:g} s" if rango[0] != rango[1] else f"Duración exacta {rango[0]:g} s"
+        chk(nombre_dur, rango[0] - 1.5 / fps <= dur_v <= rango[1] + 1.5 / fps and abs(dur_v - duracion) < 1.5 / fps,
+            f"{dur_v:.3f} s")
         # Marcas de tiempo equiespaciadas (CFR real, no solo la cabecera).
         r = subprocess.run(
             ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "packet=pts", "-of", "csv=p=0",
@@ -133,13 +145,19 @@ def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int
         primero = _fotograma(mp4, 0, ancho, alto).astype(np.int16)
         ultimo = _fotograma(mp4, esperados - 1, ancho, alto).astype(np.int16)
         dif = float(np.mean(np.abs(primero - ultimo)))
-        chk("Bucle: último fotograma = primero", dif < 1.0, f"diferencia media {dif:.3f} (máx. 1.0)")
+        chk("Bucle: último fotograma = primero", dif < tolerancia_bucle,
+            f"diferencia media {dif:.3f} (máx. {tolerancia_bucle:g})")
     if miniatura is not None:
         if miniatura.exists():
             with Image.open(miniatura) as im:
-                chk("Miniatura (fotograma 1)", im.size == (ancho, alto), f"{miniatura.name} {im.size[0]}x{im.size[1]}")
+                tam = tam_miniatura or (ancho, alto)
+                chk("Miniatura", im.size == tam, f"{miniatura.name} {im.size[0]}x{im.size[1]}")
         else:
-            chk("Miniatura (fotograma 1)", False, "no existe")
+            chk("Miniatura", False, "no existe")
+    if silencio and a is not None:
+        tramos = silencios(mp4)
+        chk("Nunca en silencio (silencedetect -45 dB, 0,5 s)", not tramos,
+            "ninguno" if not tramos else "silencio en " + ", ".join(f"{float(x):.1f} s" for x in tramos[:5]))
     return res
 
 

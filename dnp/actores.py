@@ -17,7 +17,7 @@ from dataclasses import dataclass, replace
 from . import biblioteca as bib
 from . import personajes as pj
 from . import piezas as pz
-from .lienzo import BLANCO, Lienzo, rotar, tenue
+from .lienzo import BLANCO, Lienzo, fondo, rotar, tenue
 from .objetos import (CARA_GOLPEO, Clave, EstadoObjeto, Expresion, PistaObjeto, martillo,
                       mezclar_expresion)
 from .personajes import Pose
@@ -39,6 +39,9 @@ class Cuerpo:
     subida: float = 0.0
     lapiz: bool = False
     goma: bool = False
+    vaso: bool = False  # lleva un vaso de limonada en la mano
+    cajas: int = 0  # cajas que lleva en brazos
+    monedas: list | None = None  # monedas en el aire (posiciones) que dibuja este instante
 
 
 def mezclar_cuerpo(a: Cuerpo, b: Cuerpo, u: float) -> Cuerpo:
@@ -115,6 +118,7 @@ class Muneco(Actor):
         self.perfeccionista = conf["tipo"] == "perfeccionista"
         self.herramienta = conf.get("herramienta", "ninguna")
         self.sentado_suelo = conf.get("postura", "de_pie") == "sentado_suelo"
+        self.mira = {"izquierda": -1, "derecha": 1}.get(conf.get("mira", "izquierda"), -1)
         self.paneo = conf.get("paneo", 0.2 if self.perfeccionista else -0.2)
         self.golpes: list[float] = []
         roca = next((self.obj(ac) for ac in self.acciones if ac["accion"] == "golpear"), None)
@@ -149,6 +153,19 @@ class Muneco(Actor):
                 self.golpes += instantes
                 self.obj(ac).golpes += instantes
                 self.obj(ac).paneo = self.paneo
+            elif a == "vender":
+                kio = self.obj(ac, "kiosco")
+                for t_venta, t_moneda in self.ventas(ac):
+                    kio.ventas.append(t_venta)
+                    kio.ingresos.append((t_moneda, 1))
+            elif a == "comprar_todo":
+                kio = self.obj(ac, "kiosco")
+                d, h = ac["desde_s"], ac["hasta_s"]
+                kio.ingresos.append((d + (h - d) * 0.45, ac.get("pago", 5)))
+                kio.vaciados.append(d + (h - d) * 0.55)
+            elif a == "cambiar_precio":
+                d, h = ac["desde_s"], ac["hasta_s"]
+                self.obj(ac, "cartel").cambios.append(((d + h) / 2, ac["precio"]))
             elif a in ("dibujar", "medir", "borrar", "arrugar"):
                 self.plano = self.obj(ac, "plano")
                 self.plano.usuario = self
@@ -226,7 +243,7 @@ class Muneco(Actor):
             return Cuerpo(self.con_mandarria(agarre, ang, inclinacion=10), agarre=agarre, angulo=ang)
         if self.sentado_suelo:
             return Cuerpo(self.sentado_suelo_base())
-        return Cuerpo(self.de_pie(self.x))
+        return Cuerpo(self.de_pie(self.x, mira=self.mira))
 
     # ---------------------------------------------------------------- acciones
     def _hacer(self, i, t, ts_real) -> Cuerpo:
@@ -622,6 +639,142 @@ class Muneco(Actor):
         p.mano_delante = lerp(p.mano_delante, (p.cadera[0] + 50 * p.mira, y - 120 + tiembla), arriba)
         return replace(inicio, pose=p)
 
+    # Negocio ---------------------------------------------------------------------
+    @staticmethod
+    def ventas(ac):
+        """(instante en que entrega el vaso, instante en que llega la moneda) de cada venta."""
+        d, h, n = ac["desde_s"], ac["hasta_s"], ac.get("veces", 1)
+        L = (h - d) / n
+        return [(d + L * (k + 0.55), d + L * (k + 0.85)) for k in range(n)]
+
+    def _vender(self, i, ac, t, parp):
+        kio = self.obj(ac, "kiosco")
+        d, h, n = ac["desde_s"], ac["hasta_s"], ac.get("veces", 1)
+        L = (h - d) / n
+        k = min(int((t - d) / L), n - 1) if t >= d else 0
+        u = tramo(t, d + k * L, d + (k + 1) * L)
+        lado = kio.lado
+        p = self.de_pie(kio.x, mira=lado, parpado=parp)
+        p.sonrisa = 0.9 if not self.perfeccionista else 0.3
+        vaso_mesa = (kio.x - kio.ancho / 2 + 106, pz.MOSTRADOR - 20)
+        entrega = kio.mano_cliente()
+        reposo = (kio.x + lado * 40, pz.MOSTRADOR - 70)
+        if u < 0.3:
+            mano = lerp(reposo, vaso_mesa, suave(u / 0.3))
+            lleva = False
+        elif u < 0.55:
+            mano = lerp(vaso_mesa, entrega, suave((u - 0.3) / 0.25))
+            lleva = True
+        else:
+            mano = lerp(entrega, reposo, suave(tramo(u, 0.85, 1.0)))
+            lleva = False
+        p.mano_delante = mano
+        p.mirada = (0.8, 0.3)
+        c = Cuerpo(p, vaso=lleva)
+        if 0.6 <= u < 0.85 and kio.bolsa is not None:  # la moneda vuela del cliente a la bolsa
+            v = tramo(u, 0.6, 0.85)
+            a, b = kio.puesto_cola(0), kio.bolsa.posicion()
+            a = (a[0], pz.MOSTRADOR - 40)
+            b = (b[0], b[1] - 60)
+            c.monedas = [(lerp(a[0], b[0], v), lerp(a[1], b[1], v) - math.sin(math.pi * v) * 120)]
+        return c
+
+    def _comprar_todo(self, i, ac, t, parp):
+        kio = self.obj(ac, "kiosco")
+        inicio = self.inicio(i)
+        u = self._u(ac, t)
+        x = ac.get("x", kio.x + kio.lado * (kio.ancho / 2 + 90))
+        mira = -kio.lado
+        p = self.de_pie(x, mira=mira, parpado=parp)
+        p.sonrisa = 1.0
+        c = Cuerpo(p)
+        if u < 0.45:
+            p.mano_delante = lerp((x + mira * 40, SUELO - 94), (x + mira * 110, pz.MOSTRADOR - 50), suave(u / 0.25))
+            if 0.2 <= u < 0.45 and kio.bolsa is not None:
+                v = tramo(u, 0.2, 0.45)
+                b = kio.bolsa.posicion()
+                b = (b[0], b[1] - 60)
+                a = p.mano_delante
+                c.monedas = [(lerp(a[0], b[0], v) + 14 * j, lerp(a[1], b[1], v) - math.sin(math.pi * v) * 140 - 8 * j)
+                             for j in range(3)]
+        else:
+            v = suave(tramo(u, 0.55, 0.8))
+            cajas_y = lerp(pz.MOSTRADOR - 30, SUELO - 185, v)
+            p.mano_delante = (x + mira * 46, cajas_y + 10)
+            p.mano_atras = (x + mira * 6, cajas_y + 14)
+            c.cajas = 3 if u >= 0.55 else 0
+        return mezclar_cuerpo(inicio, c, suave(limitar(u / 0.15))) if u < 0.15 else c
+
+    def _burlarse(self, i, ac, t, parp):
+        inicio = self.inicio(i)
+        u = self._u(ac, t)
+        lado = 1 if ac.get("hacia", "derecha") == "derecha" else -1
+        p = replace(inicio.pose)
+        risa = abs(math.sin(2 * math.pi * 5 * (t - ac["desde_s"]))) * (1 - tramo(u, 0.85, 1.0))
+        hombro_y = p.cadera[1] - 140
+        p.mano_delante = lerp(p.mano_delante, (p.cadera[0] + lado * 170, hombro_y - 10), suave(limitar(u / 0.2)))
+        p.mano_atras = (p.cadera[0] - lado * 10, p.cadera[1] - 40)  # mano en la barriga
+        p.mira = lado
+        p.sonrisa = 1.25
+        p.parpado = 1.0 if risa > 0.2 else 0.7
+        p.cabeza = -6 - 6 * risa
+        p.cadera = (p.cadera[0], p.cadera[1] - 6 * risa)
+        return replace(inicio, pose=p, vaso=False)
+
+    def _cambiar_precio(self, i, ac, t, parp):
+        inicio = self.inicio(i)
+        cartel = self.obj(ac, "cartel")
+        u = self._u(ac, t)
+        p = replace(inicio.pose)
+        destino = (cartel.conf["x"], cartel.conf["y"])
+        llega = suave(tramo(u, 0, 0.4)) * (1 - suave(tramo(u, 0.65, 1.0)))
+        p.mano_delante = lerp(inicio.pose.mano_delante, destino, llega)
+        p.mirada = (0.6, -0.3)
+        p.parpado = parp
+        return replace(inicio, pose=p)
+
+    def _contar_dinero(self, i, ac, t, parp):
+        inicio = self.inicio(i)
+        u = self._u(ac, t)
+        p = replace(inicio.pose)
+        cx, cy = p.cadera[0] + p.mira * 56, p.cadera[1] - 70
+        mov = math.sin(2 * math.pi * 3 * (t - ac["desde_s"]))
+        p.mano_delante = (cx + p.mira * 22, cy + 6 * mov)
+        p.mano_atras = (cx - p.mira * 22, cy - 6 * mov)
+        p.mirada = (0.5, 1.0)
+        p.cabeza = 10 + 3 * mov
+        p.sonrisa = 0.9 if not self.perfeccionista else 0.0
+        p.parpado = parp
+        f = (t - ac["desde_s"]) * 5 % 1  # una moneda pasa de mano en mano cada 0,2 s
+        m = (lerp(cx - p.mira * 22, cx + p.mira * 22, f), cy - 10 - math.sin(math.pi * f) * 40)
+        return replace(inicio, pose=p, monedas=[m] if u < 0.96 else None)
+
+    def _encogerse(self, i, ac, t, parp):
+        inicio = self.inicio(i)
+        v = suave(tramo(self._u(ac, t), 0, 0.35))
+        p = replace(inicio.pose)
+        x, y = p.cadera
+        p.hombros = lerp(inicio.pose.hombros, 18, v)
+        p.cabeza = lerp(inicio.pose.cabeza, 10, v)
+        p.sonrisa = lerp(inicio.pose.sonrisa, -0.4, v)
+        p.mano_delante = lerp(inicio.pose.mano_delante, (x + p.mira * 70, y - 10), v)
+        p.mano_atras = lerp(inicio.pose.mano_atras, (x - p.mira * 66, y - 6), v)
+        p.parpado = max(parp, 0.3 * v)
+        return replace(inicio, pose=p)
+
+    def _cruzar_brazos(self, i, ac, t, parp):
+        inicio = self.inicio(i)
+        v = suave(tramo(self._u(ac, t), 0, 0.3))
+        p = replace(inicio.pose)
+        x, y = p.cadera
+        pecho = y - 100
+        p.mano_delante = lerp(inicio.pose.mano_delante, (x - p.mira * 30, pecho), v)
+        p.mano_atras = lerp(inicio.pose.mano_atras, (x + p.mira * 34, pecho + 8), v)
+        p.sonrisa = lerp(inicio.pose.sonrisa, 0.15, v)
+        p.mirada = (-0.6, 0.0)
+        p.parpado = parp
+        return replace(inicio, pose=p)
+
     # Plano: dibujar, medir, borrar, arrugar (sentado en el suelo) --------------------
     def _dibujar(self, i, ac, t, parp):
         u = self._u(ac, t)
@@ -790,10 +943,22 @@ class Muneco(Actor):
             if c.goma:
                 lz3.poligono([(m[0] - 14, m[1] - 4), (m[0] + 14, m[1] - 4), (m[0] + 14, m[1] + 10),
                               (m[0] - 14, m[1] + 10)], relleno=BLANCO)
+            if c.vaso:
+                pz.vaso(lz3, (m[0], m[1] + 18))
+            if c.cajas:
+                ma = e["mano_a"]
+                cx, cy = (m[0] + ma[0]) / 2, (m[1] + ma[1]) / 2
+                for k in range(c.cajas):
+                    y = cy - 10 - k * 46
+                    lz3.poligono([(cx - 42, y), (cx + 42, y), (cx + 42, y - 44), (cx - 42, y - 44)],
+                                 relleno=fondo(), borde=BLANCO, ancho=3)
+                    lz3.linea([(cx - 42, y - 30), (cx + 42, y - 30)], 1.6, tenue(0.6))
 
         e = pj.dibujar(lz2, pose, perfeccionista=self.perfeccionista, en_mano=en_mano)
         if self.sentado_suelo:
             self.soplido(lz, ts, e)
+        for m in c.monedas or []:
+            pz.moneda(lz, m)
 
     # ------------------------------------------------------------------- audio
     def eventos(self):
@@ -829,8 +994,23 @@ class Muneco(Actor):
                 ev.append((d + (h - d) * self._TIRA, "bola", 0.5, pan + 0.1, {}))
             elif a == "suspirar":
                 ev.append((d, "suspiro", 0.9, pan - 0.05, {"dur": 1.1}))
-            elif a == "dudar":
-                pass
+            elif a == "vender":
+                ventas = self.ventas(ac)
+                for k, (_, tm) in enumerate(ventas):
+                    ev.append((tm, "monedas", 0.7, pan, {"semilla": k}))
+                ev.append((ventas[-1][1] + 0.08, "caja_registradora", 0.75, pan, {}))
+            elif a == "comprar_todo":
+                ev.append((d + (h - d) * 0.3, "monedas", 0.8, pan, {"semilla": 7}))
+                ev.append((d + (h - d) * 0.45, "caja_registradora", 0.8, pan, {}))
+                ev.append((d + (h - d) * 0.6, "cajas", 0.8, pan, {}))
+            elif a == "burlarse":
+                ev.append((d + 0.05, "risa", 0.8, pan, {"semilla": i}))
+            elif a == "cambiar_precio":
+                ev.append(((d + h) / 2, "ding", 0.6, pan, {}))
+            elif a == "contar_dinero":
+                n = int((h - d) / 0.2)
+                ev += [(d + 0.2 * k + 0.1, "monedas", 0.35, pan, {"semilla": 20 + k, "golpes": 1}) for k in range(n)]
+                ev.append((h - 0.1, "caja_registradora", 0.7, pan, {}))
         return ev
 
 

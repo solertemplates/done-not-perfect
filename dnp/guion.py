@@ -52,6 +52,7 @@ _ESCENA = {
     "lampara": {"tipo": dict, "campos": _LAMPARA, "opcional": True},
     "cartel": {"tipo": dict, "campos": _CARTEL, "opcional": True},
     "luna": {"tipo": bool, "opcional": True},
+    "farolas": {"tipo": list, "elemento": _NUM, "opcional": True},
     "siluetas": {"tipo": str, "opciones": esc.SILUETAS, "opcional": True},
     "siluetas_y": {"tipo": _NUM, "opcional": True},
     "semilla": {"tipo": int, "opcional": True},
@@ -81,7 +82,25 @@ _OBJETOS = {
                  "sonido": {"tipo": bool, "opcional": True}, "paneo": {"tipo": _NUM, "min": -1, "max": 1, "opcional": True}},
     "aro_rojo": {"x": {"tipo": _NUM}, "y": {"tipo": _NUM}, "aparece_s": {"tipo": _NUM},
                  "radio": {"tipo": _NUM, "min": 8, "max": 120, "opcional": True}},
+    "kiosco": {"x": {"tipo": _NUM}, "ancho": {"tipo": _NUM, "min": 180, "max": 420, "opcional": True},
+               "toldo": {"tipo": str, "opciones": list(pz.TOLDOS), "opcional": True},
+               "cola": {"tipo": str, "opciones": ["derecha", "izquierda"], "opcional": True}},
+    "limonada": {"kiosco": {"tipo": str}, "stock": {"tipo": int, "min": 0, "max": 20, "opcional": True},
+                 "reponer": {"tipo": list, "opcional": True}},
+    "cartel_precio": {"x": {"tipo": _NUM}, "y": {"tipo": _NUM}, "precio": {"tipo": str, "max_len": 6},
+                      "cambios": {"tipo": list, "opcional": True}, "tachado_s": {"tipo": _NUM, "opcional": True},
+                      "borde": {"tipo": str, "opciones": ["ambar", "naranja", "rosa_neon", "violeta"], "opcional": True}},
+    "monedas": {"x": {"tipo": _NUM}, "y": {"tipo": _NUM, "opcional": True},
+                "cantidad": {"tipo": int, "min": 1, "max": 24, "opcional": True}},
+    "bolsa_dinero": {"x": {"tipo": _NUM}, "y": {"tipo": _NUM, "opcional": True}, "kiosco": {"tipo": str, "opcional": True},
+                     "monedas": {"tipo": int, "min": 0, "max": 30, "opcional": True},
+                     "detalle": {"tipo": dict, "opcional": True, "campos": {
+                         "color": {"tipo": str, "opciones": ["verde", "rojo"]}, "aparece_s": {"tipo": _NUM}}}},
+    "clientes": {"kiosco": {"tipo": str}, "cantidad": {"tipo": int, "min": 1, "max": 8, "opcional": True},
+                 "movimientos": {"tipo": list, "opcional": True}},
 }
+# Objetos que apuntan a un kiosco (campo "kiosco").
+_APUNTAN_A_KIOSCO = ("limonada", "bolsa_dinero", "clientes")
 
 # -------------------------------------------------------------- PERSONAJES
 MUNECOS = ["hacedor", "perfeccionista"]
@@ -91,6 +110,7 @@ _PERSONAJE = {
     "id": {"tipo": str, "opcional": True},
     "herramienta": {"tipo": str, "opciones": ["martillo", "mandarria", "ninguna"], "opcional": True},
     "postura": {"tipo": str, "opciones": ["de_pie", "sentado_suelo"], "opcional": True},
+    "mira": {"tipo": str, "opciones": ["izquierda", "derecha"], "opcional": True},
     "x": {"tipo": _NUM, "opcional": True}, "y": {"tipo": _NUM, "opcional": True},
     "espejo": {"tipo": bool, "opcional": True}, "tamano": {"tipo": _NUM, "min": 0.5, "max": 2, "opcional": True},
     "parpadeos_s": {"tipo": list, "elemento": _NUM, "opcional": True},
@@ -134,6 +154,13 @@ ACCIONES_MUNECO = {
     "caminar": {"x": {"tipo": _NUM}, "de_espaldas": _o({"tipo": bool})},
     "dudar": {},
     "suspirar": {},
+    "vender": {"kiosco": _REF, "veces": _o({"tipo": int, "min": 1, "max": 20})},
+    "burlarse": {"hacia": _o({"tipo": str, "opciones": ["izquierda", "derecha"]})},
+    "comprar_todo": {"kiosco": _REF, "pago": _o({"tipo": int, "min": 1, "max": 30}), "x": _o({"tipo": _NUM})},
+    "cambiar_precio": {"cartel": _REF, "precio": {"tipo": str, "max_len": 6}},
+    "contar_dinero": {},
+    "encogerse": {},
+    "cruzar_brazos": {},
     "dibujar": {"plano": _REF},
     "medir": {"plano": _REF},
     "borrar": {"plano": _REF},
@@ -166,6 +193,8 @@ _REFS = {
     ("dibujar", "plano"): ("plano",), ("medir", "plano"): ("plano",), ("borrar", "plano"): ("plano",),
     ("arrugar", "plano"): ("plano",), ("colocar_clavo", "objeto"): ("tabla",), ("medir", "objeto"): ("tabla",),
     ("sacar_clavo", "objeto"): ("tabla",), ("poner_clavo", "objeto"): ("tabla",),
+    ("vender", "kiosco"): ("kiosco",), ("comprar_todo", "kiosco"): ("kiosco",),
+    ("cambiar_precio", "cartel"): ("cartel_precio",),
 }
 
 _ZONA = {
@@ -240,6 +269,24 @@ def _validar_zona(z, ruta, limites, errores, pantalla_partida):
         if ident in objetos:
             errores.append(f"En '{ruta}' hay dos objetos con el id \"{ident}\". Ponles un \"id\" distinto a cada uno.")
         objetos[ident] = o["tipo"]
+    for i, o in enumerate(z.get("objetos", [])):
+        if not isinstance(o, dict):
+            continue
+        r = f"{ruta}.objetos[{i}]"
+        if o.get("tipo") in _APUNTAN_A_KIOSCO and o.get("kiosco") is not None:
+            if objetos.get(o["kiosco"]) != "kiosco":
+                errores.append(f"'{r}.kiosco' es \"{o['kiosco']}\", pero no hay ningún kiosco con ese id en la zona.")
+        for campo, sub in (("reponer", {"desde_s": {"tipo": _NUM}, "cantidad": {"tipo": int, "min": 1, "max": 20}}),
+                           ("cambios", {"desde_s": {"tipo": _NUM}, "precio": {"tipo": str, "max_len": 6}}),
+                           ("movimientos", {"desde_s": {"tipo": _NUM}, "kiosco": {"tipo": str}})):
+            for j, item in enumerate(o.get(campo, []) if isinstance(o.get(campo), list) else []):
+                if not isinstance(item, dict):
+                    errores.append(f"'{r}.{campo}[{j}]' debe ser un objeto {{ }}.")
+                    continue
+                _validar_objeto(item, sub, f"{r}.{campo}[{j}].", errores)
+                if campo == "movimientos" and objetos.get(item.get("kiosco")) != "kiosco":
+                    errores.append(f"'{r}.movimientos[{j}].kiosco' es \"{item.get('kiosco')}\", "
+                                   "pero no hay ningún kiosco con ese id en la zona.")
     personajes = []
     for i, p in enumerate(z["personajes"]):
         r = f"{ruta}.personajes[{i}]"
@@ -292,7 +339,7 @@ def _validar_acciones(p, ruta, objetos, limites, errores):
         if fin_anterior is not None and d < fin_anterior:
             errores.append(f"'{r}' empieza ({d} s) antes de que termine la acción anterior ({fin_anterior} s).")
         fin_anterior = h
-        for campo in ("objeto", "madera", "arregla", "plano"):
+        for campo in ("objeto", "madera", "arregla", "plano", "kiosco", "cartel"):
             if campo in ac:
                 validos = _REFS.get((nombre, campo))
                 tipo = objetos.get(ac[campo])
@@ -337,7 +384,7 @@ class EpisodioGuion(EpisodioMotor):
             self.oy_dibujo = [0, 0]  # cada panel se dibuja recortado
         else:
             confs = [g]
-            oy = 0 if g["escena"]["tipo"] == "taller" else 480
+            oy = 0 if g["escena"]["tipo"] == "taller" else 700  # suelo en y=1500: el cielo llena la parte de arriba
             self.oy_decorado, self.oy_dibujo = [oy], [oy]
         self.zonas = []
         for indice, conf in enumerate(confs):
@@ -346,12 +393,18 @@ class EpisodioGuion(EpisodioMotor):
                 o = pz.TIPOS[oc["tipo"]](oc)
                 o.indice = indice
                 objetos[o.id] = o
+            for o in objetos.values():
+                o.enlazar(objetos)
             actores = [act.TIPOS[pc["tipo"]](pc, indice, objetos) for pc in conf["personajes"]]
             self.zonas.append((conf, objetos, actores))
 
     def _decorado(self) -> Image.Image:
         img = Image.new("RGB", (self.ancho * ESCALA, self.alto * ESCALA), fondo())
-        self.estrellas = esc.construir(img, [(conf["escena"], self.oy_decorado[i], i)
+        if self.formato == "pantalla_partida":
+            regiones = [(0, ALTO_PANEL), (ALTO_PANEL, 2 * ALTO_PANEL)]
+        else:
+            regiones = [(0, self.alto)]
+        self.estrellas = esc.construir(img, [(conf["escena"], self.oy_decorado[i], i, regiones[i])
                                              for i, (conf, _, _) in enumerate(self.zonas)])
         return img
 

@@ -42,6 +42,13 @@ ROJO = (236, 78, 78)  # fracaso / deuda
 AMARILLO = (244, 196, 64)  # riesgo
 AZUL = (80, 160, 255)  # IA
 LUZ_LAMPARA = (0xFF, 0xC8, 0x73)  # ámbar cálido de ambiente (no es el amarillo de riesgo)
+# Paleta de AMBIENTE: luces, farolas, ventanas encendidas, toldos y letreros. No son colores de concepto.
+AMBAR = LUZ_LAMPARA  # #FFC873
+NARANJA = (0xFF, 0x9F, 0x5A)  # #FF9F5A
+ROSA_NEON = (0xFF, 0x6F, 0xB5)  # #FF6FB5
+VIOLETA = (0x9B, 0x7B, 0xFF)  # #9B7BFF
+AMBIENTE = {"ambar": AMBAR, "naranja": NARANJA, "rosa_neon": ROSA_NEON, "violeta": VIOLETA}
+INDIGO = (0x2E, 0x26, 0x6E)  # tono del cielo nocturno (solo se mezcla, muy suave, con el fondo)
 TINTA = (14, 15, 18)  # rasgos de la cara: iguales en todos los episodios
 
 

@@ -14,6 +14,7 @@ import math
 import random
 
 from . import decorado as dec
+from .decorado import decor
 from .lienzo import (AMARILLO, AZUL, BLANCO, ROJO, VERDE, Lienzo, fondo, mezcla, rotar, tenue, texto)
 from .tiempo import limitar
 
@@ -44,9 +45,10 @@ def cantera_noche(lz: Lienzo, panel: int, luna: bool, semilla: int = 0) -> list:
             lz.circulo((x, y), r, relleno=tenue(brillo))
     if luna:
         c, r = (172, 172), 46
-        lz.circulo(c, r, relleno=tenue(0.88))
-        lz.circulo((c[0] + 20, c[1] - 12), r * 0.92, relleno=fondo())  # creciente
-    lejos, cerca = tenue(0.28), tenue(0.5)
+        cielo = color_cielo(lz, (c[0] + 20, c[1] - 12))  # antes de pintar la luna
+        lz.circulo(c, r, relleno=decor(0.88))
+        lz.circulo((c[0] + 20, c[1] - 12), r * 0.92, relleno=cielo)  # creciente
+    lejos, cerca = decor(0.28), decor(0.5)
     # Sierra lejana.
     sierra = [(0, 470), (120, 430), (210, 455), (330, 405), (470, 450), (590, 420), (720, 460), (860, 410),
               (980, 445), (1080, 425)]
@@ -59,16 +61,16 @@ def cantera_noche(lz: Lienzo, panel: int, luna: bool, semilla: int = 0) -> list:
     for j, (a, b) in enumerate(((( 40, 560), (120, 560)), ((210, 615), (300, 612)), ((850, 600), (900, 596)))):
         lz.boceto(a, b, 1.2, lejos, semilla=semilla * 31 + 10 + j, doble=False)
     # Suelo de grava.
-    lz.boceto((20, SUELO), (1060, SUELO), 2.6, tenue(0.72), semilla=semilla * 31 + 20)
+    lz.boceto((20, SUELO), (1060, SUELO), 2.6, decor(0.72), semilla=semilla * 31 + 20)
     for j in range(26):
         x = rnd.uniform(30, 1050)
         y = rnd.uniform(SUELO + 18, SUELO + 140)
         w = rnd.uniform(4, 12)
         lz.poligono([(x - w, y), (x - w * 0.3, y - w * 0.7), (x + w, y - w * 0.2), (x + w * 0.6, y + w * 0.4)],
-                    borde=tenue(0.4), ancho=1.4)
+                    borde=decor(0.4), ancho=1.4)
     for x, w in ((90, 46), (995, 38)):  # piedras sueltas
         lz.poligono([(x - w, SUELO), (x - w * 0.6, SUELO - w * 0.8), (x + w * 0.4, SUELO - w * 0.9),
-                     (x + w, SUELO)], relleno=fondo(), borde=tenue(0.6), ancho=2.2)
+                     (x + w, SUELO)], relleno=fondo(), borde=decor(0.6), ancho=2.2)
     return parpadean
 
 
@@ -163,7 +165,7 @@ class Roca:
             lz.poligono(self.contorno, relleno=relleno)
             lz.linea(self.contorno + [self.contorno[0]], 4, BLANCO, puntas=False)
             for a, b in self.vetas:
-                lz.linea([a, b], 1.6, tenue(0.35))
+                lz.linea([a, b], 1.6, decor(0.35))
             principal = 0.98 * limitar(progreso / 0.92)
             if principal > 0.01:
                 lz.linea(self._trozo_grieta(principal), 3.6, BLANCO)
@@ -175,7 +177,7 @@ class Roca:
                 d = (lado * math.cos(ang), math.sin(ang))
                 p1 = (p0[0] + d[0] * largo * 0.55 * g, p0[1] + d[1] * largo * 0.55 * g)
                 p2 = (p1[0] + d[0] * largo * 0.45 * g + lado * 6, p1[1] + d[1] * largo * 0.45 * g + 5)
-                lz.linea([p0, p1, p2], 2.4, tenue(0.85))
+                lz.linea([p0, p1, p2], 2.4, decor(0.85))
             return
         # Partida en dos: cada mitad gira hacia fuera sobre su base.
         s = limitar(separacion)
@@ -192,7 +194,7 @@ class Roca:
             for a, b in self.vetas:
                 lado_veta = -1 if a[0] < self._en_grieta(0.5)[0] else 1
                 if (lado_veta < 0) == (dx < 0):
-                    lz.linea([self._mover(a, piv, ang, dx), self._mover(b, piv, ang, dx)], 1.6, tenue(0.35))
+                    lz.linea([self._mover(a, piv, ang, dx), self._mover(b, piv, ang, dx)], 1.6, decor(0.35))
             if brillo is not None:
                 borde = [self._mover(p, piv, ang, dx) for p in self.grieta]
                 lz.linea(borde, 9, mezcla(fondo(), brillo, 0.35))
@@ -264,3 +266,10 @@ def barrita(lz: Lienzo, centro_derecho, color, ancho: float = 120, alfa: float =
         return
     x1, y = centro_derecho[0], centro_derecho[1] + 74
     lz.linea([(x1 - ancho * alfa, y), (x1, y)], 8, color)
+
+
+def color_cielo(lz: Lienzo, p):
+    """Color del fondo (ya pintado) en un punto: para recortar la luna sin dejar un disco plano."""
+    x = int((p[0] + lz.ox) * lz.s)
+    y = int((p[1] + lz.oy) * lz.s)
+    return lz.img.getpixel((max(0, min(lz.img.width - 1, x)), max(0, min(lz.img.height - 1, y))))

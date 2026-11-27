@@ -14,7 +14,7 @@ import random
 
 from . import biblioteca as bib
 from . import decorado as dec
-from .lienzo import BLANCO, ROJO, VERDE, Lienzo, fondo, mezcla, rotar, tenue
+from .lienzo import AMBAR, AMBIENTE, BLANCO, NARANJA, ROJO, ROSA_NEON, VERDE, VIOLETA, Lienzo, fondo, mezcla, rotar, tenue, texto
 from .personajes import Pose
 from .tiempo import entra, lerp, limitar, pulso, rebote, sale, suave, tramo
 
@@ -47,6 +47,9 @@ class Pieza:
 
     def eventos(self) -> list:
         return []
+
+    def enlazar(self, objetos: dict):
+        """Se llama cuando ya existen todos los objetos y personajes de la zona."""
 
 
 # ===================================================================== MADERA
@@ -718,7 +721,307 @@ class Contador(Pieza):
             bib.contador(img, self.de.golpes_hasta(ts), (self.x + self.dx, self.y + oy))
 
 
+# ===================================================================== NEGOCIO
+TOLDOS = {"naranja_blanco": NARANJA, "rosa_blanco": ROSA_NEON, "violeta_blanco": VIOLETA}
+MOSTRADOR = SUELO - 200  # altura de la superficie del mostrador
+
+
+def _texto_en(lz: Lienzo, trozos, centro, tam, alfa=1.0):
+    texto(lz.img, trozos, (centro[0] + lz.ox, centro[1] + lz.oy), tam, alfa, escala=lz.s)
+
+
+class Kiosco(Pieza):
+    """Puesto pequeño con mostrador y toldo a rayas de colores vivos.
+
+    El vendedor se pone detrás (mismo x). Los clientes hacen cola por el lado de "cola".
+    """
+
+    def __init__(self, conf):
+        super().__init__(conf)
+        self.x = conf["x"]
+        self.ancho = conf.get("ancho", 300)
+        self.color = TOLDOS[conf.get("toldo", "naranja_blanco")]
+        self.lado = 1 if conf.get("cola", "derecha") == "derecha" else -1
+        self.ventas: list[float] = []  # instantes en que entrega un vaso
+        self.ingresos: list[tuple[float, int]] = []  # (instante, monedas que entran)
+        self.vaciados: list[float] = []  # alguien se lo lleva todo
+        self.bolsa = None
+        self.producto = None
+
+    def puesto_cola(self, rango: int):
+        return (self.x + self.lado * (self.ancho / 2 + 70 + 78 * rango), SUELO)
+
+    def mano_cliente(self):
+        return (self.x + self.lado * (self.ancho / 2 + 40), MOSTRADOR - 40)
+
+    def dibujar(self, lz, ts):
+        x, w = self.x, self.ancho
+        linea = BLANCO
+        top = MOSTRADOR - 370
+        for px in (x - w / 2 + 12, x + w / 2 - 12):  # postes
+            lz.linea([(px, MOSTRADOR), (px, top + 40)], 7, linea)
+        # Toldo a rayas (color vivo y blanco) con borde festoneado.
+        n = 8
+        x0, x1 = x - w / 2 - 26, x + w / 2 + 26
+        alto = 64
+        for i in range(n):
+            a = x0 + (x1 - x0) * i / n
+            b = x0 + (x1 - x0) * (i + 1) / n
+            ta, tb = x + (a - x) * 0.82, x + (b - x) * 0.82
+            color = self.color if i % 2 == 0 else BLANCO
+            lz.poligono([(ta, top), (tb, top), (b, top + alto), (a, top + alto)], relleno=color)
+            lz.circulo(((a + b) / 2, top + alto), (b - a) / 2, relleno=color)
+        lz.linea([(x + (x0 - x) * 0.82, top), (x + (x1 - x) * 0.82, top)], 4, linea)
+
+    def dibujar_delante(self, lz, ts):
+        x, w = self.x, self.ancho
+        pts = [(x - w / 2, MOSTRADOR), (x + w / 2, MOSTRADOR), (x + w / 2, SUELO), (x - w / 2, SUELO)]
+        lz.poligono(pts, relleno=mezcla(fondo(), (0, 0, 0), 0.15), borde=BLANCO, ancho=4)
+        lz.linea([(x - w / 2 - 14, MOSTRADOR), (x + w / 2 + 14, MOSTRADOR)], 9, BLANCO)
+        for j in range(1, 4):  # tablas del frente
+            y = MOSTRADOR + j * 50
+            lz.linea([(x - w / 2 + 10, y), (x + w / 2 - 10, y)], 1.6, tenue(0.45))
+        # Franja de color del puesto, fina.
+        lz.linea([(x - w / 2 + 6, MOSTRADOR + 16), (x + w / 2 - 6, MOSTRADOR + 16)], 6, mezcla(fondo(), self.color, 0.85))
+
+
+def vaso(lz, base, lleno=True, escala=1.0):
+    """Vaso de limonada (cristal blanco, limonada ámbar)."""
+    x, y = base
+    w0, w1, h = 11 * escala, 15 * escala, 40 * escala
+    if lleno:
+        lz.poligono([(x - w0 + 2, y - 2), (x + w0 - 2, y - 2), (x + w1 - 3, y - h * 0.75), (x - w1 + 3, y - h * 0.75)],
+                    relleno=mezcla(fondo(), AMBAR, 0.85))
+    lz.linea([(x - w1, y - h), (x - w0, y), (x + w0, y), (x + w1, y - h)], 3 * max(escala, 0.6), BLANCO, puntas=False)
+
+
+class Limonada(Pieza):
+    """Jarra y vasos de limonada sobre el mostrador. El stock baja al vender y puede quedarse a cero."""
+
+    def __init__(self, conf):
+        super().__init__(conf)
+        self.inicial = conf.get("stock", 6)
+        self.reponer = [(r["desde_s"], r["cantidad"]) for r in conf.get("reponer", [])]
+        self.kiosco = None
+
+    def enlazar(self, objetos):
+        self.kiosco = objetos[self.conf["kiosco"]]
+        self.kiosco.producto = self
+
+    def stock(self, ts):
+        eventos = [(t, -1) for t in self.kiosco.ventas] + [(t, "vaciar") for t in self.kiosco.vaciados]
+        eventos += [(t, n) for t, n in self.reponer]
+        n = self.inicial
+        for t, d in sorted(eventos, key=lambda e: e[0]):
+            if t > ts:
+                break
+            n = 0 if d == "vaciar" else max(0, n + d)
+        return n
+
+    def dibujar_delante(self, lz, ts):
+        k = self.kiosco
+        n = self.stock(ts)
+        y = MOSTRADOR - 4
+        jx = k.x - k.ancho / 2 + 46
+        # Jarra
+        jarra = [(jx - 26, y), (jx + 26, y), (jx + 22, y - 74), (jx - 22, y - 74)]
+        if n > 0:
+            lz.poligono([(jx - 23, y - 3), (jx + 23, y - 3), (jx + 20, y - 54), (jx - 20, y - 54)],
+                        relleno=mezcla(fondo(), AMBAR, 0.85))
+        lz.linea(jarra + [jarra[0]], 4, BLANCO, puntas=False)
+        lz.arco((jx + 26, y - 44), 16, -90, 90, 4)
+        # Vasos (como mucho 6 a la vista)
+        for i in range(min(n, 6)):
+            vaso(lz, (jx + 60 + i * 34, y))
+        if n == 0:
+            lz.linea([(jx + 50, y - 2), (jx + 230, y - 2)], 2, tenue(0.4))
+
+
+class CartelPrecio(Pieza):
+    """Letrero con el precio ("$1", "$5"). Puede cambiar de precio o tacharse en rojo."""
+
+    def __init__(self, conf):
+        super().__init__(conf)
+        self.cambios = [(c["desde_s"], c["precio"]) for c in conf.get("cambios", [])]
+        self.borde = AMBIENTE[conf.get("borde", "rosa_neon")]
+
+    def precio(self, ts):
+        p, t0 = self.conf["precio"], None
+        for t, nuevo in sorted(self.cambios):
+            if ts >= t:
+                p, t0 = nuevo, t
+        return p, t0
+
+    def dibujar_delante(self, lz, ts):
+        x, y = self.conf["x"], self.conf["y"]
+        precio, t0 = self.precio(ts)
+        s = 1.0 if t0 is None else rebote(tramo(ts, t0, t0 + 0.3), 2.2)
+        w, h = 74 * s, 44 * s
+        lz.poligono([(x - w, y - h), (x + w, y - h), (x + w, y + h), (x - w, y + h)], relleno=fondo(), borde=self.borde,
+                    ancho=5)
+        _texto_en(lz, [(precio, BLANCO)], (x, y + 2), 56 * s)
+        tt = self.conf.get("tachado_s")
+        if tt is not None and ts >= tt:
+            u = sale(tramo(ts, tt, tt + 0.25))
+            lz.linea([(x - w - 6, y + h * 0.6), (x - w - 6 + (2 * w + 12) * u, y - h * 0.6)], 8, ROJO)
+
+
+def moneda(lz, c, r=11):
+    lz.circulo(c, r, relleno=mezcla(fondo(), AMBAR, 0.9), borde=BLANCO, ancho=2)
+
+
+class Monedas(Pieza):
+    """Montón de monedas."""
+
+    def dibujar(self, lz, ts):
+        x, y, n = self.conf["x"], self.conf.get("y", SUELO - 2), self.conf.get("cantidad", 6)
+        for i in range(n):
+            col, fila = i % 4, i // 4
+            moneda(lz, (x - 36 + col * 24 + (fila % 2) * 12, y - 8 - fila * 12))
+
+
+class BolsaDinero(Pieza):
+    """Bolsa de dinero: crece con cada moneda que entra en su kiosco. Detalle verde (llena) o rojo (casi vacía)."""
+
+    def __init__(self, conf):
+        super().__init__(conf)
+        self.kiosco = None
+
+    def enlazar(self, objetos):
+        if self.conf.get("kiosco"):
+            self.kiosco = objetos[self.conf["kiosco"]]
+            self.kiosco.bolsa = self
+
+    def posicion(self):
+        return (self.conf["x"], self.conf.get("y", SUELO))
+
+    def monedas(self, ts):
+        n = self.conf.get("monedas", 1)
+        if self.kiosco:
+            n += sum(m for t, m in self.kiosco.ingresos if t <= ts)
+        return n
+
+    def dibujar_delante(self, lz, ts):
+        x, y = self.posicion()
+        n = self.monedas(ts)
+        ultimo = max([t for t, _ in self.kiosco.ingresos if t <= ts], default=None) if self.kiosco else None
+        pulso_ = pulso(ts, ultimo + 0.06, 0.12) * 0.08 if ultimo is not None else 0
+        e = (0.8 + 0.08 * min(n, 14)) * (1 + pulso_)
+        r = 46 * e
+        cuerpo = [(x + r * math.cos(a), y - r + r * 0.95 * math.sin(a)) for a in [math.radians(t) for t in range(-20, 201, 20)]]
+        cuello = [(x - r * 0.35, y - 2 * r * 0.95), (x + r * 0.35, y - 2 * r * 0.95)]
+        pts = [cuello[1]] + cuerpo + [cuello[0]]
+        lz.poligono(pts, relleno=mezcla(fondo(), (0, 0, 0), 0.2), borde=BLANCO, ancho=4)
+        lz.linea([(x - r * 0.42, y - 2 * r * 0.95 - 6), (x + r * 0.42, y - 2 * r * 0.95 - 6)], 6, BLANCO)
+        det = self.conf.get("detalle")
+        color = tenue(0.8)
+        if det and ts >= det["aparece_s"]:
+            color = VERDE if det["color"] == "verde" else ROJO
+        _texto_en(lz, [("$", color)], (x, y - r * 0.85), 44 * e)
+        if det and ts >= det["aparece_s"]:
+            u = tramo(ts, det["aparece_s"], det["aparece_s"] + 0.5)
+            if det["color"] == "verde" and u < 1:
+                for k in range(6):
+                    ang = 2 * math.pi * k / 6
+                    r0, r1 = r * 1.2 + 20 * u, r * 1.35 + 34 * u
+                    lz.linea([(x + math.cos(ang) * r0, y - r + math.sin(ang) * r0),
+                              (x + math.cos(ang) * r1, y - r + math.sin(ang) * r1)], 4 * (1 - u) + 0.5, VERDE)
+
+
+class Clientes(Pieza):
+    """Siluetas que hacen cola en un kiosco, se llevan un vaso al ser atendidas y pueden irse a otro kiosco."""
+
+    def __init__(self, conf):
+        super().__init__(conf)
+        self.n = conf.get("cantidad", 4)
+        self.mov = sorted((m["desde_s"], m["kiosco"]) for m in conf.get("movimientos", []))
+        self.kioscos = {}
+
+    def enlazar(self, objetos):
+        self.kioscos = {k: o for k, o in objetos.items() if isinstance(o, Kiosco)}
+
+    def _simular(self, ts):
+        """Devuelve, para cada cliente: (posición, andando, se_va, lleva_vaso)."""
+        actual = self.conf["kiosco"]
+        eventos = [(t, "mueve", k) for t, k in self.mov]
+        for nombre, k in self.kioscos.items():
+            eventos += [(t, "venta", nombre) for t in k.ventas]
+        eventos.sort(key=lambda e: e[0])
+        donde = [actual] * self.n
+        servido = [None] * self.n  # (instante, kiosco)
+        historia = []  # (instante, objetivos) para animar
+        def objetivos():
+            out = []
+            for i in range(self.n):
+                if servido[i] is not None:
+                    out.append(None)
+                    continue
+                rango = sum(1 for j in range(i) if servido[j] is None and donde[j] == donde[i])
+                out.append(self.kioscos[donde[i]].puesto_cola(rango))
+            return out
+        previo = objetivos()
+        historia.append((-1.0, previo, previo))
+        for t, tipo, k in eventos:
+            if t > ts:
+                break
+            if tipo == "mueve":
+                donde = [k if servido[i] is None else donde[i] for i in range(self.n)]
+            else:
+                primero = next((i for i in range(self.n) if servido[i] is None and donde[i] == k), None)
+                if primero is not None:
+                    servido[primero] = (t, k)
+            nuevo = objetivos()
+            historia.append((t, previo, nuevo))
+            previo = nuevo
+        out = []
+        for i in range(self.n):
+            if servido[i] is not None:
+                t, k = servido[i]
+                kio = self.kioscos[k]
+                desde = kio.puesto_cola(0)
+                u = tramo(ts, t + 0.15, t + 2.4)
+                pos = (desde[0] + kio.lado * 1250 * suave(u), SUELO)  # se va y sale de la pantalla
+                out.append((pos, 0 < u < 1, kio.lado, True))
+                continue
+            pos = None
+            andando = False
+            for t, antes, despues in historia:
+                if despues[i] is None:
+                    continue
+                if antes[i] is None or t < 0:
+                    pos = despues[i]
+                    continue
+                dur = 0.5 if math.dist(antes[i], despues[i]) < 120 else 1.2
+                retraso = 0.0 if dur == 0.5 else 0.1 * i
+                u = tramo(ts, t + retraso, t + retraso + dur)
+                pos = lerp(antes[i], despues[i], suave(u))
+                andando = 0 < u < 1
+            lado = -1 if pos[0] > self.kioscos[donde[i]].x else 1
+            out.append((pos, andando, lado, False))
+        return out
+
+    def dibujar(self, lz, ts):
+        color = tenue(0.5)
+        for i, (pos, andando, mira, vaso_) in enumerate(self._simular(ts)):
+            x, y = pos
+            if x < -80 or x > 1160:
+                continue
+            fase = math.sin(ts * 9 + i) if andando else 0.0
+            cadera = (x, y - 120)
+            cuello = (x + 4 * mira, y - 220)
+            lz.linea([cadera, cuello], 11, color)
+            lz.circulo((x + 8 * mira, y - 262), 40, relleno=color)
+            lz.linea([(x - 14 * fase, y - 2), cadera, (x + 14 * fase + 6 * mira, y - 2)], 11, color)
+            mano = (x + 36 * mira, y - 150)
+            lz.linea([(cuello[0], cuello[1] + 14), mano], 10, color)
+            lz.linea([(cuello[0], cuello[1] + 14), (x - 20 * mira - 8 * fase, y - 140)], 10, color)
+            if vaso_:
+                vaso(lz, (mano[0] + 4 * mira, mano[1] + 6), escala=0.8)
+
+
 TIPOS = {
     "pila_madera": PilaMadera, "silla": Silla, "escalera": Escalera, "caja": Caja, "tabla": Tabla, "plano": Plano,
     "roca": Roca, "contador": Contador, "marca_ok": MarcaOk, "aro_rojo": AroRojo,
+    "kiosco": Kiosco, "limonada": Limonada, "cartel_precio": CartelPrecio, "monedas": Monedas,
+    "bolsa_dinero": BolsaDinero, "clientes": Clientes,
 }

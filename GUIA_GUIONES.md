@@ -30,9 +30,21 @@ Todos los episodios se escriben **solo con un archivo JSON** en la carpeta `epis
 | rojo | fallo / deuda |
 | amarillo | riesgo |
 | azul | IA |
-| ámbar **#FFC873** | luz de las lámparas (ambiente, **no** es el amarillo de riesgo) |
+
+### Paleta de AMBIENTE (no son colores de concepto)
+
+Sirve para dar vida: luces, farolas, ventanas encendidas, toldos y letreros.
+
+| Nombre | Código |
+|---|---|
+| `ambar` | #FFC873 (luz de lámparas y farolas) |
+| `naranja` | #FF9F5A |
+| `rosa_neon` | #FF6FB5 |
+| `violeta` | #9B7BFF |
 
 ### Fondos (`"fondo"`)
+
+El fondo **nunca es plano**: el motor pinta un degradado, más claro arriba y más oscuro abajo. En exteriores, el cielo tira a violeta/índigo con un resplandor naranja suave en el horizonte. Las ventanas muestran un cielo de noche con ese mismo resplandor.
 
 | Valor | Código |
 |---|---|
@@ -73,7 +85,7 @@ Todos los tiempos de las acciones van en **segundos del vídeo**, entre `rebobin
 
 Una **zona** tiene `"escena"` (obligatoria), `"objetos"` (lista, opcional) y `"personajes"` (lista). Los objetos se dibujan detrás de los personajes; en la lista de personajes, los últimos quedan delante.
 
-**Coordenadas:** en pantalla partida, cada zona mide 1080x960 y el suelo está en y=800. En escena única con `taller`, se usa la pantalla entera (la mesa está en y=1250). En escena única con `habitacion` o `cantera_noche`, la zona de 960 se centra en la pantalla.
+**Coordenadas:** en pantalla partida, cada zona mide 1080x960 y el suelo está en y=800. En escena única con `taller`, se usa la pantalla entera (la mesa está en y=1250). En escena única con `habitacion`, `cantera_noche` o `calle_mercado`, se usan las mismas coordenadas (suelo en y=800), que en pantalla quedan con el suelo abajo (y=1500) y el cielo llenando la parte de arriba.
 
 ---
 
@@ -81,12 +93,13 @@ Una **zona** tiene `"escena"` (obligatoria), `"objetos"` (lista, opcional) y `"p
 
 | Campo | Valores |
 |---|---|
-| `tipo` | `"habitacion"` (suelo de tablas), `"taller"` (techo, mesa de taller con balda y suelo; solo con escena única) o `"cantera_noche"` (cantera al aire libre, cielo estrellado, sierra, bancales y grava) |
+| `tipo` | `"habitacion"` (suelo de tablas), `"taller"` (techo, mesa de taller con balda y suelo; solo con escena única), `"cantera_noche"` (cantera al aire libre, cielo estrellado, sierra, bancales y grava) o `"calle_mercado"` (calle de noche con farolas de luz ámbar, cielo estrellado, luna y ciudad con ventanas encendidas en colores de ambiente) |
+| `farolas` *(opcional)* | en `calle_mercado`, lista de x de las farolas (por defecto `[150, 930]`) |
 | `ventana` *(opcional)* | `{"x", "y", "ancho", "alto", "estrellas": 0-4 (densidad, 1 por defecto), "luna": {"x", "y", "radio"}, "semilla"}`: ventana con estrellitas detrás, algunas con parpadeo suave |
 | `lampara` *(opcional)* | `{"x", "cable" (largo del cable), "luz": true, "techo" (y del techo), "luz_hasta_y" (dónde llega la luz; suelo por defecto), "ancho_luz", "semilla"}`: lámpara colgante con cono de luz **ámbar #FFC873**, suave y con degradado hacia abajo |
 | `cartel` *(opcional)* | `{"dibujo": "silla_ideal" \| "escalera_ideal", "x", "y", "ancho", "alto"}`: el cartel "perfecto" de la pared (máximo 1 en todo el episodio) |
-| `luna` *(opcional)* | en `cantera_noche`, `true`/`false` (por defecto, solo en la zona de arriba) |
-| `siluetas` *(opcional)* | `"sierra"`, `"ciudad"`, `"bancales"` o `"ninguna"`: siluetas lejanas muy tenues. `siluetas_y` fija su altura |
+| `luna` *(opcional)* | en `cantera_noche` y `calle_mercado`, `true`/`false` (por defecto, solo en la zona de arriba) |
+| `siluetas` *(opcional)* | `"sierra"`, `"ciudad"` (con ventanas encendidas), `"bancales"` o `"ninguna"`: siluetas lejanas. `siluetas_y` fija su altura |
 | `semilla` *(opcional)* | cambia los detalles al azar (trazos, grava, estrellas) |
 
 > La escena del río no existe todavía. Si hace falta, se añade a la biblioteca y luego se usa desde el JSON.
@@ -109,6 +122,12 @@ Todos llevan `"tipo"` y, opcionalmente, `"id"` (por defecto, el mismo que el tip
 | `contador` | `de` (id del personaje), `x`, `y`, `color_final` | Número grande que cuenta los golpes (1, 2, 3... 100). Al terminar, sale una barrita de color debajo |
 | `marca_ok` | `x`, `y`, `aparece_s` | ✓ verde con "ding" |
 | `aro_rojo` | `x`, `y`, `aparece_s`, `radio` | Círculo rojo discontinuo sobre lo que quedó a medias |
+| `kiosco` | `x`, `toldo`: `"naranja_blanco"` \| `"rosa_blanco"` \| `"violeta_blanco"`, `ancho` (300), `cola`: `"derecha"` \| `"izquierda"` | Puesto con mostrador y toldo a rayas de colores vivos. El vendedor se pone detrás (mismo `x`); los clientes hacen cola por el lado de `cola` |
+| `limonada` | `kiosco`, `stock` (6), `reponer`: `[{"desde_s", "cantidad"}]` | Jarra y vasos sobre el mostrador. El stock baja con cada venta, sube al reponer y se queda a cero (jarra vacía) con `comprar_todo` |
+| `cartel_precio` | `x`, `y`, `precio` ("$1"), `cambios`: `[{"desde_s", "precio"}]`, `tachado_s`, `borde` (color de ambiente) | Letrero con el precio. Cambia con un pequeño salto o se tacha en rojo |
+| `monedas` | `x`, `y`, `cantidad` | Montón de monedas |
+| `bolsa_dinero` | `x`, `y`, `kiosco`, `monedas` (inicial), `detalle`: `{"color": "verde" \| "rojo", "aparece_s"}` | Bolsa que crece con cada moneda que entra en su kiosco. Detalle verde (llena) o rojo (casi vacía) |
+| `clientes` | `kiosco`, `cantidad` (1-8), `movimientos`: `[{"desde_s", "kiosco"}]` | Siluetas grises que hacen cola, se llevan un vaso cuando les venden y se van; con `movimientos` se cambian de kiosco |
 
 Herramientas y accesorios que salen solos con las acciones: **martillo**, **mandarria** (mazo grande), **lápiz**, **goma**, **regla**, **clavos** y **bolas de papel**.
 
@@ -127,6 +146,7 @@ Herramientas y accesorios que salen solos con las acciones: **martillo**, **mand
 |---|---|
 | `herramienta` | `"martillo"`, `"mandarria"` o `"ninguna"` (muñecos) |
 | `postura` | `"de_pie"` (por defecto) o `"sentado_suelo"` (para trabajar con un plano) |
+| `mira` | `"izquierda"` (por defecto) o `"derecha"`: hacia dónde mira al empezar |
 | `x`, `y` | posición (en los martillos, el punto donde apoyan) |
 | `espejo` | martillos: `true` = miran hacia la izquierda |
 | `tamano` | martillos: 0,5-2 (1,25 por defecto) |
@@ -162,6 +182,13 @@ Todas llevan `"accion"`, `"desde_s"` y `"hasta_s"`. Los campos marcados con *(op
 | `dudar` | — | Levanta la herramienta (o la mano), duda... y la baja |
 | `rendirse` | — | Suelta la herramienta, suspira y se aleja **de espaldas**, cabizbajo |
 | `celebrar` | `estilo`: `"sentado"` (en la silla), `"señalar"` (con `punto`), `"herramienta"` o `"brazos"` | Celebra feliz |
+| `vender` | `kiosco`, `veces` (1-20) | Detrás del mostrador: entrega un vaso al primero de la cola y recibe una moneda (que vuela a la bolsa del kiosco) |
+| `comprar_todo` | `kiosco`, `pago` (5), `x` (opc.) | Paga (monedas a la bolsa de ese kiosco) y se lleva todo el stock en cajas |
+| `cambiar_precio` | `cartel`, `precio` | Alarga la mano al cartel y cambia el precio |
+| `contar_dinero` | — | Cuenta monedas pasándolas de una mano a otra |
+| `burlarse` | `hacia`: `"izquierda"` \| `"derecha"` | Señala y se ríe (ojos cerrados, risa corta sin palabras) |
+| `encogerse` | — | Hombros caídos, manos abiertas, cara de "qué le vamos a hacer" |
+| `cruzar_brazos` | — | Se cruza de brazos |
 | `suspirar` | — | Suspira (hombros abajo, soplido) |
 | `dibujar` | `plano` | Sentado: dibuja el boceto en el plano |
 | `medir` | `plano` | Sentado: mide con la regla y entorna los ojos |
@@ -204,6 +231,11 @@ No se escriben en el JSON: salen de las acciones y los objetos.
 | La roca se parte | crac + ding |
 | `marca_ok` | ding |
 | `suspirar` / `rendirse` | suspiro (y en `rendirse`, la herramienta cae y pasos) |
+| `vender` | monedas en cada venta y caja registradora al final |
+| `comprar_todo` | monedas, caja registradora y cajas |
+| `contar_dinero` | monedas una a una y caja registradora al terminar |
+| `burlarse` | risa corta sin palabras |
+| `cambiar_precio` | ding |
 | Texto final | "pop" suave |
 | Siempre | música suave en bucle (o tu `audio/musica.mp3`) |
 
@@ -255,6 +287,37 @@ No se escriben en el JSON: salen de las acciones y los objetos.
   "audio": { "musica": "auto", "volumen_musica": 0.35, "volumen_efectos": 0.9, "bpm_aproximado": 80 }
 }
 ```
+
+### Ejemplo de negocio (calle del mercado, escena única)
+
+En `tests/datos/mercado.json` hay un ejemplo completo y comprobado. Esto es lo esencial:
+
+```text
+"guion": {
+  "formato": "escena_unica", "gancho": "arriba", "cierre_y": 1650,
+  "escena": { "tipo": "calle_mercado", "farolas": [540] },
+  "objetos": [
+    { "id": "kh", "tipo": "kiosco", "x": 250, "toldo": "naranja_blanco", "cola": "derecha" },
+    { "id": "kp", "tipo": "kiosco", "x": 830, "toldo": "violeta_blanco", "cola": "izquierda" },
+    { "id": "limo_h", "tipo": "limonada", "kiosco": "kh", "stock": 4 },
+    { "id": "precio_p", "tipo": "cartel_precio", "x": 830, "y": 170, "precio": "$5", "borde": "violeta", "tachado_s": 12.0 },
+    { "id": "bolsa_h", "tipo": "bolsa_dinero", "kiosco": "kh", "x": 60, "detalle": { "color": "verde", "aparece_s": 11.6 } },
+    { "id": "gente", "tipo": "clientes", "kiosco": "kp", "cantidad": 3, "movimientos": [ { "desde_s": 5.6, "kiosco": "kh" } ] }
+  ],
+  "personajes": [
+    { "tipo": "perfeccionista", "x": 830, "acciones": [
+      { "accion": "cruzar_brazos", "desde_s": 3.0, "hasta_s": 4.2 },
+      { "accion": "burlarse", "desde_s": 4.2, "hasta_s": 5.4, "hacia": "izquierda" },
+      { "accion": "encogerse", "desde_s": 8.0, "hasta_s": 9.5 } ] },
+    { "tipo": "hacedor", "x": 250, "mira": "derecha", "acciones": [
+      { "accion": "vender", "desde_s": 6.6, "hasta_s": 9.3, "kiosco": "kh", "veces": 3 },
+      { "accion": "contar_dinero", "desde_s": 10.0, "hasta_s": 11.4 },
+      { "accion": "comprar_todo", "desde_s": 12.7, "hasta_s": 13.9, "kiosco": "kp" } ] }
+  ]
+}
+```
+
+En escena única con `habitacion`, `cantera_noche` o `calle_mercado`, el suelo está en y=1500 de la pantalla y el cielo llena la parte de arriba (las coordenadas de la zona siguen siendo las de siempre: suelo en y=800).
 
 Más ejemplos en `episodios/`:
 - `ep01_la_silla.json`: pantalla partida, construir, sentarse, tambalearse, arreglar y planos.

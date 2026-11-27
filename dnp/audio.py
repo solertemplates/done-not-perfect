@@ -276,11 +276,76 @@ def crac(semilla: int = 0) -> np.ndarray:
     return _fundido(0.8 * chasquido + 1.0 * boom + 0.6 * cuerpo + piedras, 0.001, 0.15)
 
 
+def monedas(semilla: int = 0, golpes: int = 3) -> np.ndarray:
+    """Monedas que tintinean: chasquidos metálicos agudos que caen unos sobre otros."""
+    rng = np.random.default_rng(200 + semilla)
+    n = muestras(0.5)
+    s = np.zeros(n)
+    t = np.arange(n) / SR
+    for k in range(golpes):
+        i = int((0.02 + 0.07 * k + rng.uniform(0, 0.02)) * SR)
+        m = n - i
+        tt = t[:m]
+        f = rng.uniform(2600, 3600)
+        tono = sum(a * np.sin(2 * np.pi * f * r * tt) for r, a in ((1, 1.0), (1.48, 0.5), (2.31, 0.3)))
+        s[i:] += tono * np.exp(-tt / rng.uniform(0.05, 0.09)) * (0.9 - 0.15 * k)
+        c = min(m, muestras(0.004))
+        s[i:i + c] += _banda(_ruido(c, rng), 4000, 12000) * 0.6
+    return _fundido(s * 0.35, 0.001, 0.05)
+
+
+def caja_registradora() -> np.ndarray:
+    """"Cha-ching": golpe mecánico del cajón y campanilla doble."""
+    rng = np.random.default_rng(210)
+    n = muestras(1.1)
+    t = np.arange(n) / SR
+    mecanico = _banda(_ruido(n, rng), 300, 3000) * _decae(n, 0.03)
+    s = 0.6 * mecanico
+    for retraso, f in ((0.08, 2093.0), (0.16, 2637.0)):
+        i = muestras(retraso)
+        tt = t[: n - i]
+        s[i:] += (np.sin(2 * np.pi * f * tt) + 0.4 * np.sin(2 * np.pi * f * 2.76 * tt)) * np.exp(-tt / 0.35) * 0.6
+    return _fundido(s * 0.6, 0.001, 0.2)
+
+
+def risa(semilla: int = 0) -> np.ndarray:
+    """Risa corta sin palabras: cuatro golpes de aire con un tono que baja ("je-je-je-je")."""
+    rng = np.random.default_rng(220 + semilla)
+    dur = 0.75
+    n = muestras(dur)
+    t = np.arange(n) / SR
+    pulsos = np.zeros(n)
+    for k in range(4):
+        c = 0.05 + k * 0.15
+        pulsos += np.exp(-(((t - c) / 0.035) ** 2))
+    f = 260 * np.exp(-t * 0.6)
+    fase = 2 * np.pi * np.cumsum(f) / SR
+    voz = sum(np.sin(r * fase) / r for r in range(1, 6))
+    voz = _banda(voz, 300, 2600)
+    aire = _banda(_ruido(n, rng), 900, 3500) * 0.5
+    return _fundido((0.6 * voz + aire) * pulsos * 0.8, 0.005, 0.08)
+
+
+def cajas() -> np.ndarray:
+    """Cajas de cartón que se apilan: golpes sordos con roce de cartón."""
+    rng = np.random.default_rng(230)
+    n = muestras(0.7)
+    s = np.zeros(n)
+    for k, retraso in enumerate((0.0, 0.16, 0.3)):
+        i = muestras(retraso)
+        m = n - i
+        golpe = _seno_barrido(140, 70, m / SR) * _decae(m, 0.05)
+        carton = _banda(_ruido(m, rng), 500, 3000) * _decae(m, 0.03)
+        s[i:] += (golpe + 0.5 * carton) * (1 - 0.2 * k)
+    return _fundido(s * 0.8, 0.002, 0.1)
+
+
 EFECTOS = {
     "martillo": martillo, "golpe_madera": golpe_madera, "crujido": crujido, "ding": ding, "lapiz": lapiz,
     "borrador": borrador, "papel": papel, "hoja": hoja, "bola": bola, "suspiro": suspiro,
     "rebobinado": rebobinado, "titulo": titulo, "clavo_torcido": clavo_torcido, "regla": regla,
     "mandarria": mandarria, "grieta": grieta, "crac": crac,
+    "monedas": monedas, "caja_registradora": caja_registradora, "risa": risa, "cajas": cajas,
 }
 
 

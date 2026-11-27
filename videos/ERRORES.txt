@@ -1,12 +1,36 @@
-Hay que corregir algo antes de poder hacer el vídeo.
-
-Archivo: episodios/06_limonada.json
-  1. El JSON está mal escrito en la línea 17, columna 1. Falta un valor, o hay una coma de más antes de ']' o '}'. (detalle técnico: Expecting value)
-
-Cómo arreglarlo:
-  1. En github.com abre el archivo de arriba y pulsa el lápiz (Editar).
-  2. Corrige lo que dice cada punto. Los nombres entre comillas son los campos del JSON.
-  3. Guarda (Commit changes). El vídeo se volverá a hacer solo en unos minutos.
-  Truco: si escribes desde el iPhone, desactiva 'Puntuación inteligente' para que las comillas sean rectas.
-
-(Comprobado el 2026-11-27 08:39 UTC. Este archivo se borra solo cuando todo está bien.)
+{
+  "serie": "Done, not perfect", "episodio": 6, "id": "ep06_limonada", "titulo": "La limonada", "fondo": "azul_noche",
+  "video": { "ancho": 1080, "alto": 1920, "fps": 30, "duracion_s": 18 },
+  "tiempos": { "gancho_fin_s": 1, "rebobinado_fin_s": 3, "accion_fin_s": 15 },
+  "textos": { "gancho": "Same lemonade.", "cierre": "Smart > Cheap", "marca": "Done, not perfect" },
+  "guion": {
+    "formato": "escena_unica", "gancho": "arriba", "cierre_y": 1650,
+    "escena": { "tipo": "calle_mercado", "farolas": [540] },
+    "objetos": [
+      { "id": "kb", "tipo": "kiosco", "x": 250, "toldo": "rosa_blanco", "cola": "derecha" },
+      { "id": "kc", "tipo": "kiosco", "x": 830, "toldo": "naranja_blanco", "cola": "izquierda" },
+      { "id": "limo_b", "tipo": "limonada", "kiosco": "kb", "stock": 6 },
+      { "id": "limo_c", "tipo": "limonada", "kiosco": "kc", "stock": 2, "reponer": [ { "desde_s": 9.0, "cantidad": 3 } ] },
+      { "id": "precio_b", "tipo": "cartel_precio", "x": 250, "y": 170, "precio": "$1", "borde": "rosa_neon", "tachado_s": 9.0 },
+      { "id": "precio_c", "tipo": "cartel_precio", "x": 830, "y": 170, "precio": "$3", "borde": "naranja" },
+      { "id": "bolsa_b", "tipo": "bolsa_dinero", "kiosco": "kb", "x": 60, "detalle": { "color": "rojo", "aparece_s": 13.2 } },
+      { "id": "bolsa_c", "tipo": "bolsa_dinero", "kiosco": "kc", "x": 1020, "detalle": { "color": "verde", "aparece_s": 12.9 } },
+      { "id": "gente", "tipo": "clientes", "kiosco": "kb", "cantidad": 8, "movimientos": [ { "desde_s": 9.5, "kiosco": "kc" } ] }
+    ],
+    "personajes": [
+      { "tipo": "perfeccionista", "x": 250, "mira": "derecha", "acciones": [
+        { "accion": "vender", "desde_s": 3.2, "hasta_s": 6.0, "kiosco": "kb", "veces": 3 },
+        { "accion": "burlarse", "desde_s": 6.0, "hasta_s": 7.2, "hacia": "derecha" },
+        { "accion": "contar_dinero", "desde_s": 9.0, "hasta_s": 10.4 },
+        { "accion": "encogerse", "desde_s": 13.2, "hasta_s": 15.0 } ] },
+      { "tipo": "hacedor", "x": 830, "mira": "izquierda", "acciones": [
+        { "accion": "cruzar_brazos", "desde_s": 3.2, "hasta_s": 7.2 },
+        { "accion": "comprar_todo", "desde_s": 7.4, "hasta_s": 8.8, "kiosco": "kb", "pago": 5 },
+        { "accion": "cambiar_precio", "desde_s": 9.0, "hasta_s": 9.8, "cartel": "precio_c", "precio": "$5" },
+        { "accion": "vender", "desde_s": 10.0, "hasta_s": 12.8, "kiosco": "kc", "veces": 4 },
+        { "accion": "burlarse", "desde_s": 13.0, "hasta_s": 14.2, "hacia": "izquierda" },
+        { "accion": "contar_dinero", "desde_s": 14.2, "hasta_s": 15.0 } ] }
+    ]
+  },
+  "audio": { "musica": "auto", "volumen_musica": 0.35, "volumen_efectos": 0.9, "bpm_aproximado": 96 }
+}

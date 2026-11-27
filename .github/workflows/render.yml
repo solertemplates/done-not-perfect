@@ -29,11 +29,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
@@ -43,7 +43,7 @@ jobs:
           # Los repositorios extra del runner (p. ej. packages.microsoft.com) a veces fallan y rompen apt:
           # no se necesitan, así que se quitan antes de actualizar.
           sudo grep -rlE 'packages\.microsoft\.com' /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
-          sudo apt-get update -qq || sudo apt-get update -qq -o APT::Update::Error-Mode=any || true
+          sudo apt-get update -qq || echo "::warning::apt-get update falló en algún repositorio; se sigue con lo que hay."
           sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
 
       - name: Instalar dependencias de Python
@@ -100,7 +100,7 @@ jobs:
 
       - name: Subir MP4, miniaturas y capturas
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: episodios
           path: |

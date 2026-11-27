@@ -122,17 +122,38 @@ Junto a cada vídeo se crea `videos/<id>_textos.txt`, en inglés:
 - **FACEBOOK:** texto con gancho, 2-3 emojis y 5 hashtags.
 - **YOUTUBE:** título (máx. 60 letras, con #shorts), descripción de 2 líneas y 5 hashtags.
 
-Al final de cada parte va un producto de Amazon según la lección: una frase que lo une con la lección, el enlace `https://www.<tienda>/s?k=<producto>&tag=<id>` y el aviso *As an Amazon Associate I earn from qualifying purchases.* La tienda y el ID están en `config/amazon.txt`.
+Al final del post de FACEBOOK y de la descripción de YOUTUBE va un bloque fijo de Amazon con un objeto que **se ve en el vídeo**:
 
-| Lección | Producto |
+```
+Línea 1: frase puente que une el objeto con la lección
+Línea 2: 🧰 Get this <producto> and <acción ligada a la lección> — link in the first comment 👇
+Línea 3: As an Amazon Associate I earn from qualifying purchases.
+```
+
+Debajo hay un apartado **PRIMER COMENTARIO**, para pegarlo como primer comentario:
+
+```
+🛒 Shop now 👇
+https://www.amazon.com/s?k=<producto>&tag=<id>
+```
+
+La tienda y el ID están en `config/amazon.txt`.
+
+| Lo que sale en el vídeo | Producto |
 |---|---|
-| roca, paneles (constancia) | Atomic Habits o habit tracker |
-| silla | Pomodoro timer |
-| escalera | goal planner |
-| kioscos (dinero) | The Psychology of Money |
-| martillos | The Compound Effect |
+| roca, paneles | sledgehammer o Atomic Habits (alternando) |
+| silla | desk chair |
+| escalera | step ladder |
+| kioscos | lemonade dispenser |
+| martillos | home tool kit |
+| lámpara | desk lamp |
+| portátil | laptop |
 
-Nunca se repite el mismo producto en dos episodios seguidos: si toca el mismo, se usa la alternativa (habit tracker, visual timer, daily planner, budget planner o Atomic Habits).
+- **Sin repeticiones seguidas:** si el episodio anterior llevaba el mismo producto, se usa otro objeto que también salga en el vídeo (por ejemplo la lámpara).
+- **Variedad:** la frase puente, la acción de la línea 2, el emoji y el texto del comentario tienen al menos 10 variantes cada uno. Dos episodios seguidos nunca repiten ninguna de ellas, así que no hay dos publicaciones iguales.
+- **Sin promesas:** ni de éxito ni de dinero.
+
+---
 
 ## 2. Estructura del JSON
 

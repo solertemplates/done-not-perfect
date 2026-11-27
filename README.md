@@ -59,7 +59,7 @@ Cada episodio varía solo las estrellas, la ciudad, las luces, el degradado y la
 
 Con el atajo **Nuevo episodio** copias el guion corto, tocas el atajo y te devuelve el enlace al vídeo y a sus textos. Cómo montarlo: [ATAJO_IPHONE.md](ATAJO_IPHONE.md).
 
-Junto a cada vídeo aparece `videos/<id>_textos.txt`, con el texto para Facebook y el título, la descripción y los hashtags para YouTube, en inglés. Al final de cada parte va un producto de Amazon según la lección (tienda e ID en [`config/amazon.txt`](config/amazon.txt)), con el aviso de afiliado.
+Junto a cada vídeo aparece `videos/<id>_textos.txt`, con el texto para Facebook y el título, la descripción y los hashtags para YouTube, en inglés. Al final de cada parte va un producto de Amazon que se ve en el vídeo (tienda e ID en [`config/amazon.txt`](config/amazon.txt)), con el aviso de afiliado. El enlace va en el apartado PRIMER COMENTARIO.
 
 ## Personajes
 

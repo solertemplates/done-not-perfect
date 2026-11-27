@@ -20,27 +20,89 @@ RAIZ = Path(__file__).resolve().parent.parent
 AMAZON = RAIZ / "config" / "amazon.txt"
 AVISO = "As an Amazon Associate I earn from qualifying purchases."
 
-# Producto según la lección del episodio. El primero es el preferido; si el episodio anterior
-# ya lo llevaba, se usa el siguiente (nunca el mismo producto dos episodios seguidos).
+# --- AMAZON -------------------------------------------------------------------------------
+# El producto es siempre un objeto que SE VE en el vídeo. El primero de la lista es el preferido;
+# si el episodio anterior llevaba el mismo, se usa el siguiente objeto visible.
 PRODUCTOS = {
-    "constancia": ["Atomic Habits", "habit tracker"],
-    "silla": ["Pomodoro timer", "visual timer"],
-    "escalera": ["goal planner", "daily planner"],
-    "dinero": ["The Psychology of Money", "budget planner"],
-    "martillos": ["The Compound Effect", "Atomic Habits"],
+    "constancia": ["sledgehammer", "Atomic Habits"],
+    "silla": ["desk chair"],
+    "escalera": ["step ladder"],
+    "dinero": ["lemonade dispenser"],
+    "martillos": ["home tool kit"],
 }
-FRASES = {
-    "Atomic Habits": "Small hits add up. Atomic Habits shows how to keep swinging:",
-    "habit tracker": "Track every hit. A simple habit tracker keeps you going:",
-    "Pomodoro timer": "Done beats perfect. A Pomodoro timer helps you start and finish:",
-    "visual timer": "Set a timer and build the thing. This visual timer helps:",
-    "goal planner": "Plan less, climb more. A goal planner keeps the next step clear:",
-    "daily planner": "One step a day. A daily planner keeps you climbing:",
-    "The Psychology of Money": "Cheap is easy, smart pays. Read The Psychology of Money:",
-    "budget planner": "Price it smart, track every coin. A budget planner helps:",
-    "The Compound Effect": "Nail by nail, it compounds. Read The Compound Effect:",
-}
+LAMPARA, PORTATIL = "desk lamp", "laptop"
 
+# Lección de cada categoría (para la frase puente). Sin promesas de éxito ni de dinero.
+LECCIONES = {
+    "constancia": ["What changes the result is the hit after you wanted to stop.",
+                   "The difference is who keeps going when it gets boring.",
+                   "Quitting at 99 feels the same as never starting."],
+    "silla": ["The one who finishes the wobbly version is the one who gets to sit down.",
+              "A finished chair beats a perfect drawing of one.",
+              "Done first, better later."],
+    "escalera": ["Building it beats drawing it perfectly.",
+                 "One real step is worth more than a perfect plan.",
+                 "You can only climb what you actually build."],
+    "dinero": ["The difference is how you think about value.",
+               "Same lemonade, different thinking.",
+               "Cheap is easy to copy; smart is not."],
+    "martillos": ["Done beats perfect, nail after nail.",
+                  "One hammer measures, the other one finishes.",
+                  "Measuring forever never built anything."],
+}
+# Frases puente: unen el objeto que se ve con la lección ({p} = producto, {l} = lección).
+PUENTES = [
+    "Notice the {p} in this short? {l}",
+    "Both of them had the same {p}. {l}",
+    "The {p} is not the difference here. {l}",
+    "Same {p} on both sides of the screen. {l}",
+    "A {p} is just a tool until someone uses it. {l}",
+    "Nothing fancy in this video, just a {p}. {l}",
+    "The {p} stays the same; the result doesn't. {l}",
+    "Look closely at the {p}. {l}",
+    "Give two people the same {p} and watch. {l}",
+    "This short is really about a {p}. {l}",
+    "Watch what each one does with the {p}. {l}",
+    "It was never about having a better {p}. {l}",
+]
+PUENTES_LIBRO = [  # cuando el producto es un libro (no un objeto de la escena)
+    "This short is Atomic Habits in 15 seconds. {l}",
+    "Atomic Habits explains what you just watched. {l}",
+    "Small repeated hits are the whole idea behind Atomic Habits. {l}",
+    "If this short hit home, Atomic Habits goes deeper. {l}",
+    "Atomic Habits is the long version of this rock. {l}",
+    "The rock is a metaphor; Atomic Habits is the manual. {l}",
+    "Every hit in this video is a habit. {l}",
+    "Atomic Habits is about the hits nobody sees. {l}",
+    "Why does hit 100 work? Atomic Habits has a theory. {l}",
+    "Same rock, same tool, different habits. {l}",
+]
+ACCIONES = {
+    "constancia": ["keep swinging", "take one more hit today", "show up again tomorrow", "count your reps, not your doubts",
+                   "finish what you started", "go for hit 100", "stop waiting to feel ready",
+                   "keep going when it gets boring", "build the habit one hit at a time", "trust the boring part"],
+    "silla": ["build the imperfect version first", "finish before you polish", "sit on something you actually finished",
+              "stop redrawing and start building", "make it real today", "build it, then fix it",
+              "choose done over perfect", "start with what you have", "get your project off the paper",
+              "finish one thing this week"],
+    "escalera": ["climb one step at a time", "take the first step today", "start before the plan is perfect",
+                 "build your next step", "go up one rung today", "stop measuring and start climbing",
+                 "turn the sketch into real steps", "make progress you can stand on", "take the next small step",
+                 "build instead of overplanning"],
+    "dinero": ["think about value, not just price", "run your stand your way", "learn from the smart stand",
+               "set up your summer stand", "price with a plan", "serve your first customers",
+               "keep it simple and open today", "try your idea for real", "set up your first stand",
+               "test your idea this weekend"],
+    "martillos": ["fix that thing you keep postponing", "finish the project in your garage", "start the repair today",
+                  "nail it, then improve it", "stop measuring and start hammering", "handle the small fixes this weekend",
+                  "get the job done, not perfect", "build something with your hands", "tackle your to-do list",
+                  "finish one fix today"],
+}
+EMOJIS_AMAZON = ["🧰", "🛠️", "🔧", "✅", "🚀", "📦", "⭐", "💪", "🎯", "✨", "🔥", "👉"]
+COMENTARIOS = ["🛒 Shop now 👇", "🛒 Grab yours here 👇", "🔗 Find it here 👇", "🛒 Check it out 👇",
+               "👀 See it on Amazon 👇", "🧰 The one from the video 👇", "📦 Link as promised 👇",
+               "🛒 Take a look 👇", "👉 Here's the link 👇", "🔎 Browse the options 👇", "🛍️ Have a look here 👇",
+               "📌 Saved you a search 👇"]
 TEMAS = {
     "constancia": dict(
         emojis=["🪨", "🔨", "💪", "🔥", "⛏️"],
@@ -105,27 +167,50 @@ def categoria(datos: dict) -> str:
     return "constancia"
 
 
-def _categoria_archivo(ruta: Path) -> str | None:
-    """Categoría de un episodio de la carpeta, sin renderizarlo (rápido)."""
+def candidatos(datos: dict) -> list[str]:
+    """Productos que se ven en el vídeo, del preferido al último."""
+    cat = categoria(datos)
+    lista = list(PRODUCTOS[cat])
+    g = json.dumps(datos.get("guion", {}))
+    if '"lampara"' in g:
+        lista.append(LAMPARA)
+    if "portatil" in g or "laptop" in g:
+        lista.append(PORTATIL)
+    return lista
+
+
+def _candidatos_archivo(ruta: Path) -> list[str] | None:
+    """Lo mismo, leyendo un episodio de la carpeta sin renderizarlo (rápido)."""
     from .plantillas import _clave, leer, normalizar
 
     try:
         texto = normalizar(ruta.read_text(encoding="utf-8"))
         if ruta.suffix == ".json":
-            return categoria(json.loads(texto))
+            return candidatos(json.loads(texto))
         campos, _ = leer(texto)
         p = _clave(campos.get("plantilla", ""))
         if p == "construir":
-            return "escalera" if _clave(campos.get("objeto", "")) == "escalera" else "silla"
-        return {"roca": "constancia", "paneles": "constancia", "kioscos": "dinero", "martillos": "martillos"}.get(p)
+            objeto = "escalera" if _clave(campos.get("objeto", "")) == "escalera" else "silla"
+            return PRODUCTOS[objeto] + [LAMPARA]
+        if p == "martillos":
+            return PRODUCTOS["martillos"] + [LAMPARA]
+        return {"roca": PRODUCTOS["constancia"], "paneles": PRODUCTOS["constancia"],
+                "kioscos": PRODUCTOS["dinero"]}.get(p)
     except (OSError, ValueError, AttributeError):
         return None
 
 
-def elegir_producto(cat: str, ident: str, anterior: str | None) -> str:
-    opciones = list(PRODUCTOS[cat])
-    if cat == "constancia" and numero(ident, "producto") % 2:  # Atomic Habits o habit tracker, alternando
-        opciones.reverse()
+def _numero_episodio(ident: str) -> int:
+    import re
+
+    m = re.match(r"ep(\d+)", ident)
+    return int(m.group(1)) if m else numero(ident, "num")
+
+
+def elegir_producto(opciones: list[str], ident: str, anterior: str | None) -> str:
+    opciones = list(opciones)
+    if opciones[:2] == PRODUCTOS["constancia"] and _numero_episodio(ident) % 2:  # mazo o libro, alternando
+        opciones[0], opciones[1] = opciones[1], opciones[0]
     return next((o for o in opciones if o != anterior), opciones[0])
 
 
@@ -140,15 +225,15 @@ def producto_anterior(ruta: Path) -> str | None:
         return None
     lista = []
     for otro in list(carpeta.glob("*.json")) + list(carpeta.glob("*.txt")):
-        n, ident = _nombre(otro)
+        n, _ = _nombre(otro)
         if n is not None and n < num:
-            lista.append((n, otro.name, otro, ident))
+            lista.append((n, otro.name, otro))
     anterior = None
-    for _, _, otro, _ in sorted(lista):
-        cat = _categoria_archivo(otro)
+    for _, _, otro in sorted(lista):
+        opciones = _candidatos_archivo(otro)
         ident = id_de_archivo(otro)
-        if cat and ident:
-            anterior = elegir_producto(cat, ident, anterior)
+        if opciones and ident:
+            anterior = elegir_producto(opciones, ident, anterior)
     return anterior
 
 
@@ -167,14 +252,36 @@ def amazon() -> dict | None:
     return None
 
 
-def bloque_amazon(datos: dict, anterior: str | None = None) -> str:
+def _elige(lista: list, ident: str, sal: str, paso: int):
+    """Variante para este episodio: episodios seguidos nunca repiten (paso primo con el tamaño)."""
+    n = _numero_episodio(ident)
+    return lista[(n * paso + numero(sal, "base")) % len(lista)]
+
+
+def amazon_partes(datos: dict, anterior: str | None = None) -> dict | None:
+    """Bloque de la descripción (3 líneas) y primer comentario (2 líneas), o None sin config/amazon.txt."""
     conf = amazon()
     if not conf:
-        return ""
-    producto = elegir_producto(categoria(datos), datos["id"], anterior)
+        return None
+    ident = datos["id"]
+    cat = categoria(datos)
+    producto = elegir_producto(candidatos(datos), ident, anterior)
+    leccion = _elige(LECCIONES[cat], ident, "leccion", 1)
+    if producto == "Atomic Habits":
+        puente = _elige(PUENTES_LIBRO, ident, "puente", 3).format(l=leccion)
+    else:
+        puente = _elige(PUENTES, ident, "puente", 5).format(p=producto, l=leccion)
+    accion = _elige(ACCIONES[cat], ident, "accion", 7)
+    emoji = _elige(EMOJIS_AMAZON, ident, "emoji", 5)
+    nombre = f"{producto} book" if producto == "Atomic Habits" else producto
+    comentario = _elige(COMENTARIOS, ident, "comentario", 7)
     tienda = conf["tienda"].removeprefix("https://").removeprefix("www.").strip("/")
     enlace = f"https://www.{tienda}/s?k={quote_plus(producto)}&tag={conf['id']}"
-    return f"{FRASES[producto]}\n{enlace}\n{AVISO}\n"
+    return {
+        "producto": producto,
+        "descripcion": f"{puente}\n{emoji} Get this {nombre} and {accion} — link in the first comment 👇\n{AVISO}",
+        "comentario": f"{comentario}\n{enlace}",
+    }
 
 
 def _cierre_legible(cierre: str) -> str:
@@ -204,17 +311,21 @@ def generar(datos: dict, anterior: str | None = None) -> str:
 
     fb = f"{gancho} {e[0]}\n{frase} {e[1]}\n{_cierre_legible(cierre)}. {pregunta} {e[2]}"
     yt_desc = f"{frase} {_cierre_legible(cierre)}.\n{pregunta} Follow for a new short every day."
-    amz = bloque_amazon(datos, anterior)
-    return (
+    amz = amazon_partes(datos, anterior)
+    bloque = f"{amz['descripcion']}\n" if amz else ""
+    texto = (
         "FACEBOOK\n"
         f"{fb}\n"
         f"{' '.join(tags_fb)}\n"
-        f"{amz}"
+        f"{bloque}"
         "\n"
         "YOUTUBE\n"
         f"Title: {titulo}\n"
         "Description:\n"
         f"{yt_desc}\n"
+        f"{bloque}"
         f"Hashtags: {' '.join(tags_yt)}\n"
-        f"{amz}"
     )
+    if amz:
+        texto += f"\nPRIMER COMENTARIO\n{amz['comentario']}\n"
+    return texto

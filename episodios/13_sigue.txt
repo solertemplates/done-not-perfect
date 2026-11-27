@@ -1,0 +1,4 @@
+plantilla: roca
+golpes: 50
+gancho: 50 hits. Then he quit.
+cierre: Keep going

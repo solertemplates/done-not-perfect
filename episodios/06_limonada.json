@@ -1,1 +1,16 @@
-
+{
+  "serie": "Done, not perfect", "episodio": 6, "id": "ep06_limonada", "titulo": "La limonada", "fondo": "azul_noche",
+  "video": { "ancho": 1080, "alto": 1920, "fps": 30, "duracion_s": 18 },
+  "tiempos": { "gancho_fin_s": 1, "rebobinado_fin_s": 3, "accion_fin_s": 15 },
+  "textos": { "gancho": "Same lemonade.", "cierre": "Smart > Cheap", "marca": "Done, not perfect" },
+  "guion": {
+    "formato": "escena_unica", "gancho": "arriba", "cierre_y": 1650,
+    "escena": { "tipo": "calle_mercado", "farolas": [540] },
+    "objetos": [
+      { "id": "kb", "tipo": "kiosco", "x": 250, "toldo": "rosa_blanco", "cola": "derecha" },
+      { "id": "kc", "tipo": "kiosco", "x": 830, "toldo": "naranja_blanco", "cola": "izquierda" },
+      { "id": "limo_b", "tipo": "limonada", "kiosco": "kb", "stock": 6 },
+      { "id": "limo_c", "tipo": "limonada", "kiosco": "kc", "stock": 2, "reponer": [ { "desde_s": 9.0, "cantidad": 3 } ] },
+      { "id": "precio_b", "tipo": "cartel_precio", "x": 250, "y": 170, "precio": "$1", "borde": "rosa_neon", "tachado_s": 9.0 },
+      { "id": "precio_c", "tipo": "cartel_precio", "x": 830, "y": 170, "precio": "$3", "borde": "naranja" },
+      { "id": "bolsa_b", "tipo": "bolsa_dinero", "kiosco": "kb", "x": 60, "detalle":

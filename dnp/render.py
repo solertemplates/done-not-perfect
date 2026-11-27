@@ -69,7 +69,7 @@ def renderizar(ruta_json: str, carpeta: Path, capturas: list[float] | None = Non
         i = min(n - 1, int(round(seg * fps)))
         escena.fotograma(i / fps).save(carpeta / f"captura_{seg:g}s.png")
 
-    pista, origen = audio.mezclar(ep.duracion, escena.eventos_audio(), ep["audio"], RAIZ)
+    pista, origen = audio.mezclar(ep.duracion, escena.eventos_audio(), ep["audio"], RAIZ, ep["id"])
     print(f"♪ Música: {origen}")
     with tempfile.TemporaryDirectory() as tmp:
         wav = Path(tmp) / "audio.wav"

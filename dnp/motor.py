@@ -19,6 +19,7 @@ import numpy as np
 from PIL import Image
 
 from .config import Episodio
+from . import color, variedad
 from .lienzo import BLANCO, ESCALA, FONDOS, ROJO, VERDE, capa, fondo, fuente, tenue, texto, usar_fondo
 from .tiempo import rebote, suave, tramo
 
@@ -44,8 +45,12 @@ class EpisodioMotor:
         self.color_fondo = FONDOS[ep["fondo"]]
         usar_fondo(self.color_fondo)
         self.estrellas = []
+        self.variacion = variedad.para(ep["id"])
+        variedad.usar(self.variacion)
         self._preparar()
         self._fondo = self._decorado()
+        mapa = color.mapa_radial(self.ancho, self.alto, self.color_fondo, self._zonas_color(), self.variacion)
+        self._componer = color.Componedor(self.color_fondo, mapa)
 
     # --- a definir en cada episodio ----------------------------------------------
     def _preparar(self):
@@ -56,6 +61,10 @@ class EpisodioMotor:
 
     def _dibujar(self, img: Image.Image, a: float, fase_bucle: float):
         raise NotImplementedError
+
+    def _zonas_color(self) -> list:
+        """Zonas del degradado radial: [(y0, y1, horizonte o None)]."""
+        return [(0, self.alto, None)]
 
     def eventos_episodio(self) -> list:
         raise NotImplementedError
@@ -166,6 +175,7 @@ class EpisodioMotor:
     # ============================================================== FOTOGRAMA
     def fotograma(self, t: float) -> Image.Image:
         usar_fondo(self.color_fondo)
+        variedad.usar(self.variacion)
         a = self.accion(t)
         fase_bucle = (t / self.periodo_bucle) % 1.0
         img = self._fondo.copy()
@@ -175,7 +185,7 @@ class EpisodioMotor:
         self._cierre(img, t, cierre)
         self._icono_rebobinar(img, t)
         texto(img, [(self.textos["marca"], tenue(0.75))], (44, 62), 26, 1.0, ancla="lm")
-        img = img.reduce(ESCALA)
+        img = self._componer(img.reduce(ESCALA))
         if self.g <= t < self.r:
             arr = self._rebobinado(np.array(img), t)
             img = Image.fromarray(arr)

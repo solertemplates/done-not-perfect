@@ -15,13 +15,20 @@ from PIL import Image, ImageDraw, ImageFont
 
 ESCALA = 2
 
-# Fondos permitidos: siempre MUY oscuros para que los personajes blancos resalten.
+# Fondos: el COLOR DEL CENTRO del degradado radial (puro y saturado). Los bordes se oscurecen
+# hasta #000000 (ver dnp/color.py). Los personajes son siempre blancos.
 FONDOS = {
-    "negro": (0x0E, 0x0F, 0x12),  # #0E0F12
-    "azul_noche": (0x0D, 0x14, 0x24),  # #0D1424
-    "marron_cafe": (0x1A, 0x13, 0x0E),  # #1A130E
-    "gris_pizarra": (0x15, 0x18, 0x1C),  # #15181C
-    "morado_oscuro": (0x17, 0x12, 0x22),  # #171222
+    "negro": (0x34, 0x18, 0x96),  # índigo muy profundo (el centro siempre lleva color)
+    "azul_noche": (0x00, 0x30, 0xA8),
+    "marron_cafe": (0x96, 0x40, 0x00),
+    "gris_pizarra": (0x00, 0x5C, 0x7C),  # pizarra azulada, nunca gris apagado
+    "morado_oscuro": (0x5A, 0x00, 0x96),
+    "azul_electrico": (0x00, 0x50, 0xFF),
+    "violeta": (0x82, 0x28, 0xFF),
+    "naranja_atardecer": (0xF0, 0x5A, 0x00),
+    "rosa": (0xC8, 0x00, 0xA0),
+    "verde_esmeralda": (0x00, 0x8C, 0x5A),
+    "rojo_vino": (0x96, 0x00, 0x2D),
 }
 FONDO = FONDOS["negro"]  # fondo por defecto (episodio 1)
 _fondo_actual = [FONDO]
@@ -37,10 +44,11 @@ def usar_fondo(color) -> None:
 
 
 BLANCO = (245, 245, 240)
-VERDE = (64, 214, 128)  # logro / ahorro
-ROJO = (236, 78, 78)  # fracaso / deuda
-AMARILLO = (244, 196, 64)  # riesgo
-AZUL = (80, 160, 255)  # IA
+# Colores de CONCEPTO: puros y saturados, para que destaquen sobre cualquier fondo.
+VERDE = (60, 255, 110)  # logro / ahorro
+ROJO = (255, 40, 60)  # fracaso / deuda
+AMARILLO = (255, 214, 0)  # riesgo
+AZUL = (0, 200, 255)  # IA
 LUZ_LAMPARA = (0xFF, 0xC8, 0x73)  # ámbar cálido de ambiente (no es el amarillo de riesgo)
 # Paleta de AMBIENTE: luces, farolas, ventanas encendidas, toldos y letreros. No son colores de concepto.
 AMBAR = LUZ_LAMPARA  # #FFC873

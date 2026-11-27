@@ -121,13 +121,25 @@ def test_falta_fondo(datos):
     assert errores(datos) == ["Falta el campo obligatorio 'fondo'."]
 
 
-def test_fondos_muy_oscuros_y_distintos_de_los_colores_de_concepto():
-    from dnp.lienzo import AMARILLO, AZUL, FONDOS, ROJO, VERDE
+def test_fondos_vivos_y_saturados():
+    """El centro de cada fondo es un color puro y saturado (nada agrisado ni desteñido)."""
+    from dnp.lienzo import FONDOS
 
-    for nombre, (r, g, b) in FONDOS.items():
-        assert 0.2126 * r + 0.7152 * g + 0.0722 * b < 25, nombre  # tan oscuro como el negro de la serie
-        for concepto in (VERDE, ROJO, AMARILLO, AZUL):
-            assert sum(abs(x - y) for x, y in zip((r, g, b), concepto)) > 250, nombre
+    assert len(FONDOS) >= 11
+    for nuevo in ("azul_electrico", "violeta", "naranja_atardecer", "rosa", "verde_esmeralda", "rojo_vino"):
+        assert nuevo in FONDOS
+    for nombre, c in FONDOS.items():
+        alto, bajo = max(c), min(c)
+        assert (alto - bajo) / alto >= 0.8, nombre  # saturación (HSV)
+        assert alto >= 115, nombre  # con color, no casi negro
+        assert 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] < 130, nombre  # los personajes blancos destacan
+
+
+def test_colores_de_concepto_puros():
+    from dnp.lienzo import AMARILLO, AZUL, ROJO, VERDE
+
+    for c in (VERDE, ROJO, AMARILLO, AZUL):
+        assert max(c) == 255 and (max(c) - min(c)) / 255 >= 0.75
 
 
 def test_episodios_2_y_3_son_validos():

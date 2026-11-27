@@ -20,6 +20,7 @@ from pathlib import Path
 import json
 
 from .config import ErrorConfig, cargar, validar
+from .textos import generar as generar_textos
 
 RAIZ = Path(__file__).resolve().parent.parent
 SIN_ERRORES = ".sin_errores"  # aviso para que el workflow borre videos/ERRORES.txt
@@ -87,6 +88,7 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, render=_r
             destino.mkdir(parents=True, exist_ok=True)
             shutil.copy(mp4, destino / f"{ep['id']}.mp4")
             shutil.copy(mini, destino / f"{ep['id']}_miniatura.png")
+            (destino / f"{ep['id']}_textos.txt").write_text(generar_textos(ep.datos), encoding="utf-8")
             publicados.append(ep["id"])
     if destino is not None:
         destino.mkdir(parents=True, exist_ok=True)
@@ -104,6 +106,28 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, render=_r
     return len(problemas)
 
 
+def ident_de(ruta: Path) -> str | None:
+    """id del vídeo de un episodio (JSON o .txt), o None si el archivo tiene errores."""
+    try:
+        if ruta.suffix == ".txt":
+            from .plantillas import convertir
+
+            return convertir(ruta.read_text(encoding="utf-8"), ruta)["id"]
+        return cargar(ruta)["id"]
+    except ErrorConfig:
+        return None
+
+
+def sin_video(videos: Path) -> list[Path]:
+    """Episodios cuyo MP4 todavía no está en videos/ (p. ej. si un render quedó cancelado en la cola)."""
+    faltan = []
+    for ruta in sorted(list((RAIZ / "episodios").glob("*.json")) + list((RAIZ / "episodios").glob("*.txt"))):
+        i = ident_de(ruta)
+        if i and not (videos / f"{i}.mp4").exists():
+            faltan.append(ruta)
+    return faltan
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Valida, renderiza y publica episodios.")
     ap.add_argument("archivos", nargs="*")
@@ -111,10 +135,14 @@ def main(argv=None):
     ap.add_argument("--destino", default=None, help="carpeta donde dejar MP4, miniaturas y ERRORES.txt")
     ap.add_argument("--solo-comprobar", action="store_true", help="no deja nada en el destino")
     ap.add_argument("--salida", default="salida")
+    ap.add_argument("--faltan", action="store_true", help="añade los episodios que aún no tienen vídeo en videos/")
     args = ap.parse_args(argv)
     archivos = [Path(a) for a in args.archivos if a.strip()]
-    if args.todos or not archivos:
+    if args.todos or (not archivos and not args.faltan):
         archivos = sorted(list((RAIZ / "episodios").glob("*.json")) + list((RAIZ / "episodios").glob("*.txt")))
+    if args.faltan:
+        ya = {a.resolve() for a in archivos}
+        archivos += [a for a in sin_video(RAIZ / "videos") if a.resolve() not in ya]
     archivos = [a for a in archivos if a.suffix in (".json", ".txt") and a.exists()]
     if not archivos:
         print("No hay episodios que procesar.")

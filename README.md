@@ -8,7 +8,7 @@ Todo se genera por código en GitHub Actions: dibujo, animación, música y efec
 
 1. En github.com, entra en la carpeta `episodios/` y sube un JSON nuevo (**Add file → Create new file**) o edita uno con el lápiz. Guarda (**Commit changes**).
 2. Ya está: el workflow **se lanza solo** y renderiza solo los episodios que has subido o cambiado. No hay que tocar Actions.
-3. En unos 3 minutos el vídeo aparece en [`videos/`](videos/), con su miniatura (`<id>_miniatura.png`). Descarga directa:
+3. En unos 3 minutos el vídeo aparece en [`videos/`](videos/), con su miniatura (`<id>_miniatura.png`) y sus textos para publicar (`<id>_textos.txt`). Descarga directa:
    - Ep. 1: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep01_la_silla.mp4
    - Ep. 2: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep02_la_escalera.mp4
    - Ep. 3: https://github.com/solertemplates/done-not-perfect/raw/main/videos/ep03_los_dos_martillos.mp4
@@ -37,17 +37,29 @@ Cada vídeo pasa siempre las mismas comprobaciones (30 fps, cero negros, bucle y
 
 ## Fondos
 
-Cada episodio elige su fondo con el campo `"fondo"` del JSON. Solo se permiten estos, todos muy oscuros para que los personajes blancos resalten:
+Degradado radial: centro de color vivo y bordes oscuros. Los personajes son siempre blancos. Si un `.txt` no dice `fondo:`, se elige uno distinto al de los últimos 6 episodios.
 
-| `"fondo"` | Color |
+| `"fondo"` | Centro |
 |---|---|
-| `negro` | #0E0F12 |
-| `azul_noche` | #0D1424 |
-| `marron_cafe` | #1A130E |
-| `gris_pizarra` | #15181C |
-| `morado_oscuro` | #171222 |
+| `negro` | #341896 |
+| `azul_noche` | #0030A8 |
+| `marron_cafe` | #964000 |
+| `gris_pizarra` | #005C7C |
+| `morado_oscuro` | #5A0096 |
+| `azul_electrico` | #0050FF |
+| `violeta` | #8228FF |
+| `naranja_atardecer` | #F05A00 |
+| `rosa` | #C800A0 |
+| `verde_esmeralda` | #008C5A |
+| `rojo_vino` | #96002D |
 
-Las ventanas muestran estrellitas, algunas con un parpadeo muy suave. Las lámparas proyectan un cono de luz ámbar cálido: es luz de ambiente, no el amarillo de riesgo.
+Cada episodio varía solo las estrellas, la ciudad, las luces, el degradado y la música. Hay 8 estilos de música generada por código, distinta en cada vídeo.
+
+## Publicar de un toque desde el iPhone
+
+Con el atajo **Nuevo episodio** copias el guion corto, tocas el atajo y te devuelve el enlace al vídeo y a sus textos. Cómo montarlo: [ATAJO_IPHONE.md](ATAJO_IPHONE.md).
+
+Junto a cada vídeo aparece `videos/<id>_textos.txt`, con el texto para Facebook y el título, la descripción y los hashtags para YouTube, en inglés.
 
 ## Personajes
 

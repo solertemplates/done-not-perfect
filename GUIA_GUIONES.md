@@ -32,7 +32,7 @@ fondo: azul_noche
 Campos comunes (todos opcionales menos `plantilla`):
 - `gancho`: máximo 40 letras;
 - `cierre`: máximo 24 letras; con `>` sale en verde > rojo;
-- `fondo`: negro, azul_noche, marron_cafe, gris_pizarra o morado_oscuro;
+- `fondo`: uno de los 11 fondos (ver «Fondos»). Si no lo pones, se elige solo uno distinto al de los últimos 6 episodios;
 - `titulo`, `episodio` e `id`.
 
 Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo está mal, `videos/ERRORES.txt` lo explica.
@@ -45,12 +45,12 @@ Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo
 |---|---|
 | Formato | vertical 1080x1920, 30 fps, de 15 a 20 s, sin voz |
 | Personajes | **siempre blancos**, con cara de puntos y sonrisa simple. El Perfeccionista lleva gafas y lápiz en la oreja (o, si es un objeto, gafas pequeñas) |
-| Decorado | líneas blancas finas, estilo boceto, sobre un fondo muy oscuro |
+| Decorado | líneas blancas finas, estilo boceto, sobre un fondo de color vivo con degradado radial |
 | Carteles | como mucho **1** en todo el episodio |
 | Estructura | gancho (segundo 0) → rebobinado → acción → vuelve la imagen del gancho con el texto final |
 | Bucle | el último fotograma es idéntico al primero (lo hace el motor solo) |
 
-### Colores (solo como concepto, siempre pequeños y suaves)
+### Colores de concepto (pequeños, puros y saturados, con un halo oscuro para que destaquen sobre cualquier fondo)
 
 | Color | Significa |
 |---|---|
@@ -72,17 +72,42 @@ Sirve para dar vida: luces, farolas, ventanas encendidas, toldos y letreros.
 
 ### Fondos (`"fondo"`)
 
-El fondo **nunca es plano**: el motor pinta un degradado, más claro arriba y más oscuro abajo. En exteriores, el cielo tira a violeta/índigo con un resplandor naranja suave en el horizonte. Las ventanas muestran un cielo de noche con ese mismo resplandor.
+Degradado **radial**: el centro es el color vivo del fondo y los bordes se oscurecen hasta el negro. Los personajes siguen siempre blancos. El código es el color del centro.
 
-| Valor | Código |
+| Valor | Centro |
 |---|---|
-| `negro` | #0E0F12 |
-| `azul_noche` | #0D1424 |
-| `marron_cafe` | #1A130E |
-| `gris_pizarra` | #15181C |
-| `morado_oscuro` | #171222 |
+| `negro` | #341896 |
+| `azul_noche` | #0030A8 |
+| `marron_cafe` | #964000 |
+| `gris_pizarra` | #005C7C |
+| `morado_oscuro` | #5A0096 |
+| `azul_electrico` | #0050FF |
+| `violeta` | #8228FF |
+| `naranja_atardecer` | #F05A00 |
+| `rosa` | #C800A0 |
+| `verde_esmeralda` | #008C5A |
+| `rojo_vino` | #96002D |
 
----
+### Variedad automática
+
+Cada episodio, a partir de su `id`, cambia solo:
+- las estrellas y la ciudad;
+- el centro y el tamaño del degradado;
+- el color del resplandor del horizonte;
+- el color dominante de las ventanas encendidas;
+- la música.
+
+Dos vídeos nunca se ven ni suenan iguales.
+
+### Música
+
+Se genera por código y es distinta en cada episodio. Hay 8 estilos: alegre, epico_suave, lofi, piano, ukelele, electronico_suave, misterio y triunfal. El estilo sale del número del episodio, así que 8 episodios seguidos nunca lo repiten. La tonalidad, el tempo, los acordes, la melodía y la batería salen del `id`. Para forzar un estilo: `"audio": {..., "estilo": "lofi"}`.
+
+### Textos para publicar
+
+Junto a cada vídeo se crea `videos/<id>_textos.txt`, en inglés:
+- **FACEBOOK:** texto con gancho, 2-3 emojis y 5 hashtags.
+- **YOUTUBE:** título (máx. 60 letras, con #shorts), descripción de 2 líneas y 5 hashtags.
 
 ## 2. Estructura del JSON
 
@@ -92,12 +117,12 @@ El fondo **nunca es plano**: el motor pinta un degradado, más claro arriba y m�
 | `episodio` | entero 1-999 |
 | `id` | minúsculas, números y `_`. Es el nombre del vídeo: `videos/<id>.mp4` |
 | `titulo` | hasta 60 caracteres |
-| `fondo` | uno de los 5 fondos |
+| `fondo` | uno de los 11 fondos |
 | `video` | `{"ancho": 1080, "alto": 1920, "fps": 30, "duracion_s": 15-20}` |
 | `tiempos` | `{"gancho_fin_s", "rebobinado_fin_s", "accion_fin_s"}` (normalmente 1, 3 y 14). La acción dura al menos 8 s y quedan al menos 3 s hasta el final |
 | `textos` | `{"gancho": "...", "cierre": "...", "marca": "Done, not perfect"}`. Si `cierre` lleva `>`, la izquierda sale verde y la derecha roja |
 | `guion` | ver abajo |
-| `audio` | `{"musica": "auto" \| "generada" \| "audio/x.mp3", "volumen_musica": 0-1, "volumen_efectos": 0-1, "bpm_aproximado": 50-160}` |
+| `audio` | `{"musica": "auto" \| "generada" \| "audio/x.mp3", "volumen_musica": 0-1, "volumen_efectos": 0-1, "estilo": opcional}` (`bpm_aproximado` ya no hace falta: se ignora) |
 
 Todos los tiempos de las acciones van en **segundos del vídeo**, entre `rebobinado_fin_s` y `accion_fin_s`.
 
@@ -265,7 +290,7 @@ No se escriben en el JSON: salen de las acciones y los objetos.
 | `burlarse` | risa corta sin palabras |
 | `cambiar_precio` | ding |
 | Texto final | "pop" suave |
-| Siempre | música suave en bucle (o tu `audio/musica.mp3`) |
+| Siempre | música en bucle, distinta en cada episodio (o tu `audio/musica.mp3`) |
 
 ---
 

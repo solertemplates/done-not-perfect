@@ -408,6 +408,14 @@ class EpisodioGuion(EpisodioMotor):
                                              for i, (conf, _, _) in enumerate(self.zonas)])
         return img
 
+    def _zonas_color(self):
+        if self.formato == "pantalla_partida":
+            regiones = [(0, ALTO_PANEL), (ALTO_PANEL, 2 * ALTO_PANEL)]
+        else:
+            regiones = [(0, self.alto)]
+        return [(y0, y1, esc.horizonte(conf["escena"], self.oy_decorado[i]))
+                for i, ((conf, _, _), (y0, y1)) in enumerate(zip(self.zonas, regiones))]
+
     def _dibujar_zona(self, lz, indice, ts, fase_bucle):
         _, objetos, actores = self.zonas[indice]
         dec.estrellas(lz, self.estrellas, indice, fase_bucle)

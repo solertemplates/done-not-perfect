@@ -68,7 +68,10 @@ ESQUEMA: dict[str, Any] = {
             "musica": {"tipo": str, "max_len": 200},
             "volumen_musica": {"tipo": _NUM, "min": 0, "max": 1},
             "volumen_efectos": {"tipo": _NUM, "min": 0, "max": 1},
-            "bpm_aproximado": {"tipo": _NUM, "min": 50, "max": 160},
+            "bpm_aproximado": {"tipo": _NUM, "min": 50, "max": 160, "opcional": True},  # ya no se usa
+            "estilo": {"tipo": str, "opcional": True, "opciones": ["auto", "alegre", "epico_suave", "lofi", "piano",
+                                                                   "ukelele", "electronico_suave", "misterio",
+                                                                   "triunfal"]},
         },
     },
 }

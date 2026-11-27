@@ -33,7 +33,9 @@ def cantera_noche(lz: Lienzo, panel: int, luna: bool, semilla: int = 0) -> list:
     zonas_libres = [(800, 40, 1080, 250)]  # sin estrellas detrás del contador
     if luna:
         zonas_libres.append((90, 90, 260, 260))
-    for _ in range(46):
+    from . import variedad
+
+    for _ in range(int(46 * variedad.actual().estrellas)):
         x, y = rnd.uniform(20, 1060), rnd.uniform(18, 470)
         if any(x0 <= x <= x1 and y0 <= y <= y1 for x0, y0, x1, y1 in zonas_libres):
             continue

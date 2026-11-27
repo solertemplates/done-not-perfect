@@ -27,7 +27,7 @@ COMUNES = {
     "plantilla": "roca, kioscos, construir o martillos",
     "gancho": "texto del principio (máx. 40 letras)",
     "cierre": "texto final (máx. 24; con \">\" sale verde > rojo)",
-    "fondo": "negro, azul_noche, marron_cafe, gris_pizarra o morado_oscuro",
+    "fondo": "si no lo pones, se elige uno distinto a los últimos episodios",
     "titulo": "título del episodio",
     "episodio": "número (si no, el del nombre del archivo)",
     "id": "nombre del vídeo (si no, sale del nombre del archivo)",
@@ -147,6 +147,8 @@ def convertir(texto: str, ruta: Path) -> dict:
     d["titulo"] = campos.get("titulo") or d["id"].split("_", 1)[-1].replace("_", " ").capitalize()
     if "fondo" in campos:
         d["fondo"] = _clave(campos["fondo"])
+    else:
+        d["fondo"] = fondo_automatico(ruta, num, d["id"])
     if "gancho" in campos:
         d["textos"]["gancho"] = campos["gancho"]
     if "cierre" in campos:
@@ -159,6 +161,55 @@ def convertir(texto: str, ruta: Path) -> dict:
     if errores:
         raise ErrorConfig(errores, str(ruta))
     return d
+
+
+RECIENTES = 6  # el fondo automático no repite ninguno de los últimos 6 episodios
+
+
+def _fondo_propio(archivo: Path):
+    """Fondo escrito en el archivo (JSON o .txt), o None si no lo dice."""
+    try:
+        texto = normalizar(archivo.read_text(encoding="utf-8"))
+        if archivo.suffix == ".json":
+            return json.loads(texto).get("fondo")
+        campos, _ = leer(texto)
+        return _clave(campos["fondo"]) if "fondo" in campos else None
+    except (OSError, ValueError):
+        return None
+
+
+def _elegir(usados: list, ident: str) -> str:
+    from .lienzo import FONDOS
+    from .variedad import numero
+
+    libres = [f for f in FONDOS if f not in usados[-RECIENTES:]] or list(FONDOS)
+    return libres[numero(ident, "fondo") % len(libres)]
+
+
+def fondo_automatico(ruta: Path, num, ident: str) -> str:
+    """Elige un fondo distinto al de los 6 episodios anteriores (siempre el mismo para un id).
+
+    Recorre los episodios en orden de número: los que no dicen su fondo reciben el
+    automático, igual que cuando se renderizaron.
+    """
+    carpeta = Path(ruta).parent
+    anteriores = []
+    if num is not None and carpeta.is_dir():
+        for otro in carpeta.iterdir():
+            if otro.suffix not in (".json", ".txt") or otro.resolve() == Path(ruta).resolve():
+                continue
+            n, otro_id = _nombre(otro)
+            if n is not None and n < num:
+                anteriores.append((n, otro.name, otro, otro_id))
+    anteriores.sort()
+    usados: list = []
+    for _, _, otro, otro_id in anteriores:
+        f = _fondo_propio(otro)
+        if f is None and otro.suffix == ".txt":
+            campos, _ = leer(normalizar(otro.read_text(encoding="utf-8")))
+            f = _elegir(usados, campos.get("id") or otro_id)
+        usados.append(f)
+    return _elegir(usados, ident)
 
 
 def _roca(d, campos, errores):

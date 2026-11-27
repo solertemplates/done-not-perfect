@@ -351,13 +351,6 @@ EFECTOS = {
 
 # --- música -------------------------------------------------------------------------
 
-_NOTAS = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
-
-
-def _hz(midi: float) -> float:
-    return 440.0 * 2 ** ((midi - 69) / 12)
-
-
 def _poner(buf: np.ndarray, sonido: np.ndarray, inicio: int, gan_l: float, gan_r: float) -> None:
     """Suma `sonido` en `buf` (estéreo) a partir de `inicio`, dando la vuelta al final (bucle)."""
     n = buf.shape[0]
@@ -371,58 +364,6 @@ def _poner(buf: np.ndarray, sonido: np.ndarray, inicio: int, gan_l: float, gan_r
         pos += m
         resto -= m
         i = 0
-
-
-def musica(duracion: float, bpm_aprox: float = 80) -> np.ndarray:
-    """Música suave en bucle perfecto: el tempo se ajusta para que la duración
-    sea un número entero de compases y las colas de las notas dan la vuelta."""
-    n = int(round(duracion * SR))
-    compases = max(2, round(duracion / (4 * 60 / bpm_aprox)))
-    pulso = duracion / (compases * 4)
-    buf = np.zeros((n, 2))
-    acordes = [("C", [0, 4, 7]), ("A", [-3, 0, 4]), ("F", [-7, -3, 0]), ("G", [-5, -1, 2])]
-    seq = [acordes[i % 4] for i in range(compases)]
-    seq[-1] = acordes[3]  # el último compás prepara la vuelta al primero
-    raiz = 60
-    rng = np.random.default_rng(3)
-    for c, (nombre, notas) in enumerate(seq):
-        t0 = c * 4 * pulso
-        # Colchón suave (pad)
-        dur_pad = 4 * pulso + 0.6
-        t = _t(dur_pad)
-        env = np.clip(t / 0.5, 0, 1) * np.clip((dur_pad - t) / 0.8, 0, 1)
-        for k, semi in enumerate(notas):
-            f = _hz(raiz + semi)
-            onda = np.sin(2 * np.pi * f * t) + 0.25 * np.sin(2 * np.pi * 2 * f * t)
-            det = np.sin(2 * np.pi * f * 1.003 * t)
-            _poner(buf, onda * env * 0.05, int(t0 * SR), 1.0, 0.7)
-            _poner(buf, det * env * 0.05, int(t0 * SR), 0.7, 1.0)
-        # Bajo en los tiempos 1 y 3
-        for b in (0, 2):
-            d = 1.6 * pulso
-            tt = _t(d)
-            f = _hz(raiz - 24 + notas[0] % 12 - (12 if notas[0] % 12 > 7 else 0))
-            nota = (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(4 * np.pi * f * tt)) * _decae(len(tt), 0.5)
-            _poner(buf, _fundido(nota, 0.01, 0.1) * 0.22, int((t0 + b * pulso) * SR), 1.0, 1.0)
-        # Arpegio tipo marimba en corcheas
-        patron = [0, 1, 2, 1, 0, 2, 1, 2]
-        for j, idx in enumerate(patron):
-            semi = notas[idx] + 12
-            if j == 4:
-                semi += 12 if rng.random() < 0.5 else 0
-            f = _hz(raiz + semi)
-            d = 0.9
-            tt = _t(d)
-            nota = (np.sin(2 * np.pi * f * tt) * _decae(len(tt), 0.35)
-                    + 0.2 * np.sin(2 * np.pi * 4 * f * tt) * _decae(len(tt), 0.05))
-            pan = 0.3 * np.sin(j)
-            _poner(buf, _fundido(nota, 0.003, 0.05) * 0.10, int((t0 + j * pulso / 2) * SR), 1 - pan, 1 + pan)
-        # Shaker suave a contratiempo
-        for j in range(4):
-            m = int(0.05 * SR)
-            sh = _banda(rng.standard_normal(m), 5000, 12000) * _decae(m, 0.012)
-            _poner(buf, sh * 0.05, int((t0 + (j + 0.5) * pulso) * SR), 0.8, 1.0)
-    return buf
 
 
 def leer_musica_externa(ruta: Path, duracion: float) -> np.ndarray:
@@ -463,7 +404,7 @@ def buscar_musica(raiz: Path, ajuste: str) -> Path | None:
     return (preferidos or candidatos or [None])[0]
 
 
-def mezclar(duracion: float, eventos, ajustes: dict, raiz: Path) -> tuple[np.ndarray, str]:
+def mezclar(duracion: float, eventos, ajustes: dict, raiz: Path, ident: str = "episodio") -> tuple[np.ndarray, str]:
     """Pista final estéreo (float, -1..1) y descripción de la música usada."""
     n = int(round(duracion * SR))
     externa = buscar_musica(raiz, ajustes["musica"])
@@ -471,8 +412,11 @@ def mezclar(duracion: float, eventos, ajustes: dict, raiz: Path) -> tuple[np.nda
         m = leer_musica_externa(externa, duracion)
         origen = f"archivo {externa.relative_to(raiz)}"
     else:
-        m = musica(duracion, ajustes["bpm_aproximado"])
-        origen = "generada por código"
+        from .musica import generar
+
+        m, receta = generar(duracion, ident, ajustes.get("estilo"))
+        origen = (f"generada por código: estilo {receta['estilo']}, {receta['escala']}, "
+                  f"{receta['bpm_real']:.0f} bpm, batería {receta['bateria'] or 'sin batería'}")
     m = m * ajustes["volumen_musica"] / 0.35
     # La música baja durante el rebobinado.
     t = np.arange(n) / SR

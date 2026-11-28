@@ -105,6 +105,7 @@ class Buscador:
         self.k_pixabay = os.environ.get("PIXABAY_API_KEY", "").strip()
         self.k_pexels = os.environ.get("PEXELS_API_KEY", "").strip()
         self.usados: set[str] = set()
+        self.recientes: list = []  # (candidato, ruta) ya elegidos, por si hay que reutilizar uno
         self.avisos = avisos if avisos is not None else []
         self._analisis: dict = {}
         if not self.k_pixabay and not self.k_pexels:
@@ -306,29 +307,39 @@ class Buscador:
                 continue
             self.usados.add(c.clave)
             elegidos.append((c, ruta))
-        # Lo que falte: plano neutro del lugar (sin manos), nunca uno sin relación.
-        for consulta in NEUTROS[frase.lugar]:
-            if len(elegidos) == len(segundos):
-                break
-            for c in sorted(self.buscar(consulta), key=lambda c: -c.popularidad):
+        # Lo que falte: plano neutro del lugar (sin manos), nunca uno sin relación. Si ni así,
+        # una vista de la ciudad (siempre hay), y como último recurso se reutiliza un plano ya elegido.
+        for lugar in dict.fromkeys([frase.lugar, "ciudad"]):
+            for consulta in NEUTROS[lugar]:
                 if len(elegidos) == len(segundos):
                     break
-                if c.clave in self.usados or self.puntuar(c, consulta, "nadie", largo) is None:
-                    continue
-                tags = _palabras(" ".join(c.etiquetas))
-                if tags & {"hand", "person", "people", "woman", "man"}:
-                    continue
-                if not tags & ANCLA[frase.lugar] or (frase.lugar != "ciudad" and tags & EXTERIOR):
-                    continue  # tiene que ser ese lugar, sin jardines ni paisajes
-                try:
-                    ruta = self.descargar(c)
-                except Exception:  # noqa: BLE001
-                    continue
-                if self.analizar(ruta, "nadie")[0]:
-                    self.usados.add(c.clave)
-                    elegidos.append((c, ruta))
+                for c in sorted(self.buscar(consulta), key=lambda c: -c.popularidad):
+                    if len(elegidos) == len(segundos):
+                        break
+                    if c.clave in self.usados or self.puntuar(c, consulta, "nadie", largo) is None:
+                        continue
+                    tags = _palabras(" ".join(c.etiquetas))
+                    if tags & {"hand", "person", "people", "woman", "man"}:
+                        continue
+                    if not tags & ANCLA[lugar] or (lugar != "ciudad" and tags & EXTERIOR):
+                        continue  # tiene que ser ese lugar, sin jardines ni paisajes
+                    try:
+                        ruta = self.descargar(c)
+                    except Exception:  # noqa: BLE001
+                        continue
+                    if self.analizar(ruta, "nadie")[0]:
+                        self.usados.add(c.clave)
+                        elegidos.append((c, ruta))
+            if len(elegidos) == len(segundos):
+                break
         if len(elegidos) < len(segundos):
-            raise RuntimeError(f"No hay clips para \"{frase.texto['en'][:60]}\" (buscado: {', '.join(frase.clip)}).")
+            reserva = elegidos or self.recientes[-6:-1]
+            if not reserva:
+                raise RuntimeError(f"No hay clips para \"{frase.texto['en'][:60]}\" (buscado: {', '.join(frase.clip)}).")
+            self.avisos.append(f"Pocos clips para \"{frase.texto['en'][:60]}\": se repite un plano.")
+            while len(elegidos) < len(segundos):
+                elegidos.append(reserva[len(elegidos) % len(reserva)])
+        self.recientes += elegidos
         return elegidos
 
 

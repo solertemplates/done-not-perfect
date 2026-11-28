@@ -111,6 +111,18 @@ def test_puntuacion_de_clips():
     assert b.puntuar(_cand({"coffee", "cup", "table"}), "coffee cup", "nadie", 5, ["red mug", "mug"]) is None
 
 
+def test_sin_clips_nunca_bloquea_el_video():
+    """Si una frase no tiene clips (ni planos neutros), se reutiliza un plano ya elegido y se avisa."""
+    b = cl.Buscador.__new__(cl.Buscador)
+    b.usados, b.recientes, b.avisos, b.buscar = set(), [], [], lambda q: []
+    gu_f = gu.Frase({"en": "Nothing here.", "es": "Nada."}, ["zzz"], lugar="tienda")
+    with pytest.raises(RuntimeError):
+        b.elegir(gu_f, [3.0])
+    b.recientes = [("a", Path("a.mp4")), ("b", Path("b.mp4")), ("c", Path("c.mp4"))]
+    out = b.elegir(gu_f, [3.0, 3.0])
+    assert len(out) == 2 and b.avisos
+
+
 # --------------------------------------------------------------------- color
 def test_etalonaje_normaliza_clips_distintos():
     rng = np.random.default_rng(1)

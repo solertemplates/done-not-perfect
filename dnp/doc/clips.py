@@ -229,12 +229,12 @@ class Buscador:
                       ("haarcascade_frontalface_default.xml", "haarcascade_profileface.xml")]
         info = sondear(ruta)
         ok, motivo = True, ""
-        for f in (0.2, 0.5, 0.8):
+        for f in (0.1, 0.3, 0.5, 0.7, 0.9):
             img = fotograma(ruta, info["duracion"] * f, 640, 360)
             if img is None:
                 continue
             r, g, b = (img[..., i].astype(int) for i in range(3))
-            if ((g > 170) & (r < 110) & (b < 110)).mean() > 0.02:
+            if ((g > 140) & (g > r + 60) & (g > b + 50)).mean() > 0.01:
                 ok, motivo = False, "pantalla verde (croma)"
                 break
             gris = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)

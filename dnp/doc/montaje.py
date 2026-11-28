@@ -79,6 +79,12 @@ def tablas_clip(muestra: np.ndarray) -> list[np.ndarray]:
 
 
 def etalonar(img: np.ndarray, tablas) -> np.ndarray:
+    try:
+        import cv2
+
+        return cv2.LUT(img, np.stack(tablas, axis=-1).reshape(256, 1, 3))
+    except ImportError:
+        pass
     out = np.empty_like(img)
     for c in range(3):
         out[..., c] = np.take(tablas[c], img[..., c])
@@ -105,7 +111,7 @@ class Linea:
 
 
 def partir(span: float) -> list[float]:
-    n = max(1, math.ceil(span / 4.6))
+    n = max(1, math.ceil(span / 5.0))
     if span / n < 2.5 and n > 1 and span / (n - 1) <= 5.0:
         n -= 1
     return [span / n] * n
@@ -141,8 +147,11 @@ def _rellenar(ln: Linea, t: float, todas) -> Linea:
     """Prueba de duración fija: lo que sobra hasta el final son planos nuevos de la última frase."""
     if t < ln.duracion - 1e-3 and ln.frases:
         fi = todas.index(ln.frases[-1][0])
-        n0 = len([x for x in ln.trozos if x.frase == fi])
         resto = ln.duracion - t
+        if resto < 1.5 and ln.trozos:  # poco: se alarga el último plano
+            ln.trozos[-1].dur += resto
+            return ln
+        n0 = len([x for x in ln.trozos if x.frase == fi])
         for j, d in enumerate(partir(resto)):
             ln.trozos.append(Trozo(t + j * d, d, fi, n0 + j))
     return ln
@@ -150,19 +159,18 @@ def _rellenar(ln: Linea, t: float, todas) -> Linea:
 
 # ================================================================== VÍDEO
 def _render_trozo(args):
-    ruta, desde, dur, salida, semilla = args
+    ruta, desde, dur, salida, semilla, n = args
     rnd = random.Random(semilla)
     w, h = int(ANCHO * MARGEN) // 2 * 2, int(ALTO * MARGEN) // 2 * 2
     muestra = _leer(ruta, desde + dur / 2, w // 4, h // 4, 1)
     tablas = tablas_clip(muestra[0])
-    n = int(round(dur * FPS))
     cmd = ["ffmpeg", "-v", "error", "-ss", f"{desde:.3f}", "-i", str(ruta), "-t", f"{dur + 0.5:.3f}", "-an", "-vf",
            f"fps={FPS},scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}",
            "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
     lector = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s",
                             f"{ANCHO}x{ALTO}", "-framerate", str(FPS), "-i", "-", "-c:v", "libx264", "-preset",
-                            "veryfast", "-crf", "12", "-pix_fmt", "yuv420p", str(salida)], stdin=subprocess.PIPE)
+                            "ultrafast", "-crf", "10", "-pix_fmt", "yuv420p", str(salida)], stdin=subprocess.PIPE)
     acerca = rnd.random() < 0.6
     z0, z1 = (1.0, 1.065) if acerca else (1.065, 1.0)
     px, py = rnd.uniform(-1, 1), rnd.uniform(-0.6, 0.6)
@@ -179,15 +187,28 @@ def _render_trozo(args):
         vw, vh = w / MARGEN / z, h / MARGEN / z  # parte visible (en píxeles del clip)
         cx = w / 2 + px * (w - vw) / 2 * (0.3 + 0.7 * u)
         cy = h / 2 + py * (h - vh) / 2 * (0.3 + 0.7 * u)
-        img = Image.fromarray(ultimo).transform((ANCHO, ALTO), Image.Transform.EXTENT,
-                                                (cx - vw / 2, cy - vh / 2, cx + vw / 2, cy + vh / 2),
-                                                resample=Image.Resampling.BICUBIC)
-        enc.stdin.write(etalonar(np.asarray(img), tablas).tobytes())
+        img = encuadre(ultimo, cx, cy, vw, vh)
+        enc.stdin.write(etalonar(img, tablas).tobytes())
     lector.kill()
     enc.stdin.close()
     if enc.wait() != 0:
         raise RuntimeError(f"ffmpeg falló con el trozo {salida.name}")
     return str(salida)
+
+
+def encuadre(src: np.ndarray, cx, cy, vw, vh) -> np.ndarray:
+    """Recorte subpíxel (para que el movimiento sea suave) escalado a 1920x1080."""
+    try:
+        import cv2
+
+        sx, sy = ANCHO / vw, ALTO / vh
+        m = np.array([[sx, 0, -(cx - vw / 2) * sx], [0, sy, -(cy - vh / 2) * sy]], np.float32)
+        return cv2.warpAffine(src, m, (ANCHO, ALTO), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
+    except ImportError:
+        img = Image.fromarray(src).transform((ANCHO, ALTO), Image.Transform.EXTENT,
+                                             (cx - vw / 2, cy - vh / 2, cx + vw / 2, cy + vh / 2),
+                                             resample=Image.Resampling.BILINEAR)
+        return np.asarray(img)
 
 
 def _leer(ruta, seg, w, h, n):
@@ -222,9 +243,9 @@ ScaledBorderAndShadow: yes
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Sub,{fuente},82,&H00FFFFFF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,1,0,1,4.5,2,2,120,120,{FRANJA + 70},1
-Style: Grande,{fuente},96,&H00FFFFFF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,2,0,1,5,3,5,160,160,0,1
-Style: Titulo,{fuente},88,&H00FFFFFF,&H00FFFFFF,&H00101010,&H00000000,-1,0,0,0,100,100,9,0,1,0,0,5,100,100,0,1
-Style: Anio,{fuente},54,&H0073C8FF,&H0073C8FF,&H00101010,&H00000000,-1,0,0,0,100,100,14,0,1,0,0,5,100,100,0,1
+Style: Grande,{fuente},84,&H00FFFFFF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,2,0,1,5,3,5,160,160,0,1
+Style: Titulo,{fuente},88,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,-1,0,0,0,100,100,9,0,1,3.5,3,5,100,100,0,1
+Style: Anio,{fuente},54,&H0073C8FF,&H0073C8FF,&H00101010,&H80000000,-1,0,0,0,100,100,14,0,1,3,2,5,100,100,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -243,7 +264,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             tiempos = repartir(" ".join(w for w, _ in palabras), loc.duracion)
         if f.grande:
             texto = " ".join(_colorear(w.upper(), c) for w, c in palabras)
-            ev.append(f"Dialogue: 1,{_t(ini)},{_t(ini + loc.duracion + 0.4)},Grande,,0,0,0,,{{\\fad(250,300)}}{texto}")
+            ev.append(f"Dialogue: 1,{_t(ini)},{_t(ini + loc.duracion + 0.4)},Grande,,0,0,0,,{{\\q0\\fad(250,300)}}{texto}")
             continue
         grupos, actual = [], []
         for k, (w, c) in enumerate(palabras):
@@ -368,7 +389,8 @@ def renderizar(g: Guion, carpeta: Path, cache: Path, procesos: int | None = None
             info = sondear(ruta)
             libre = max(0.0, info["duracion"] - tr.dur - 0.6)
             desde = 0.3 + libre * 0.35
-            trabajos.append((str(ruta), desde, tr.dur, tmp / f"t{k:04d}.mp4", hash((g.id, k)) & 0xFFFF))
+            n = int(round((tr.inicio + tr.dur) * FPS)) - int(round(tr.inicio * FPS))  # suma exacta de fotogramas
+            trabajos.append((str(ruta), desde, tr.dur, tmp / f"t{k:04d}.mp4", hash((g.id, k)) & 0xFFFF, n))
             registro.append({"idioma": idioma, "inicio": round(tr.inicio, 2), "dur": round(tr.dur, 2),
                              "frase": todas[fi].texto["en"][:70], "clip": c.pagina or c.clave})
         with mp.get_context("fork").Pool(procesos or os.cpu_count() or 2) as pool:
@@ -387,12 +409,12 @@ def renderizar(g: Guion, carpeta: Path, cache: Path, procesos: int | None = None
         ass.write_text(subtitulos(ln, nombre_fuente), encoding="utf-8")
         mp4 = carpeta / f"{g.nombre(idioma)}.mp4"
         kbps = int(min(6000, 86e6 * 8 / ln.duracion / 1000 - 200))  # siempre por debajo de ~90 MB
-        filtros = (f"trim=duration={ln.duracion:.3f},setpts=PTS-STARTPTS,vignette=angle=PI/5:mode=forward,"
+        filtros = (f"tpad=stop_mode=clone:stop_duration=1,trim=duration={ln.duracion:.3f},setpts=PTS-STARTPTS,vignette=angle=PI/5:mode=forward,"
                    f"noise=alls=5:allf=t,drawbox=x=0:y=0:w=iw:h={FRANJA}:color=black:t=fill,"
                    f"drawbox=x=0:y=ih-{FRANJA}:w=iw:h={FRANJA}:color=black:t=fill,"
                    f"ass={ass}:fontsdir={Path(archivo_fuente).parent},format=yuv420p")
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(base), "-i", str(wav), "-map", "0:v:0", "-map", "1:a:0",
-                        "-vf", filtros, "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-tune", "film",
+                        "-vf", filtros, "-c:v", "libx264", "-profile:v", "high", "-preset", "medium", "-tune", "film",
                         "-crf", "20", "-maxrate", f"{kbps}k", "-bufsize", f"{2 * kbps}k", "-pix_fmt", "yuv420p",
                         "-r", str(FPS), "-fps_mode", "cfr", "-color_primaries", "bt709", "-color_trc", "bt709",
                         "-colorspace", "bt709", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",

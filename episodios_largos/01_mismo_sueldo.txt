@@ -48,44 +48,62 @@ lugar: casa
 
 en: Mark and Sarah had just signed their first lease.
 es: Marcos y Sara acababan de firmar su primer contrato de alquiler.
-clip: hands signing contract | signing document pen
+clip: signing lease contract pen | apartment keys handover | signing document pen
 quien: pareja
 lugar: casa
 
 en: Same job title. Same paycheck.
 es: Mismo puesto. Mismo sueldo.
-clip: counting money hands | paycheck money
+clip: counting money cash | paycheck salary money
 quien: nadie
 lugar: oficina
 
 en: That night, Sarah opened a small notebook and wrote one line: {+save first}.
 es: Esa noche, Sara abrió una libreta pequeña y escribió una sola línea: {+ahorra primero}.
-clip: woman hands writing notebook | writing notebook pen table
+clip: writing notebook pen night | notebook handwriting desk lamp | planner writing pen
 quien: sarah
 lugar: casa
 
 en: Mark laughed. "We just got here," he said. "Let's wait for the {!perfect moment}."
 es: Marcos se rió. "Acabamos de llegar", dijo. "Esperemos el {!momento perfecto}."
-clip: man sofa phone living room | man watching tv sofa
+clip: man sofa television remote | couple sofa living room evening | man couch phone
 quien: mark
 lugar: casa
 
 en: She didn't argue. She just placed a {+red mug} on the shelf… and dropped a few coins in it.
 es: Ella no discutió. Solo puso una {+taza roja} en la estantería… y dejó caer unas monedas.
-clip: coins jar hands | dropping coins jar
+clip: coins jar saving | dropping coins jar | piggy bank coins
 quien: sarah
 lugar: cocina
 
 en: Every month, the same {+small habit}.
 es: Cada mes, el mismo {+pequeño hábito}.
-clip: coins saving jar | calendar pages
+clip: calendar pages flipping | calendar month planner | coins stack saving
 quien: nadie
 lugar: casa
 
 en: And every month, Mark found a new reason to wait.
 es: Y cada mes, Marcos encontraba una nueva razón para esperar.
-clip: online shopping laptop credit card | man shopping online laptop
+clip: online shopping laptop credit card | shopping online laptop
 quien: mark
+lugar: casa
+
+en: A new phone. A weekend trip. A {-credit card} he swore he'd pay off next month.
+es: Un teléfono nuevo. Un viaje de fin de semana. Una {-tarjeta de crédito} que juró pagar el mes siguiente.
+clip: credit card payment terminal | paying credit card shop | new smartphone box unboxing
+quien: mark
+lugar: tienda
+
+en: Sarah kept writing in her notebook. Small numbers. Every single week.
+es: Sara siguió escribiendo en su libreta. Números pequeños. Cada semana.
+clip: notebook writing numbers calculator | budget planner writing | writing notebook pen
+quien: sarah
+lugar: casa
+
+en: Nobody noticed. Not even Mark.
+es: Nadie lo notó. Ni siquiera Marcos.
+clip: apartment window evening city | window city lights night
+quien: nadie
 lugar: casa
 
 en: But that first year, there was one decision nobody saw coming…

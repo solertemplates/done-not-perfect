@@ -57,8 +57,23 @@ class Candidato:
         return f"{self.fuente}-{self.id}"
 
 
+GENERICOS = {"man", "woman", "men", "women", "person", "people", "hand", "hands", "girl", "boy", "guy", "lady", "young",
+             "adult", "close", "up", "closeup", "view", "background", "footage", "video", "her", "his", "him"}
+VACIAS = {"of", "the", "a", "an", "and", "with", "in", "on", "at", "to", "for", "from", "by"}
+
+
+def _singular(w: str) -> str:
+    if len(w) > 4 and w.endswith("ies"):
+        return w[:-3] + "y"
+    if len(w) > 3 and w.endswith("es") and w[-3] in "sxz":
+        return w[:-2]
+    if len(w) > 3 and w.endswith("s") and not w.endswith("ss"):
+        return w[:-1]
+    return w
+
+
 def _palabras(texto: str) -> set:
-    return {w for w in re.split(r"[^a-z0-9]+", texto.lower()) if w}
+    return {_singular(w) for w in re.split(r"[^a-z0-9]+", texto.lower()) if w}
 
 
 class Buscador:
@@ -160,12 +175,15 @@ class Buscador:
             return None
         if quien == "mark" and palabras_tags & MUJER and not palabras_tags & HOMBRE:
             return None
-        clave = _palabras(consulta)
+        todas = _palabras(consulta) - VACIAS
+        clave = todas - {_singular(g) for g in GENERICOS}  # lo importante: objetos, acciones, lugares
         coinciden = len(clave & palabras_tags)
-        if coinciden == 0:
-            return None  # sin relación con lo que dice la voz: mejor un plano neutro
+        hace_falta = 1 if len(clave) <= 1 else 2
+        if coinciden < hace_falta:
+            return None  # no muestra lo que dice la voz: mejor un plano neutro del lugar
+        genericas = len((todas - clave) & palabras_tags)
         extra = len(_palabras(CONTINUIDAD.get(quien, "")) & palabras_tags)
-        return coinciden * 10 + extra * 4 + np.log1p(c.popularidad) + min(c.duracion, 20) * 0.1
+        return coinciden * 12 + genericas * 3 + extra * 4 + np.log1p(c.popularidad) + min(c.duracion, 20) * 0.1
 
     # ------------------------------------------------------------- descargar
     def descargar(self, c: Candidato) -> Path:

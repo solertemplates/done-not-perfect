@@ -421,8 +421,8 @@ def renderizar(g: Guion, carpeta: Path, cache: Path, procesos: int | None = None
                         "-colorspace", "bt709", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
                         "-t", f"{ln.duracion:.3f}", "-movflags", "+faststart", str(mp4)], check=True)
         mini = carpeta / f"{g.nombre(idioma)}_miniatura.png"
-        miniatura(mp4, mini, g.cabecera.get(f"miniatura_{idioma}", g.cabecera.get(f"titulo_{idioma}", "")),
-                  archivo_fuente)
+        miniatura(base, mini, g.cabecera.get(f"miniatura_{idioma}", g.cabecera.get(f"titulo_{idioma}", "")),
+                  archivo_fuente)  # del plano limpio, sin subtítulos
         salida[idioma] = {"mp4": mp4, "miniatura": mini, "linea": ln, "musica": titulos_musica}
         print(f"✔ {mp4.name}: {ln.duracion:.1f} s, {mp4.stat().st_size / 1e6:.1f} MB")
     (carpeta / f"{g.id}_clips.json").write_text(json.dumps(registro, ensure_ascii=False, indent=1), encoding="utf-8")

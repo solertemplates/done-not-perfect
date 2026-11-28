@@ -233,6 +233,10 @@ class Buscador:
             img = fotograma(ruta, info["duracion"] * f, 640, 360)
             if img is None:
                 continue
+            r, g, b = (img[..., i].astype(int) for i in range(3))
+            if ((g > 170) & (r < 110) & (b < 110)).mean() > 0.02:
+                ok, motivo = False, "pantalla verde (croma)"
+                break
             gris = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
             caras = [c for d in detectores for c in d.detectMultiScale(gris, 1.12, 5, minSize=(30, 30))]
             caras += [c for d in detectores[1:] for c in d.detectMultiScale(cv2.flip(gris, 1), 1.12, 5, minSize=(30, 30))]

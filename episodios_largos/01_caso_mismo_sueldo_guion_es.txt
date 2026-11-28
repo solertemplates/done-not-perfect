@@ -1,0 +1,289 @@
+# CASO 01 — Marcos y Sara. Casos de dinero (estilo true crime). Historia ficticia, dramatizada con fines educativos.
+# Página: Un rato con Rene. Aquí va solo el texto; lo que se ve sale del guion en inglés, frase a frase.
+titulo: Mismo sueldo, otra vida
+expediente: CASO 01: MISMO SUELDO
+ciudad: Portland, Oregón
+miniatura: MISMO SUELDO. OTRA VIDA.
+siguiente: CASO 02: MISMA EDAD
+pregunta: Dos amigos, la misma edad. Una decisión a los 25 partió sus vidas en dos.
+
+
+== GANCHO
+
+texto: Marzo de 2024. Portland, Oregón. Dos expedientes sobre la mesa.
+rotulo: PORTLAND · MARZO 2024
+
+texto: Mismo sueldo. Misma ciudad. La misma línea de salida.
+
+texto: Diez años después, una es {+libre}…
+
+texto: …y el otro debe {-cuarenta y un mil dólares}.
+
+texto: Todo se reduce a una pequeña decisión, tomada un {!martes lluvioso}.
+
+
+== CAPITULO 1 | LA PROMESA | 2014
+
+texto: Para entender este caso, hay que volver atrás. Diez años atrás.
+
+texto: Octubre de 2014. Un apartamento diminuto de alquiler, al este de Portland.
+rotulo: OCTUBRE 2014
+
+texto: Marcos y Sara acababan de firmar su primer contrato de alquiler.
+
+texto: Trabajaban en la misma empresa de logística, con el mismo puesto.
+
+texto: El mismo sueldo: tres mil doscientos dólares al mes.
+evidencia: NÓMINA · 3.200 $ / MES
+
+texto: Sobre el papel, eran idénticos.
+
+texto: La misma edad: veintiséis. El alquiler a medias: novecientos dólares cada uno.
+rotulo: ALQUILER · 900 $ CADA UNO
+
+texto: Los mismos coches viejos. Los mismos préstamos de estudios. El mismo sueño de comprar una casa algún día.
+
+texto: Si hubieras mirado sus cuentas esa semana, no habrías sabido distinguirlos.
+
+texto: Pero esa primera noche pasó algo que nadie apuntó… salvo Sara.
+
+texto: Abrió una libreta pequeña y escribió una sola línea.
+
+texto: “{+Primero me pago a mí}. Cada día de cobro. Pase lo que pase.”
+
+texto: Marcos se rió. “Acabamos de llegar”, dijo. “Esperemos el {!momento perfecto}.”
+
+texto: Sara no discutió.
+
+texto: Puso una {+taza roja} en la estantería de la cocina y dejó caer unas monedas.
+
+texto: Doce dólares con cuarenta centavos.
+rotulo: 12,40 $
+
+texto: Parecía nada. Los investigadores lo llaman una pequeña pista. {!Fácil de pasar por alto}.
+
+texto: El sueldo llegaba cada dos semanas.
+
+texto: Y cada día de cobro, antes de pagar nada, Sara pasaba {+doscientos dólares} a otra cuenta.
+evidencia: TRANSFERENCIA · 200 $ · CADA COBRO
+
+texto: No era una fortuna. Solo un {+hábito}.
+
+texto: Algunos meses dolía. Se perdió un concierto. Tomó el autobús en vez de un taxi.
+
+texto: Pero nunca se saltó la transferencia. Ni una vez en el primer año.
+
+texto: Marcos tenía otro plan.
+
+texto: Empezaría a ahorrar {!más adelante}. Cuando ganara más. Cuando las cosas se calmaran.
+
+texto: Recuerda esa palabra: {!más adelante}. En este caso, resultó ser la palabra más cara de todas.
+
+texto: Pero la primera grieta de esta historia no fue una factura. Fue un {-regalo que Marcos se hizo}.
+
+
+== CAPITULO 2 | LA PRIMERA GRIETA | 2016
+
+texto: Primavera de 2016. Marcos consiguió una pequeña subida: noventa dólares al mes.
+rotulo: ABRIL 2016 · +90 $ / MES
+
+texto: Esa misma semana, entró en un concesionario.
+
+texto: Un todoterreno nuevo. Brillante. Con olor a cuero.
+
+texto: El vendedor dijo las palabras mágicas: “{-solo cuatrocientos doce al mes}”.
+evidencia: PRÉSTAMO DEL COCHE · 412 $ × 72 MESES
+
+texto: Setenta y dos meses. {-Seis años}.
+
+texto: Marcos se lo llevó a casa esa misma tarde. Sentía que por fin lo había conseguido.
+
+texto: La subida era de noventa dólares. La cuota, de cuatrocientos doce. Marcos no hizo la cuenta.
+
+texto: Para tapar el hueco, sacó su {-primera tarjeta de crédito}.
+
+texto: Cenas fuera, casi todos los viernes.
+
+texto: Un {-móvil nuevo} que en realidad no necesitaba.
+
+texto: Un fin de semana en Seattle, pagado a cuatro plazos.
+
+texto: Cada cosa parecía pequeña. Pero {-cada una traía una cuota mensual}.
+
+texto: Mientras tanto, en la cocina, la {+taza roja} estaba llena.
+
+texto: Sara la vació en un tarro de cristal con una palabra en la etiqueta: {+emergencia}.
+evidencia: TARRO DE CRISTAL · ETIQUETA: “EMERGENCIA”
+
+texto: Y volvió a empezar. La misma taza. Las mismas monedas.
+
+texto: Algunos amigos decían que era aburrida.
+
+texto: Cuando el grupo planeó un viaje a Las Vegas, Sara dijo que no.
+
+texto: Marcos dijo que sí, y cargó el hotel a la tarjeta.
+
+texto: “No soy aburrida. Solo voy {+adelantada}.”
+
+texto: Diciembre de 2016. Los ahorros de Sara: {+cuatro mil ochocientos dólares}.
+rotulo: DICIEMBRE 2016 · +4.800 $
+
+texto: El saldo de la tarjeta de Marcos: {-dos mil novecientos}.
+rotulo: DICIEMBRE 2016 · −2.900 $
+
+texto: Mismo sueldo. {!Dos direcciones}.
+
+texto: Y entonces, en 2018, llegó una carta que solo uno de los dos podía permitirse abrir.
+
+
+== CAPITULO 3 | LAS PRUEBAS | 2018
+
+texto: Febrero de 2018. La empresa anunció recortes.
+rotulo: FEBRERO 2018
+
+texto: Un tercio menos de horas. Para todos.
+evidencia: CIRCULAR DE LA EMPRESA · −33 % DE HORAS
+
+texto: El mismo sueldo acababa de convertirse en el mismo {!recorte}.
+
+texto: Aquí es donde los dos expedientes empiezan a ser muy distintos.
+
+texto: Sara abrió el tarro, y su cuenta de ahorro. {+Siete meses de gastos}.
+
+texto: No entró en pánico. Cocinó en casa, recortó gastos y esperó.
+
+texto: Marcos abrió su correo.
+
+texto: Cuota del coche: cuatrocientos doce. Mínimo de la tarjeta: ciento noventa. Tarifa del móvil: ochenta y cinco.
+evidencia: FACTURAS · 412 $ + 190 $ + 85 $
+
+texto: Así que hizo lo que hace tanta gente. {-Pagó una tarjeta con otra tarjeta}.
+
+texto: Los investigadores tienen un nombre para esto. Se llama {!espiral de deuda}.
+
+texto: No empieza con un gran error. Empieza con muchos {-pequeños síes}.
+
+texto: Sí a la mejora. Sí a la comida a domicilio. Sí a “ya lo arreglo el mes que viene”.
+
+texto: Cada “sí” parecía libertad. Juntos, se convirtieron en una {-jaula}.
+
+texto: Diciembre de 2018. Marcos debía {-once mil dólares}.
+rotulo: DICIEMBRE 2018 · −11.000 $
+
+texto: ¿Y Sara? Seguía echando monedas en la {+taza roja}.
+
+texto: Pero este expediente guarda una pista más: una página dentro de la libreta de Sara.
+evidencia: LIBRETA DE SARA · PÁGINA 1
+
+texto: No era un presupuesto. Era una lista. Tres reglas.
+
+texto: “Una: {+primero págate a ti}.”
+
+texto: “Dos: {+ninguna cuota que dure más que lo que compras}.”
+
+texto: “Tres: {+espera treinta días antes de cualquier compra grande}.”
+
+texto: Esa tercera regla había salvado a Sara más de una vez.
+
+texto: En 2017 quería un portátil nuevo. Esperó treinta días. El viejo seguía funcionando. Se lo quedó.
+
+texto: Reglas sencillas. Reglas aburridas. De las que ganan despacio.
+
+texto: No en un día. No en un mes. Pero con {+constancia y disciplina}, sucede.
+
+texto: Marcos estaba a punto de tomar la decisión que lo cambió todo. Pero no como imaginas.
+
+
+== CAPITULO 4 | EL GIRO | 2020
+
+texto: Junio de 2020. Marcos estaba solo en su coche, en un aparcamiento vacío.
+rotulo: JUNIO 2020
+
+texto: La cifra en la pantalla del móvil: {-veintitrés mil dólares}.
+rotulo: JUNIO 2020 · −23.000 $
+
+texto: Esa noche hizo algo que llevaba seis años evitando.
+
+texto: Llamó a la puerta de Sara.
+
+texto: No para pedir dinero. {+Para pedir la libreta}.
+
+texto: “No hay momento perfecto, Marcos. Solo está {+el próximo cobro}.”
+
+texto: Así que empezó. Mal. {+Imperfecto}. Pero empezó.
+
+texto: Vendió el todoterreno y compró un coche usado, {+pagado al contado}.
+evidencia: CONTRATO DE VENTA · COCHE USADO · 6.500 $ AL CONTADO
+
+texto: {+Cortó dos tarjetas de crédito}.
+
+texto: Escribió cada deuda en un papel, de la más pequeña a la más grande.
+
+texto: Primer objetivo: la tarjeta de la tienda. Seiscientos cuarenta dólares.
+rotulo: OBJETIVO 1 · 640 $
+
+texto: Le costó tres meses. Cuando llegó a cero, escribió una palabra al lado: {+hecho}.
+
+texto: Luego la siguiente. Y la siguiente.
+
+texto: Y en la estantería de su propia cocina, puso una taza.
+
+texto: No era roja. Daba igual.
+
+texto: ¿Recuerdas la pista que te dijimos que vigilaras? Aquí está.
+
+texto: La decisión que lo cambió todo no fue una subida. No fue suerte. No fue un plan perfecto.
+
+texto: Fue aquella primera noche de 2014: {+págate primero, antes que nada}.
+
+texto: Marcos tomó la misma decisión seis años después. {!Seis años tarde}. Pero la tomó.
+
+texto: {+Hecho, no perfecto}.
+
+texto: ¿Y dónde están ahora? La última página de este expediente se escribió en marzo de 2024.
+
+
+== CAPITULO 5 | EL VEREDICTO | 2024
+
+texto: Marzo de 2024. Diez años después de aquel primer contrato.
+rotulo: MARZO 2024
+
+texto: Sara tiene {+un año de gastos ahorrado}, ninguna deuda y una casita propia.
+
+texto: Todavía tiene la {+taza roja}. Ahora sirve para el café.
+
+texto: Marcos ha pagado {+dieciocho mil dólares}.
+rotulo: MARZO 2024 · QUEDAN 5.000 $
+
+texto: Aún debe cinco mil. No ha terminado.
+
+texto: “Perdí seis años esperando el momento perfecto”, dice. “No voy a perder ni un día más.”
+
+texto: Pero por primera vez en diez años, sus números van {+en la dirección correcta}.
+
+texto: Dos personas. Mismo sueldo. Misma ciudad.
+
+texto: La diferencia entre ellos nunca fueron los ingresos.
+
+texto: Fue {+lo pronto} que empezaron, y {+la constancia} con la que siguieron.
+
+texto: Doscientos dólares cada cobro no parece mucho.
+
+texto: Pero diez años de cobros, sin saltarse ni uno, es lo que marcó la diferencia en este caso.
+
+
+== FINAL
+
+texto: El caso 01 está cerrado. Esta es la lección.
+
+texto: No necesitas un momento perfecto. Necesitas un {+primer paso} y la {+disciplina} para repetirlo.
+
+texto: No en un día. No en un mes. Pero con {+constancia y disciplina}, sucede.
+
+texto: ¿Cuál va a ser tu taza roja? Cuéntanos en los comentarios por dónde vas a empezar.
+
+texto: Próximo caso: dos amigos. La misma edad. El mismo instituto.
+
+texto: A los veinticinco, uno tomó una decisión de la que el otro se rió.
+
+texto: Quince años después, {!nadie se ríe}.

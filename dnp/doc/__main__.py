@@ -1,6 +1,6 @@
 """Vídeos largos estilo documental.
 
-    python -m dnp.doc episodios_largos/01_mismo_sueldo.txt --destino salida/largos_videos
+    python -m dnp.doc episodios_largos/01_caso_mismo_sueldo_guion_en.txt --destino salida/largos_videos
     python -m dnp.doc --todos --solo-validar
 
 Los errores (y los avisos, por ejemplo si Edge TTS falló y se usó Piper) van a
@@ -10,13 +10,14 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import sys
 import traceback
 from pathlib import Path
 
 from ..config import ErrorConfig
-from .guion import cargar
+from .guion import cargar, pareja
 
 RAIZ = Path(__file__).resolve().parents[2]
 CACHE = Path(os.environ.get("DNP_CACHE", Path.home() / ".cache" / "dnp"))
@@ -43,6 +44,9 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, solo_prue
         nombre = os.path.relpath(ruta, RAIZ) if ruta.is_absolute() else str(ruta)
         try:
             g = cargar(ruta)
+            if g.modo == "borrador":
+                print(f"📝 {nombre}: borrador (guion válido, no se renderiza todavía)")
+                continue
             if solo_prueba:
                 g.modo = "prueba"
             resultado = renderizar(g, salida / g.id, CACHE)
@@ -83,7 +87,7 @@ def procesar(archivos: list[Path], destino: Path | None, salida: Path, solo_prue
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Vídeos largos estilo documental (Mark y Sarah).")
+    ap = argparse.ArgumentParser(description="Vídeos largos estilo documental: Money Cases / Casos de dinero.")
     ap.add_argument("archivos", nargs="*")
     ap.add_argument("--todos", action="store_true")
     ap.add_argument("--destino", default=None)
@@ -94,7 +98,13 @@ def main(argv=None):
     archivos = [Path(a) for a in args.archivos if a.strip().endswith(".txt")]
     if args.todos or not archivos:
         archivos = sorted((RAIZ / "episodios_largos").glob("*.txt"))
-    archivos = [a for a in archivos if a.exists()]
+    casos = {}  # cada caso son dos archivos (_en y _es): se procesa una sola vez
+    for a in archivos:
+        if a.exists() and re.search(r"_(en|es)$", a.stem):
+            casos.setdefault(pareja(a)[0], a)
+        elif a.exists():
+            print(f"⚠ {a.name}: los guiones largos se llaman NN_caso_<nombre>_guion_en.txt / _es.txt; se ignora.")
+    archivos = list(casos)
     if not archivos:
         print("No hay vídeos largos que procesar.")
         return 0

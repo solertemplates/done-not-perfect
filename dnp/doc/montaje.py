@@ -27,7 +27,7 @@ from PIL import Image, ImageDraw, ImageFont
 from .clips import Buscador, sondear
 from .guion import Guion
 from .musica import Discoteca
-from .voz import PAUSA, SR, Narrador
+from .voz import OBJETIVO_PPM, PAUSA, SR, Narrador
 
 ANCHO, ALTO, FPS = 1920, 1080, 30
 MARGEN = 1.10  # el clip se decodifica un 10 % más grande para poder moverse sin bordes
@@ -36,8 +36,10 @@ DUR_PRUEBA = 60.0
 FRANJA = 40  # franjas de cine arriba y abajo (px)
 COLORES_ASS = {"verde": "&H6EFF3C&", "rojo": "&H3C28FF&", "amarillo": "&H00D6FF&"}
 TEXTOS = {
-    "en": {"capitulo": "CHAPTER", "anio": "YEAR", "sigue": "To be continued…"},
-    "es": {"capitulo": "CAPÍTULO", "anio": "AÑO", "sigue": "Continuará…"},
+    "en": {"capitulo": "CHAPTER", "anio": "YEAR", "sigue": "To be continued…", "evidencia": "EVIDENCE",
+           "siguiente": "NEXT CASE"},
+    "es": {"capitulo": "CAPÍTULO", "anio": "AÑO", "sigue": "Continuará…", "evidencia": "EVIDENCIA",
+           "siguiente": "PRÓXIMO CASO"},
 }
 
 
@@ -105,9 +107,16 @@ class Linea:
     idioma: str
     frases: list  # (frase, locucion, inicio)
     trozos: list[Trozo]
-    titulos: list  # (inicio, texto1, texto2)
+    titulos: list  # (inicio, texto1, texto2): títulos de capítulo
     duracion: float
-    secciones: list  # (inicio, ambiente de música)
+    secciones: list  # (inicio, ambiente): cada entrada empieza una música nueva (como mucho 20 s)
+    tarjetas: list = None  # (inicio, duración, tipo, [líneas]): expediente del caso y "siguiente caso"
+    evidencias: list = None  # (inicio, duración, texto)
+    rotulos: list = None  # (inicio, duración, texto)
+
+
+MAX_MUSICA = 20.0  # ninguna música dura más de 20 s
+PAUSA_CASO = 3.2  # tiempo (solo música) para el rótulo del expediente antes del capítulo 1
 
 
 def partir(span: float) -> list[float]:
@@ -117,30 +126,83 @@ def partir(span: float) -> list[float]:
     return [span / n] * n
 
 
-def linea_de_tiempo(g: Guion, idioma: str, narrador: Narrador, hasta: float | None) -> Linea:
+def _cues(inicios_seccion, frases_t, fin) -> list[tuple[float, str]]:
+    """Músicas: empiezan en cada sección y donde el guion pone 'musica'; si una pasaría de 20 s,
+    se cambia en la frase (escena) más cercana antes de llegar a los 20 s."""
+    marcas = sorted(set(inicios_seccion) | {(t, m) for t, m in frases_t if m})
+    cues: list[tuple[float, str]] = []
+    for t, m in marcas:
+        if cues and abs(cues[-1][0] - t) < 0.01:
+            cues[-1] = (t, m)
+        else:
+            cues.append((t, m))
+    escenas = sorted({t for t, _ in frases_t})
+    out: list[tuple[float, str]] = []
+    for k, (t, m) in enumerate(cues):
+        t1 = cues[k + 1][0] if k + 1 < len(cues) else fin
+        out.append((t, m))
+        actual = t
+        while t1 - actual > MAX_MUSICA:
+            corte = max([e for e in escenas if actual + 6 <= e <= actual + MAX_MUSICA] or [actual + MAX_MUSICA])
+            out.append((corte, m))
+            actual = corte
+    return out
+
+
+def linea_de_tiempo(g: Guion, idioma: str, narradores, hasta: float | None) -> Linea:
+    """`narradores`: {papel: Narrador} (narrador y sarah) o un solo Narrador para todo."""
+    if not isinstance(narradores, dict):
+        narradores = {"narrador": narradores, "sarah": narradores}
     t = 0.0
-    frases, trozos, titulos, secciones = [], [], [], []
+    frases, trozos, titulos, tarjetas, evidencias, rotulos = [], [], [], [], [], []
+    inicios, marcas_frase = [], []
     todas = g.frases()
+    tx = TEXTOS[idioma]
+    n_evidencia = 0
+
+    def cerrar(fin):
+        ln = Linea(idioma, frases, trozos, titulos, fin, [], tarjetas, evidencias, rotulos)
+        ln.secciones = _cues(inicios, marcas_frase, fin)
+        return ln
+
     for si, sec in enumerate(g.secciones):
-        secciones.append((t, sec.musica))
+        inicios.append((t, sec.musica))
         for fi, f in enumerate(sec.frases):
-            loc = narrador.decir(f.limpio(idioma))
+            loc = narradores[f.voz[idioma]].decir(f.limpio(idioma))
             extra = 0.0
             if fi == 0 and sec.tipo == "capitulo":
-                tx = TEXTOS[idioma]
-                titulos.append((t, f"{tx['capitulo']} {sec.numero}: {sec.titulo[idioma].upper()}",
+                if sec.numero == min(s.numero for s in g.secciones if s.tipo == "capitulo"):
+                    lineas = [g.cab(idioma, "expediente", g.id.upper()),
+                              " · ".join(x for x in (g.cab(idioma, "ciudad"), g.cab(idioma, "anio")) if x)]
+                    tarjetas.append((t, PAUSA_CASO, "caso", lineas))
+                    extra += PAUSA_CASO
+                titulos.append((t + extra, f"{tx['capitulo']} {sec.numero}: {sec.titulo[idioma].upper()}",
                                 f"{tx['anio']} {sec.anio}"))
-                extra = PAUSA_CAPITULO
+                extra += PAUSA_CAPITULO
             span = extra + loc.duracion + PAUSA
             if hasta is not None and t + span > hasta - 0.2:
-                return _rellenar(Linea(idioma, frases, trozos, titulos, hasta, secciones), t, todas)
-            frases.append((f, loc, t + extra))
+                return _rellenar(cerrar(hasta), t, todas)
+            ini = t + extra
+            frases.append((f, loc, ini))
+            marcas_frase.append((t, f.musica))
+            if f.evidencia.get(idioma):
+                n_evidencia += 1
+                evidencias.append((ini, loc.duracion + PAUSA, f"{tx['evidencia']} #{n_evidencia:02d} · "
+                                                              f"{f.evidencia[idioma].upper()}"))
+            if f.rotulo.get(idioma):
+                rotulos.append((ini, loc.duracion + PAUSA, f.rotulo[idioma].upper()))
             for k, d in enumerate(partir(span)):
                 trozos.append(Trozo(t + sum(partir(span)[:k]), d, todas.index(f), k))
             t += span
+        if sec.tipo == "final" and hasta is None:
+            sig = g.cab(idioma, "siguiente")
+            if sig:  # "Siguiente caso" al final, con la música de cierre
+                tarjetas.append((t, 4.5, "siguiente", [tx["siguiente"], sig.upper()]))
+                trozos.append(Trozo(t, 4.5, todas.index(sec.frases[-1]), len(partir(span))))
+                t += 4.5
     if hasta is not None:
-        return _rellenar(Linea(idioma, frases, trozos, titulos, hasta, secciones), t, todas)
-    return Linea(idioma, frases, trozos, titulos, t + 1.5, secciones)
+        return _rellenar(cerrar(hasta), t, todas)
+    return cerrar(t + 1.0)
 
 
 def _rellenar(ln: Linea, t: float, todas) -> Linea:
@@ -231,7 +293,7 @@ def _limpiar(w: str) -> str:
     return w.replace("{", "").replace("}", "").replace("\\", "")
 
 
-def subtitulos(linea: Linea, fuente: str) -> str:
+def subtitulos(linea: Linea, fuente: str, fina: str | None = None) -> str:
     """Subtítulos ASS: grupos de hasta 4 palabras; la palabra que suena se ilumina y crece."""
     cab = f"""[Script Info]
 ScriptType: v4.00+
@@ -244,13 +306,28 @@ ScaledBorderAndShadow: yes
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Sub,{fuente},82,&H00FFFFFF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,1,0,1,4.5,2,2,120,120,{FRANJA + 70},1
 Style: Grande,{fuente},84,&H00FFFFFF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,2,0,1,5,3,5,160,160,0,1
-Style: Titulo,{fuente},88,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,-1,0,0,0,100,100,9,0,1,3.5,3,5,100,100,0,1
-Style: Anio,{fuente},54,&H0073C8FF,&H0073C8FF,&H00101010,&H80000000,-1,0,0,0,100,100,14,0,1,3,2,5,100,100,0,1
+Style: Titulo,{fina},74,&H00FFFFFF,&H00FFFFFF,&H00101010,&H78000000,0,0,0,0,100,100,16,0,1,1.2,2,5,100,100,0,1
+Style: Anio,{fina},42,&H0073C8FF,&H0073C8FF,&H00101010,&H78000000,0,0,0,0,100,100,22,0,1,1,1.5,5,100,100,0,1
+Style: Caso,{fina},86,&H00FFFFFF,&H00FFFFFF,&H00101010,&H78000000,0,0,0,0,100,100,14,0,1,1.2,2,5,100,100,0,1
+Style: Evidencia,{fina},34,&H00FFFFFF,&H00FFFFFF,&H003C28FF,&H96000000,0,0,0,0,100,100,8,0,3,6,0,7,90,90,90,1
+Style: Rotulo,{fina},38,&H0073C8FF,&H0073C8FF,&H00101010,&H96000000,0,0,0,0,100,100,10,0,1,1.2,1.5,1,90,90,{FRANJA + 60},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+    fina = fina or fuente
     ev = []
+    for ini, dur, tipo, lineas in linea.tarjetas or []:
+        fin = ini + dur
+        ev.append(f"Dialogue: 2,{_t(ini + 0.2)},{_t(fin)},Caso,,0,0,0,,{{\\fad(500,500)\\pos({ANCHO // 2},{ALTO // 2 - 30})}}"
+                  f"{_limpiar(lineas[0])}")
+        if len(lineas) > 1 and lineas[1]:
+            ev.append(f"Dialogue: 2,{_t(ini + 0.7)},{_t(fin)},Anio,,0,0,0,,{{\\fad(500,500)\\pos({ANCHO // 2},{ALTO // 2 + 60})}}"
+                      f"{_limpiar(lineas[1])}")
+    for ini, dur, texto in linea.evidencias or []:
+        ev.append(f"Dialogue: 2,{_t(ini)},{_t(ini + dur)},Evidencia,,0,0,0,,{{\\fad(250,250)}}{_limpiar(texto)}")
+    for ini, dur, texto in linea.rotulos or []:
+        ev.append(f"Dialogue: 2,{_t(ini)},{_t(ini + dur)},Rotulo,,0,0,0,,{{\\fad(300,300)}}{_limpiar(texto)}")
     for ini, t1, t2 in linea.titulos:
         fin = ini + PAUSA_CAPITULO + 0.4
         ev.append(f"Dialogue: 2,{_t(ini + 0.15)},{_t(fin)},Titulo,,0,0,0,,{{\\fad(450,450)\\pos({ANCHO // 2},{ALTO // 2 - 40})}}{t1}")
@@ -298,7 +375,29 @@ def _colorear(w, c):
 
 
 # ================================================================== AUDIO
+# Volumen de cada ambiente (el suspense del gancho, igual que en la prueba aprobada; el piano, más bajo).
+GANANCIA_MUSICA = {"suspense": 1.0, "intriga": 0.85, "tension": 0.8, "epico": 0.7, "emotivo": 0.45, "esperanza": 0.55}
+SUELO = 0.06  # durante el respiro entre músicas queda un fondo muy bajo (nunca silencio total)
+SALIDA, RESPIRO, ENTRADA = 2.6, 0.8, 2.2  # segundos: la anterior se apaga, respiro, la siguiente entra
+
+
+def envolvente_musica(t: np.ndarray, t0: float, t1: float, primera: bool, ultima: bool) -> np.ndarray:
+    """Volumen de una música de t0 a t1: entra suave, se apaga despacio, respiro casi sin música."""
+    e = np.ones_like(t)
+    if not primera:
+        u = np.clip((t - t0) / ENTRADA, 0, 1)
+        e *= u * u * (3 - 2 * u)
+    if not ultima:
+        u = np.clip((t - (t1 - SALIDA)) / (SALIDA - RESPIRO), 0, 1)  # baja hasta el suelo
+        baja = 1 - (1 - SUELO) * (u * u * (3 - 2 * u))
+        cola = np.clip(1 - (t - t1) / 0.4, 0, 1)  # el suelo se va en 0,4 s cuando ya entra la siguiente
+        e *= np.where(t < t1, baja, SUELO * cola)
+    return e
+
+
 def mezcla(linea: Linea, discoteca: Discoteca, musicas_previas: dict) -> tuple[np.ndarray, list[str]]:
+    from .musica import ajustar
+
     n = int(round(linea.duracion * SR))
     voz = np.zeros(n, np.float32)
     for f, loc, ini in linea.frases:
@@ -307,31 +406,28 @@ def mezcla(linea: Linea, discoteca: Discoteca, musicas_previas: dict) -> tuple[n
         voz[i0:i0 + len(a)] += a
     pico = np.max(np.abs(voz)) + 1e-6
     voz = voz / pico * 0.85
-    # Música por secciones, con fundido de 2 s entre ambientes. La misma elección en los dos idiomas.
     musica = np.zeros((n, 2), np.float32)
     titulos = []
-    fund = int(2.0 * SR)
-    for k, (t0, ambiente) in enumerate(linea.secciones):
-        t1 = linea.secciones[k + 1][0] if k + 1 < len(linea.secciones) else linea.duracion
-        if t0 >= linea.duracion:
-            break
-        t1 = min(t1, linea.duracion)
-        ini = max(0.0, t0 - (2.0 if k else 0.0))
+    cues = [c for c in linea.secciones if c[0] < linea.duracion]
+    anterior = None
+    for k, (t0, ambiente) in enumerate(cues):
+        t1 = min(cues[k + 1][0] if k + 1 < len(cues) else linea.duracion, linea.duracion)
+        ultima = k == len(cues) - 1
+        fin = linea.duracion if ultima else min(linea.duracion, t1 + 0.4)
         clave = (k, ambiente)
-        if clave not in musicas_previas:  # la misma canción para esta sección en los dos idiomas
-            musicas_previas[clave] = discoteca.cancion(ambiente)
+        if clave not in musicas_previas:  # la misma canción en los dos idiomas
+            musicas_previas[clave] = discoteca.cancion(ambiente, evitar=anterior)
         cruda, titulo = musicas_previas[clave]
-        from .musica import ajustar
-
-        trozo = ajustar(cruda, t1 - ini)
-        if k:
-            trozo[:fund] *= np.linspace(0, 1, min(fund, len(trozo)))[:, None]
-        if t1 < linea.duracion:
-            trozo[-fund:] *= np.linspace(1, 0, min(fund, len(trozo)))[:, None]
-        i0 = int(round(ini * SR))
+        anterior = titulo
+        dur = fin - t0
+        desde = int((hash((titulo, k)) % 1000) / 1000 * max(0, len(cruda) / SR - dur - 5) * SR)  # otra parte si se repite
+        trozo = ajustar(cruda[desde:], dur)
+        t = t0 + np.arange(len(trozo)) / SR
+        trozo = trozo * (envolvente_musica(t, t0, t1, k == 0, ultima) * GANANCIA_MUSICA.get(ambiente, 0.8))[:, None]
+        i0 = int(round(t0 * SR))
         musica[i0:i0 + len(trozo)] += trozo[: n - i0]
         titulos.append(titulo)
-    # La música baja mientras habla la voz (envolvente suave).
+    # La música baja mientras habla la voz (la voz siempre por encima).
     habla = np.convolve((np.abs(voz) > 0.02).astype(np.float32), np.ones(int(0.35 * SR)) / int(0.35 * SR), "same")
     habla = np.clip(habla * 3, 0, 1)
     ganancia = 0.85 - 0.5 * habla
@@ -342,6 +438,12 @@ def mezcla(linea: Linea, discoteca: Discoteca, musicas_previas: dict) -> tuple[n
 
 
 # ================================================================== FUENTES
+def fuente_fina() -> str:
+    """Letra fina y moderna para títulos y rótulos (estilo documental): Montserrat Light."""
+    r = subprocess.run(["fc-match", "-f", "%{family}|%{style}", "Montserrat:style=Light"], capture_output=True, text=True)
+    return "Montserrat Light" if "montserrat" in r.stdout.lower() else "DejaVu Sans"
+
+
 def fuente(estilo: str = "ExtraBold") -> tuple[str, str]:
     """(nombre para ASS, archivo .ttf) de Montserrat; si no está instalada, DejaVu Sans Bold."""
     for nombre in ("Montserrat", "DejaVu Sans"):
@@ -354,18 +456,49 @@ def fuente(estilo: str = "ExtraBold") -> tuple[str, str]:
 
 
 # ================================================================== TODO JUNTO
+DUR_OBJETIVO = 540.0  # vídeo completo: unos 9 minutos
+
+
+def objetivo_ppm(g: Guion, idioma: str) -> float:
+    """Palabras por minuto para que el vídeo completo dure unos 9 min (prueba: el ritmo de siempre)."""
+    base = OBJETIVO_PPM * 1.06
+    if g.modo == "prueba":
+        return base
+    frases = g.frases()
+    palabras = sum(len(f.limpio(idioma).split()) for f in frases)
+    caps = sum(1 for sec in g.secciones if sec.tipo == "capitulo")
+    fijo = len(frases) * PAUSA + caps * PAUSA_CAPITULO + PAUSA_CASO + 5.5  # pausas, títulos y cierre
+    voz = max(60.0, DUR_OBJETIVO - fijo)
+    return max(150.0, min(195.0, palabras / voz * 60))
+
+
 def renderizar(g: Guion, carpeta: Path, cache: Path, procesos: int | None = None) -> dict:
     """Hace los vídeos en los dos idiomas. Devuelve {idioma: {mp4, miniatura, linea, musica, avisos}}."""
     carpeta.mkdir(parents=True, exist_ok=True)
     avisos: list[str] = []
     hasta = DUR_PRUEBA if g.modo == "prueba" else None
-    narradores = {i: Narrador(i, cache) for i in ("en", "es")}
     lineas = {}
-    for i, nar in narradores.items():
-        ppm, vel = nar.calibrar([f.limpio(i) for f in g.frases()])
-        print(f"🎙 {i}: {nar.voz}, {ppm:.0f} ppm con +0% → velocidad {vel}")
-        lineas[i] = linea_de_tiempo(g, i, nar, hasta)
-        avisos += [f"[{i}] {a}" for a in nar.avisos]
+    for i in ("en", "es"):
+        nars = {papel: Narrador(i, cache, papel) for papel in ("narrador", "sarah")}
+        ppm_obj = objetivo_ppm(g, i)
+        for papel, nar in nars.items():
+            textos = [f.limpio(i) for f in g.frases() if f.voz[i] == papel] or [f.limpio(i) for f in g.frases()]
+            ppm, vel = nar.calibrar(textos, ppm_obj)
+            print(f"🎙 {i}/{papel}: {nar.voz}, {ppm:.0f} ppm natural → {vel} (objetivo {ppm_obj:.0f} ppm)")
+        lineas[i] = linea_de_tiempo(g, i, nars, hasta)
+        for _ in range(2):  # la velocidad de Edge no es exacta: se corrige con la duración real (8:45-9:15)
+            if hasta is not None or abs(lineas[i].duracion - DUR_OBJETIVO) <= 15:
+                break
+            fijo = lineas[i].duracion - sum(loc.duracion for _, loc, _ in lineas[i].frases)
+            factor = (lineas[i].duracion - fijo) / max(60.0, DUR_OBJETIVO - fijo)
+            for nar in nars.values():
+                actual = 1 + int(nar.velocidad.rstrip("%")) / 100
+                nar.velocidad = f"{max(-25, min(35, int(round((actual * factor - 1) * 100)))):+d}%"
+            print(f"🎙 {i}: {lineas[i].duracion:.0f} s → reajuste a {nars['narrador'].velocidad}")
+            lineas[i] = linea_de_tiempo(g, i, nars, hasta)
+        print(f"⏱ {i}: {lineas[i].duracion:.1f} s")
+        for nar in nars.values():
+            avisos += [f"[{i}] {a}" for a in dict.fromkeys(nar.avisos)]
     # Clips: los mismos en los dos idiomas (hacen falta tantos como el idioma que más trozos tenga).
     buscador = Buscador(cache, avisos)
     todas = g.frases()
@@ -407,10 +540,10 @@ def renderizar(g: Guion, carpeta: Path, cache: Path, procesos: int | None = None
 
         guardar_wav(wav, pista)
         ass = tmp / "subs.ass"
-        ass.write_text(subtitulos(ln, nombre_fuente), encoding="utf-8")
+        ass.write_text(subtitulos(ln, nombre_fuente, fuente_fina()), encoding="utf-8")
         mp4 = carpeta / f"{g.nombre(idioma)}.mp4"
         kbps = int(min(6000, 86e6 * 8 / ln.duracion / 1000 - 200))  # siempre por debajo de ~90 MB
-        filtros = (f"tpad=stop_mode=clone:stop_duration=1,trim=duration={ln.duracion:.3f},setpts=PTS-STARTPTS,vignette=angle=PI/5:mode=forward,"
+        filtros = (f"tpad=stop_mode=clone:stop_duration=1,trim=duration={ln.duracion:.3f},setpts=PTS-STARTPTS,vignette=angle=PI/9:mode=forward,"
                    f"noise=alls=5:allf=t,drawbox=x=0:y=0:w=iw:h={FRANJA}:color=black:t=fill,"
                    f"drawbox=x=0:y=ih-{FRANJA}:w=iw:h={FRANJA}:color=black:t=fill,"
                    f"ass={ass}:fontsdir={Path(archivo_fuente).parent},format=yuv420p")
@@ -421,8 +554,7 @@ def renderizar(g: Guion, carpeta: Path, cache: Path, procesos: int | None = None
                         "-colorspace", "bt709", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
                         "-t", f"{ln.duracion:.3f}", "-movflags", "+faststart", str(mp4)], check=True)
         mini = carpeta / f"{g.nombre(idioma)}_miniatura.png"
-        miniatura(base, mini, g.cabecera.get(f"miniatura_{idioma}", g.cabecera.get(f"titulo_{idioma}", "")),
-                  archivo_fuente)  # del plano limpio, sin subtítulos
+        miniatura(base, mini, g.cab(idioma, "miniatura", g.cab(idioma, "titulo")), archivo_fuente)  # del plano limpio, sin subtítulos
         salida[idioma] = {"mp4": mp4, "miniatura": mini, "linea": ln, "musica": titulos_musica}
         print(f"✔ {mp4.name}: {ln.duracion:.1f} s, {mp4.stat().st_size / 1e6:.1f} MB")
     (carpeta / f"{g.id}_clips.json").write_text(json.dumps(registro, ensure_ascii=False, indent=1), encoding="utf-8")

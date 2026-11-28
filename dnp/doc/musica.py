@@ -37,6 +37,7 @@ class Discoteca:
         self.cache.mkdir(parents=True, exist_ok=True)
         self.usadas: list[str] = []
         self.fallos: list[str] = []
+        self._cache: dict = {}
 
     def _descargar(self, titulo: str) -> Path | None:
         destino = self.cache / f"{titulo}.mp3"
@@ -55,16 +56,22 @@ class Discoteca:
             self.fallos.append(f"{titulo}: {e}")
             return None
 
-    def cancion(self, ambiente: str) -> tuple[np.ndarray, str]:
-        """(audio estéreo decodificado, título) de una canción de ese ambiente que aún no se haya usado."""
-        for titulo in CANCIONES[ambiente] + [t for v in CANCIONES.values() for t in v]:
-            if titulo in self.usadas:
+    def cancion(self, ambiente: str, evitar: str | None = None) -> tuple[np.ndarray, str]:
+        """(audio, título) de una canción del ambiente: primero las que aún no han sonado, nunca la misma
+        que la anterior. Con muchas escenas, una canción puede volver más tarde (desde otra parte)."""
+        lista = CANCIONES[ambiente] + [t for v in CANCIONES.values() for t in v if t not in CANCIONES[ambiente]]
+        orden = [t for t in lista if t not in self.usadas] + [t for t in lista if t in self.usadas]
+        for titulo in orden:
+            if titulo == evitar:
                 continue
             ruta = self._descargar(titulo)
             if ruta is None:
                 continue
-            self.usadas.append(titulo)
-            return leer(ruta), titulo
+            if titulo not in self.usadas:
+                self.usadas.append(titulo)
+            if titulo not in self._cache:
+                self._cache[titulo] = leer(ruta)
+            return self._cache[titulo], titulo
         raise RuntimeError("No se pudo descargar música de incompetech.com: " + "; ".join(self.fallos[-4:]))
 
 

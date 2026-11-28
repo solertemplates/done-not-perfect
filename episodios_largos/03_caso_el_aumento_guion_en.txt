@@ -1,0 +1,227 @@
+# CASE 03 — Nina and Omar. Money Cases. Fictional story, dramatized for educational purposes.
+# DRAFT (modo: borrador): it is validated but not rendered. Expand to ~1,300 words and set modo: completo.
+id: caso03_el_aumento
+modo: borrador
+titulo: The Raise That Made Her Poorer
+expediente: CASE 03: THE RAISE
+ciudad: Denver, Colorado
+anio: 2017
+miniatura: BIGGER RAISE. LESS MONEY.
+producto: cash envelope wallet
+siguiente: CASE 04: THE INHERITANCE
+pregunta: He inherited fifty thousand dollars. Eighteen months later, it was gone.
+
+
+== GANCHO
+musica: suspense
+
+texto: Denver, 2019. A nurse earning {+more than ever}…
+clip: denver aerial | city aerial drone
+quien: nadie
+lugar: ciudad
+rotulo: DENVER · 2019
+
+texto: …opens her bank app and sees {-two hundred dollars}.
+clip: phone screen hand | smartphone screen
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+
+texto: Her colleague earns {!less}. And he has a year of savings.
+clip: hospital corridor | hospital building
+quien: nadie
+lugar: oficina
+
+texto: The thief in this case never broke a window. It walked in through the front door.
+clip: front door house | door
+objeto: door
+quien: nadie
+lugar: casa
+
+
+== CAPITULO 1 | THE PROMOTION | 2017
+musica: intriga
+
+texto: 2017. Nina and Omar worked nights at the same hospital.
+clip: hospital building night | hospital building
+quien: nadie
+lugar: oficina
+rotulo: DENVER · 2017
+
+texto: Same shifts. Same tired coffee at four in the morning.
+clip: coffee cup night | coffee cup
+objeto: coffee | coffee cup | cup
+quien: nadie
+lugar: cocina
+
+texto: Then Nina got promoted: {+eighteen thousand dollars more a year}.
+clip: documents desk | paperwork desk
+objeto: documents | paper | paperwork
+quien: nadie
+lugar: casa
+evidencia: PROMOTION LETTER · +$18,000 / YEAR
+
+texto: She celebrated. She deserved it. Nobody in this case is the villain.
+clip: celebration toast glasses | champagne toast
+objeto: glasses | champagne | toast
+quien: nadie
+lugar: ciudad
+
+texto: But that same month, something {!quietly} started to change.
+clip: city night traffic | city traffic night
+quien: nadie
+lugar: ciudad
+grande: si
+musica: tension
+
+
+== CAPITULO 2 | THE CREEP | 2018
+musica: tension
+
+texto: First, a nicer apartment. {-Four hundred more} a month. “I can afford it now.”
+clip: modern apartment interior | apartment interior
+quien: nadie
+lugar: casa
+rotulo: RENT · +$400 / MONTH
+
+texto: Then a lease on a new car.
+clip: new car interior | suv car
+objeto: car | suv
+quien: nadie
+lugar: tienda
+
+texto: Then gym, streaming, meal kits, a cleaner. Each one, a small monthly payment.
+clip: pile of bills | bills invoices
+objeto: bills | bill | invoice
+quien: nadie
+lugar: casa
+
+texto: Economists call it {-lifestyle inflation}. Investigators call it a slow leak.
+clip: water drop leak | dripping faucet
+objeto: faucet | water drop | drop
+quien: nadie
+lugar: cocina
+
+texto: Omar got a smaller raise. And he did something odd with it: {+nothing}.
+clip: man walking city street | man walking street
+quien: mark
+lugar: ciudad
+musica: intriga
+
+texto: He kept his old apartment. And he sent the whole raise to savings, {+automatically}.
+clip: online banking phone | smartphone banking app
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+
+texto: Then he did something even stranger: he went back to {+cash envelopes}.
+clip: cash envelope money | envelopes money
+objeto: envelope | envelopes | cash
+quien: nadie
+lugar: casa
+
+texto: But one night in 2019, a {!phone call} tested both of them.
+clip: phone ringing night | smartphone night
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+grande: si
+musica: suspense
+
+
+== CAPITULO 3 | THE CALL | 2019
+musica: tension
+
+texto: Nina's car broke down on the highway. The repair: {-two thousand four hundred}.
+clip: car broken down highway | car repair garage
+objeto: car | garage
+quien: nadie
+lugar: ciudad
+evidencia: REPAIR INVOICE · $2,400
+
+texto: She earned more than ever. And she had {-two hundred dollars} in the bank.
+clip: phone screen hand | smartphone screen
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+
+texto: The repair went on the credit card. {!At twenty-four percent}.
+clip: credit card payment | credit card
+objeto: credit card | card
+quien: nadie
+lugar: casa
+
+texto: The same month, Omar's water heater died. He opened an envelope and paid. {+Done}.
+clip: cash envelope money | envelopes money
+objeto: envelope | envelopes | cash
+quien: nadie
+lugar: casa
+musica: emotivo
+
+texto: The raise never made Nina poorer. {-Spending all of it} did.
+clip: rain window evening | raindrops window
+quien: nadie
+lugar: casa
+
+texto: Not in a day. Not in a month. But with {+consistency and discipline}, it happens.
+voz: sarah
+clip: sunrise city aerial | city sunrise
+quien: nadie
+lugar: ciudad
+musica: esperanza
+
+
+== CAPITULO 4 | THE RULE | 2021
+musica: esperanza
+
+texto: Nina asked Omar for his secret. He wrote one rule on a napkin.
+clip: writing on napkin | handwriting paper
+objeto: napkin | paper
+quien: nadie
+lugar: cocina
+
+texto: “{+Half of every raise is for the future you}.”
+voz: sarah
+clip: handwriting notebook | writing journal pen
+objeto: notebook | journal | paper
+quien: nadie
+lugar: casa
+
+texto: She gave up the car lease. She kept the apartment, but cut the rest.
+clip: woman walking city evening | woman walking street
+quien: sarah
+lugar: ciudad
+
+texto: 2021. Nina's emergency fund: {+six thousand dollars}. For the first time in her life.
+clip: coin jar | jar coins savings
+objeto: jar | coin jar
+quien: nadie
+lugar: cocina
+rotulo: 2021 · +$6,000
+
+
+== FINAL
+musica: emotivo
+
+texto: Case 03 is closed. The lesson: {+a raise is only a raise if you keep part of it}.
+clip: closing folder | file folder documents
+objeto: folder | documents | file
+quien: nadie
+lugar: casa
+
+texto: Not in a day. Not in a month. But with {+consistency and discipline}, it happens.
+voz: sarah
+clip: sunset city aerial | city sunset aerial
+quien: nadie
+lugar: ciudad
+
+texto: Next case: a man inherits {!fifty thousand dollars}.
+clip: city street night | city traffic night
+quien: nadie
+lugar: ciudad
+musica: suspense
+
+texto: Eighteen months later, {-it's all gone}.
+clip: city aerial night | skyline aerial night
+quien: nadie
+lugar: ciudad

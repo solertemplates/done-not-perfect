@@ -52,75 +52,104 @@ Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo
 
 ---
 
-## Vídeos largos estilo documental (episodios_largos/)
+## Vídeos largos: serie "Money Cases" / "Casos de dinero" (episodios_largos/)
 
-Serie dramática de **Mark y Sarah** (en español, Marcos y Sara). Ganan lo mismo y piensan distinto sobre el dinero: Sarah es constante y Mark espera "el momento perfecto". Cada `.txt` es un capítulo de su vida, de unos 9 minutos, y sale en inglés y en español.
+Documentales estilo *true crime* sobre dinero, de unos 9 minutos (8:30-9:30), en inglés y en español (página **Un rato con Rene**). **Cada vídeo es un CASO nuevo** con personajes distintos (nombre, ciudad, trabajo). Mark y Sarah son el CASO 01. Todos los casos son ficticios, sin nombres de personas reales; la descripción termina con *"Story dramatized for educational purposes."*
+
+**Cómo se cuenta un caso:**
+- empieza por el final (gancho de 15 s con el momento más fuerte);
+- vuelve al principio y avanza con pistas, fechas y cifras;
+- revela la decisión que lo cambió todo;
+- tiene un minigancho cada ~2 min y repite el mensaje central;
+- cierra con la lección, el mensaje de constancia y disciplina y el adelanto del próximo caso.
 
 **Cómo se hace el vídeo (todo gratis, en Actions):**
-- **Voz:** Edge TTS (en-US-AndrewNeural / es-MX-JorgeNeural), a unas 165 palabras por minuto. Si falla, se usa Piper y se avisa en `ERRORES.txt`.
-- **Clips reales** de Pixabay (secret `PIXABAY_API_KEY`) y, si hay clave, de Pexels (`PEXELS_API_KEY`). Se buscan **frase a frase** con las palabras de `clip:`. Se descartan:
-  - los de aspecto barato;
-  - la cámara lenta;
-  - los de menos de 1920x1080;
-  - los que enseñan una cara de cerca (lo detecta OpenCV);
-  - los que no encajan con el personaje.
+- **Voces (Edge TTS):**
+  - narrador: en-US-AndrewNeural; en español, es-US-AlonsoNeural o es-MX-JorgeNeural, la que suene más natural;
+  - voz femenina (`voz: sarah`) para la protagonista y los momentos clave: en-US-AvaNeural / es-MX-DaliaNeural;
+  - la velocidad se ajusta sola para que el caso dure unos 9 minutos;
+  - si Edge TTS falla, se usa Piper y se avisa en `ERRORES.txt`.
+- **Clips reales** de Pixabay (y de Pexels si hay `PEXELS_API_KEY`), frase a frase:
+  - si la frase tiene `objeto:`, se busca primero ese objeto exacto y solo vale un clip que lo enseñe;
+  - si no hay ninguno, se usa un plano neutro (casa, ciudad), nunca otro objeto;
+  - se descartan los de aspecto barato, la cámara lenta, menos de 1920x1080, caras de cerca, pantallas verdes y los que no encajan con el personaje;
+  - un clip nuevo cada 3-5 s, sin repetir.
+- **Imagen:** el mismo filtro de color en todo el vídeo, franjas finas, viñeta muy suave y grano ligero.
+- **Rótulos de expediente** con letra fina y moderna (Montserrat Light, estilo documental):
+  - "CASE 01: SAME SALARY" con la ciudad y el año;
+  - títulos de capítulo;
+  - "EVIDENCE #01 · …" (`evidencia:`);
+  - fechas y cifras abajo a la izquierda (`rotulo:`);
+  - "NEXT CASE" al final.
+- **Subtítulos** palabra a palabra: `{+…}` verde (logros y buenos hábitos), `{-…}` rojo (deudas y malos hábitos), `{!…}` amarillo (riesgos); el resto en blanco.
+- **Música real** de Kevin MacLeod (incompetech.com, CC BY 4.0), siempre por debajo de la voz:
+  - el gancho lleva la música de suspense;
+  - ninguna música dura más de 20 s; cambia con cada giro o escena (`musica:`);
+  - cada cambio es lento: la anterior se apaga, casi un segundo de respiro y la siguiente entra suave.
 
-  Si no hay ninguno que encaje, se usa un plano neutro del lugar, sin manos. Hay un clip nuevo cada 3-5 s, nunca se repite, con movimiento suave y a velocidad normal.
-- **Mismo etalonaje** en todo el vídeo: balance de blancos y brillo normalizados, la misma LUT de cine (cálida y contrastada), franjas finas, viñeta y grano ligero.
-- **Subtítulos** grandes palabra a palabra. `{+libre}` sale en verde, `{-deuda}` en rojo y `{!riesgo}` en amarillo. Títulos de capítulo estilo película ("CHAPTER 1: THE PROMISE", "YEAR 1").
-- **Música real** de Kevin MacLeod (incompetech.com, CC BY 4.0), distinta en cada sección y más baja que la voz. El crédito va al final de la descripción.
-
-**El .txt** (bloques separados por una línea en blanco):
+**Cada caso son dos archivos:** `NN_caso_<nombre>_guion_en.txt` (todo) y `NN_caso_<nombre>_guion_es.txt` (solo el texto, frase a frase; lo que se ve se toma del inglés).
 
 ```
-id: largo01
-modo: prueba                       # prueba = solo 60 s; completo = el capítulo entero
-titulo_en: Same Salary, Different Life
-titulo_es: Mismo sueldo, otra vida
-miniatura_en: SAME SALARY. DIFFERENT LIFE.
-miniatura_es: MISMO SUELDO. OTRA VIDA.
+id: caso01_mismo_sueldo
+modo: completo                 # completo | prueba (60 s) | borrador (solo se valida)
+titulo: Same Salary, Different Life
+expediente: CASE 01: SAME SALARY
+ciudad: Portland, Oregon
+anio: 2014
+miniatura: SAME SALARY. DIFFERENT LIFE.
 producto: budget planner
-pregunta_en: What did Mark hide in that envelope?
-pregunta_es: ¿Qué escondía Marcos en ese sobre?
+siguiente: CASE 02: SAME AGE
+pregunta: Two friends, the same age. One decision at 25 split their lives in two.
 
 == GANCHO
 musica: suspense
 
-en: Ten years later, one of them is {+free}…
-es: Diez años después, una es {+libre}…
-clip: woman walking beach sunset | woman walking park sunset
+texto: Ten years later, one of them is {+free}…
+clip: woman walking park sunset | woman walking beach sunset
 quien: sarah
 lugar: ciudad
 
-== CAPITULO 1 | THE PROMISE | LA PROMESA | 1
-musica: emotivo
-...
+== CAPITULO 1 | THE PROMISE | 2014
+musica: intriga
+
+texto: She put a {+red mug} on the kitchen shelf, and dropped in a few coins.
+clip: red mug coins | red mug | coins mug
+objeto: red mug | coins mug | mug
+lugar: cocina
+
+texto: “{+Pay myself first}. Every payday. No matter what.”
+voz: sarah
+clip: handwriting notebook | writing journal pen
+objeto: notebook | journal
+evidencia: SARAH'S NOTEBOOK · PAGE 1
 ```
 
-- **Secciones:** `== GANCHO` (15 s), `== CAPITULO n | título en inglés | título en español | año` y `== FINAL`.
-- **musica:** suspense, intriga, emotivo, epico, tension o esperanza.
-- **Cada frase lleva:**
-  - `en:` y `es:`: lo que dice la voz;
-  - `clip:`: palabras de lo que se ve, con alternativas separadas por `|`;
-  - `quien:`: sarah, mark, pareja o nadie;
-  - `lugar:`: casa, cocina, ciudad, oficina o tienda;
-  - `pin:` (opcional): id de Pixabay fijo;
-  - `grande: si` (opcional): texto grande, para los miniganchos.
-- **producto:** budget planner, cash envelope wallet, piggy bank, Atomic Habits, The Psychology of Money o The Total Money Makeover.
+En español, la cabecera lleva `titulo`, `expediente`, `ciudad`, `miniatura`, `siguiente` y `pregunta` traducidos. Las secciones son `== CAPITULO 1 | LA PROMESA | 2014`, y cada frase lleva solo `texto:` (y, si hace falta, `voz:`, `evidencia:` o `rotulo:` traducidos).
+
+**Campos de cada frase:**
+- `texto:` lo que dice la voz;
+- `clip:` palabras de lo que se ve, con alternativas separadas por `|`;
+- `objeto:` (opcional) el objeto que la voz nombra y que tiene que verse;
+- `quien:` sarah (ella), mark (él), pareja o nadie;
+- `lugar:` casa, cocina, ciudad, oficina o tienda;
+- `voz:` narrador o sarah;
+- `musica:` aquí empieza otra música (suspense, intriga, emotivo, epico, tension, esperanza);
+- `evidencia:`, `rotulo:`, `pin:` (id de Pixabay fijo) y `grande: si` (miniganchos).
+
+`producto:` budget planner, cash envelope wallet, piggy bank, Atomic Habits, The Psychology of Money o The Total Money Makeover.
 
 **Lo que sale en `videos/`:**
-- `largo01_en.mp4` y `largo01_es.mp4` (en modo prueba: `largo01_prueba_en.mp4` y `largo01_prueba_es.mp4`);
+- `caso01_mismo_sueldo_en.mp4` y `caso01_mismo_sueldo_es.mp4`;
 - sus miniaturas de 1280x720;
-- `_textos.txt` con título, descripción, capítulos con minutos, hashtags, Amazon, créditos de la música y PRIMER COMENTARIO.
+- sus `_textos.txt`.
 
 **Comprobaciones:**
-- 1920x1080 a 30 fps;
+- 1920x1080 a 30 fps, H.264 High y AAC 48 kHz estéreo;
+- entre 8:30 y 9:30;
 - cero fotogramas negros y nunca en silencio;
 - menos de 95 MB.
 
-Los errores van al apartado LARGOS de `videos/ERRORES.txt` y no bloquean los Shorts. En los pull requests solo se hace la prueba de 60 s, que se sube a la rama `previews-largo` para revisarla.
-
----
+Los errores van al apartado LARGOS de `videos/ERRORES.txt` y no bloquean los Shorts. En los pull requests se hace una prueba de 60 s en la rama `previews-largo`.
 
 ## 1. Reglas fijas de la serie
 

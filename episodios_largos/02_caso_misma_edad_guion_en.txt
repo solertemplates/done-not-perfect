@@ -1,0 +1,275 @@
+# CASE 02 — Emily and Ryan. Money Cases. Fictional story, dramatized for educational purposes.
+# DRAFT (modo: borrador): it is validated but not rendered. Expand to ~1,300 words and set modo: completo.
+id: caso02_misma_edad
+modo: borrador
+titulo: Same Age, Different Future
+expediente: CASE 02: SAME AGE
+ciudad: Austin, Texas
+anio: 2009
+miniatura: SAME AGE. DIFFERENT FUTURE.
+producto: The Psychology of Money
+siguiente: CASE 03: THE RAISE
+pregunta: She got a big raise. Two years later, she had less than before.
+
+
+== GANCHO
+musica: suspense
+
+texto: Austin, Texas. Two friends, both forty years old.
+clip: austin aerial | city aerial drone
+quien: nadie
+lugar: ciudad
+rotulo: AUSTIN · 2024
+
+texto: One of them put in {+less money}… and ended up with {+almost twice as much}.
+clip: woman walking park sunset | woman walking city evening
+quien: sarah
+lugar: ciudad
+
+texto: The other one did everything right. Just {!ten years later}.
+clip: man walking city street | man walking street
+quien: mark
+lugar: ciudad
+
+texto: This case is about the one thing money can't buy back: {!time}.
+clip: clock ticking | wall clock
+objeto: clock
+quien: nadie
+lugar: casa
+
+
+== CAPITULO 1 | THE BET | 2009
+musica: intriga
+
+texto: 2009. Emily and Ryan had been friends since high school.
+clip: school hallway | school building
+quien: nadie
+lugar: ciudad
+rotulo: AUSTIN · 2009
+
+texto: Both twenty-five. Both teachers at the same public school.
+clip: classroom empty | school classroom
+quien: nadie
+lugar: oficina
+
+texto: Both earning about forty thousand dollars a year.
+clip: dollar bills money | counting money dollars
+objeto: money | dollars | dollar | cash
+quien: nadie
+lugar: casa
+evidencia: SALARY · $40,000 / YEAR
+
+texto: One afternoon in the staff room, Emily signed a form.
+clip: signing contract pen | contract signature pen
+objeto: contract | signature | signing
+quien: nadie
+lugar: casa
+
+texto: {+One hundred and fifty dollars a month} into a retirement account. Automatic.
+clip: online banking phone | smartphone banking app
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+evidencia: RETIREMENT FORM · $150 / MONTH
+
+texto: Ryan read it over her shoulder and laughed.
+clip: documents desk | paperwork desk
+objeto: documents | paper | paperwork
+quien: nadie
+lugar: casa
+
+texto: “Retirement? We're twenty-five. {!I'll start at thirty-five}, when I earn real money.”
+clip: living room sofa evening lamp | cozy living room evening
+quien: nadie
+lugar: casa
+
+texto: They made a bet. A dinner, to be paid in fifteen years.
+clip: restaurant dinner table | restaurant table food
+objeto: restaurant | dinner
+quien: nadie
+lugar: ciudad
+
+texto: It sounded like a joke. It was the most important bet of their lives.
+clip: city night traffic | city traffic night
+quien: nadie
+lugar: ciudad
+grande: si
+musica: tension
+
+
+== CAPITULO 2 | THE QUIET YEARS | 2010
+musica: emotivo
+
+texto: For years, nothing seemed to happen.
+clip: calendar pages | calendar
+objeto: calendar
+quien: nadie
+lugar: casa
+
+texto: Emily's account grew slowly. Some years it even went down.
+clip: stock market chart screen | chart screen
+objeto: chart | graph
+quien: nadie
+lugar: casa
+
+texto: She didn't check it every day. She didn't sell when it dropped. She just {+kept going}.
+clip: woman walking park morning | woman walking morning
+quien: sarah
+lugar: ciudad
+
+texto: Ryan spent his twenties well. Travel, a motorcycle, a {-bigger apartment}.
+clip: motorcycle road | motorcycle city
+objeto: motorcycle | motorbike
+quien: nadie
+lugar: ciudad
+
+texto: Nothing crazy. Nothing wrong. Just {!not yet}.
+clip: rain window evening | raindrops window
+quien: nadie
+lugar: casa
+
+texto: 2014. Emily's statement showed {+eleven thousand dollars}. Most of it, her own deposits.
+clip: documents desk | paperwork desk
+objeto: documents | paper | paperwork
+quien: nadie
+lugar: casa
+rotulo: 2014 · $11,000
+
+texto: It didn't look like much. But investigators know: in cases like this, {!the clue is the date}.
+clip: magnifying glass documents | magnifying glass paper
+objeto: magnifying glass | magnifier
+quien: nadie
+lugar: casa
+grande: si
+musica: suspense
+
+
+== CAPITULO 3 | THE LATE START | 2019
+musica: tension
+
+texto: 2019. Ryan turned thirty-five, and kept his word.
+clip: birthday cake candles | birthday cake
+objeto: cake | birthday cake
+quien: nadie
+lugar: casa
+rotulo: 2019
+
+texto: He started saving. And to catch up, he saved {+double}: three hundred a month.
+clip: online banking phone | smartphone banking app
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+evidencia: RETIREMENT FORM · $300 / MONTH
+
+texto: Twice as much as Emily. Every month. For five years.
+clip: calculator hands | calculator
+objeto: calculator
+quien: nadie
+lugar: casa
+
+texto: That's the part that makes this case so strange.
+clip: city night rain street | rainy night street
+quien: nadie
+lugar: ciudad
+
+texto: Because Emily's money had a ten-year head start. And in money, {+time works like a second salary}.
+clip: coins growing plant | plant growing coins
+objeto: coins | plant
+quien: nadie
+lugar: casa
+
+texto: Every year, the growth started to grow on top of itself.
+clip: snowball rolling | snow ball
+objeto: snowball
+quien: nadie
+lugar: casa
+
+texto: Not in a day. Not in a month. But with {+consistency and discipline}, it happens.
+voz: sarah
+clip: sunrise city aerial | city sunrise
+quien: nadie
+lugar: ciudad
+musica: esperanza
+
+texto: In 2024, it was time to pay the bet. And to open the two statements.
+clip: opening envelope | letter envelope
+objeto: envelope | letter | mail
+quien: nadie
+lugar: casa
+grande: si
+musica: suspense
+
+
+== CAPITULO 4 | THE STATEMENTS | 2024
+musica: intriga
+
+texto: A restaurant in downtown Austin. Two envelopes on the table.
+clip: restaurant dinner table | restaurant table food
+objeto: restaurant | dinner
+quien: nadie
+lugar: ciudad
+rotulo: AUSTIN · 2024
+
+texto: Ryan had put in eighteen thousand dollars in five years.
+clip: documents desk | paperwork desk
+objeto: documents | paper | paperwork
+quien: nadie
+lugar: casa
+evidencia: RYAN · DEPOSITED $18,000
+
+texto: Emily had put in twenty-seven thousand, over fifteen years.
+clip: documents folder | file folder documents
+objeto: folder | documents | file
+quien: nadie
+lugar: casa
+evidencia: EMILY · DEPOSITED $27,000
+
+texto: But her account was worth {+more than twice his}.
+clip: stock market chart screen | chart screen
+objeto: chart | graph
+quien: nadie
+lugar: casa
+
+texto: The numbers in this case are illustrative. Markets go up and down. {!Nothing is guaranteed}.
+clip: city aerial morning | aerial city skyline
+quien: nadie
+lugar: ciudad
+
+texto: But the pattern is real: {+starting early} often matters more than starting big.
+clip: walking feet road | footsteps road
+quien: nadie
+lugar: ciudad
+musica: emotivo
+
+texto: Ryan paid for dinner. Then he asked Emily for the name of that form.
+clip: restaurant table food | restaurant dinner table
+objeto: restaurant | dinner
+quien: nadie
+lugar: ciudad
+
+
+== FINAL
+musica: esperanza
+
+texto: Case 02 is closed. The lesson: {+the best moment to start was yesterday. The second best is today}.
+clip: closing folder | file folder documents
+objeto: folder | documents | file
+quien: nadie
+lugar: casa
+
+texto: Not in a day. Not in a month. But with {+consistency and discipline}, it happens.
+voz: sarah
+clip: sunset city aerial | city sunset aerial
+quien: nadie
+lugar: ciudad
+
+texto: Next case: a nurse in Denver gets the {!biggest raise} of her career.
+clip: denver aerial | city aerial drone
+quien: nadie
+lugar: ciudad
+musica: suspense
+
+texto: Two years later, she has {-less money than before}. How?
+clip: city aerial night | skyline aerial night
+quien: nadie
+lugar: ciudad

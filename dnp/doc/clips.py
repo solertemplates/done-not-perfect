@@ -32,12 +32,17 @@ CARAS = {"face", "portrait", "selfie", "headshot", "smile", "smiling", "eyes", "
 MUJER = {"woman", "women", "female", "girl", "lady", "her", "mother", "wife"}
 HOMBRE = {"man", "men", "male", "guy", "businessman", "father", "husband", "boy"}
 # Si no hay clip que encaje: plano neutro del lugar, sin manos.
-NEUTROS = {"casa": ["living room interior", "apartment interior", "home interior cozy"],
-           "cocina": ["kitchen interior", "kitchen counter", "coffee kitchen morning"],
+NEUTROS = {"casa": ["cozy living room interior", "modern apartment interior", "home interior lamp evening"],
+           "cocina": ["modern kitchen interior", "kitchen counter coffee", "coffee kitchen morning"],
            "ciudad": ["city aerial", "city street evening", "skyline aerial"],
            "oficina": ["office interior empty", "desk office", "office building"],
            "tienda": ["store shelves", "shopping mall interior", "supermarket aisle"]}
 CONTINUIDAD = {"sarah": "woman beige sweater", "mark": "man blue shirt"}
+# Lugares venidos a menos o de miedo: no encajan con la casa de Mark y Sarah (mismo nivel económico).
+DESENTONA = {"abandoned", "ruin", "ruins", "destroyed", "dirty", "decay", "horror", "creepy", "grunge", "messy",
+             "war", "broken", "derelict", "spooky"}
+# Objetos que llaman la atención: si la frase no los pide, el clip no encaja (p. ej. "notebook" no es un portátil).
+LLAMATIVOS = {"laptop", "computer", "keyboard", "smartphone", "phone", "tablet", "car", "dog", "cat", "baby"}
 
 
 @dataclass
@@ -170,6 +175,8 @@ class Buscador:
             return None
         if any(t in c.etiquetas for t in CARAS):
             return None
+        if _palabras(etiquetas) & {_singular(d) for d in DESENTONA}:
+            return None
         palabras_tags = _palabras(etiquetas)
         if quien == "sarah" and palabras_tags & HOMBRE and not palabras_tags & MUJER:
             return None
@@ -182,6 +189,9 @@ class Buscador:
         if coinciden < hace_falta:
             return None  # no muestra lo que dice la voz: mejor un plano neutro del lugar
         genericas = len((todas - clave) & palabras_tags)
+        sobran = ({_singular(x) for x in LLAMATIVOS} & palabras_tags) - todas
+        if sobran:
+            return None  # sale algo que la voz no dice (un portátil, un perro...)
         extra = len(_palabras(CONTINUIDAD.get(quien, "")) & palabras_tags)
         return coinciden * 12 + genericas * 3 + extra * 4 + np.log1p(c.popularidad) + min(c.duracion, 20) * 0.1
 

@@ -31,6 +31,12 @@ clip: man bills table stress | pile of bills calculator
 quien: mark
 lugar: casa
 
+en: One kept a promise. The other kept waiting for the {!perfect moment}.
+es: Una cumplió una promesa. El otro siguió esperando el {!momento perfecto}.
+clip: rain window night city lights | rainy night street umbrella
+quien: nadie
+lugar: ciudad
+
 en: Nobody saw it coming. Not even them. So what really happened?
 es: Nadie lo vio venir. Ni siquiera ellos. ¿Qué pasó de verdad?
 clip: city night rain street | rainy window night city
@@ -48,7 +54,7 @@ lugar: casa
 
 en: Mark and Sarah had just signed their first lease.
 es: Marcos y Sara acababan de firmar su primer contrato de alquiler.
-clip: signing lease contract pen | apartment keys handover | signing document pen
+clip: signing contract paper pen | handing over house keys | key apartment door
 quien: pareja
 lugar: casa
 
@@ -60,19 +66,19 @@ lugar: oficina
 
 en: That night, Sarah opened a small notebook and wrote one line: {+save first}.
 es: Esa noche, Sara abrió una libreta pequeña y escribió una sola línea: {+ahorra primero}.
-clip: writing notebook pen night | notebook handwriting desk lamp | planner writing pen
+clip: writing notebook pen | handwriting journal pen | planner writing pen
 quien: sarah
 lugar: casa
 
 en: Mark laughed. "We just got here," he said. "Let's wait for the {!perfect moment}."
 es: Marcos se rió. "Acabamos de llegar", dijo. "Esperemos el {!momento perfecto}."
-clip: man sofa television remote | couple sofa living room evening | man couch phone
+clip: couple sofa living room evening | man sitting sofa television remote | couple relaxing couch
 quien: mark
 lugar: casa
 
 en: She didn't argue. She just placed a {+red mug} on the shelf… and dropped a few coins in it.
 es: Ella no discutió. Solo puso una {+taza roja} en la estantería… y dejó caer unas monedas.
-clip: coins jar saving | dropping coins jar | piggy bank coins
+clip: red mug shelf | coins jar saving | dropping coins jar
 quien: sarah
 lugar: cocina
 
@@ -90,13 +96,13 @@ lugar: casa
 
 en: A new phone. A weekend trip. A {-credit card} he swore he'd pay off next month.
 es: Un teléfono nuevo. Un viaje de fin de semana. Una {-tarjeta de crédito} que juró pagar el mes siguiente.
-clip: credit card payment terminal | paying credit card shop | new smartphone box unboxing
+clip: credit card payment terminal | paying credit card shop | shopping bags mall
 quien: mark
 lugar: tienda
 
 en: Sarah kept writing in her notebook. Small numbers. Every single week.
 es: Sara siguió escribiendo en su libreta. Números pequeños. Cada semana.
-clip: notebook writing numbers calculator | budget planner writing | writing notebook pen
+clip: handwriting numbers paper pen | budget planner writing pen | calculator notepad pen
 quien: sarah
 lugar: casa
 

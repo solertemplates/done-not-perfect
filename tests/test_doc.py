@@ -109,8 +109,8 @@ def test_linea_de_tiempo_y_subtitulos():
     duraciones = [t.dur for t in ln.trozos]
     assert all(1.5 <= d <= 5.0 for d in duraciones)  # un clip nuevo cada pocos segundos, nunca más de 5
     assert 2.8 <= np.mean(duraciones) <= 4.5
-    gancho_fin = [ini for f, _, ini in ln.frases if f.seccion == 1][0]
-    assert gancho_fin < 17  # el gancho dura unos 15 s
+    gancho_fin = ln.titulos[0][0]  # donde empieza el capítulo 1
+    assert 12 < gancho_fin < 18  # el gancho dura unos 15 s
     assert ln.titulos and ln.titulos[0][1] == "CHAPTER 1: THE PROMISE" and ln.titulos[0][2] == "YEAR 1"
     ass = mo.subtitulos(ln, "DejaVu Sans")
     assert "\\fscx112" in ass  # la palabra que suena crece

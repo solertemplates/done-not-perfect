@@ -336,7 +336,7 @@ def mezcla(linea: Linea, discoteca: Discoteca, musicas_previas: dict) -> tuple[n
     ganancia = 0.85 - 0.5 * habla
     final_fade = np.clip((linea.duracion - np.arange(n) / SR) / 1.5, 0, 1)
     pista = musica * (ganancia * final_fade)[:, None] + voz[:, None]
-    pista = np.tanh(pista * 1.1) / np.tanh(1.1) * 0.92
+    pista = np.tanh(pista * 1.1) / np.tanh(1.1) * 0.78  # ≈ -14 LUFS, el nivel de YouTube
     return pista.astype(np.float32), list(dict.fromkeys(titulos))
 
 

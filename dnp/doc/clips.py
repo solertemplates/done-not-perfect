@@ -38,6 +38,13 @@ NEUTROS = {"casa": ["cozy living room interior", "modern apartment interior", "h
            "oficina": ["office interior empty", "desk office", "office building"],
            "tienda": ["store shelves", "shopping mall interior", "supermarket aisle"]}
 CONTINUIDAD = {"sarah": "woman beige sweater", "mark": "man blue shirt"}
+# El plano neutro tiene que ser de verdad ese lugar (una de estas palabras) y no otra cosa.
+ANCLA = {"casa": {"interior", "living", "apartment", "bedroom", "sofa", "couch", "lamp"},
+         "cocina": {"kitchen"},
+         "ciudad": {"city", "skyline", "street", "urban", "downtown", "aerial"},
+         "oficina": {"office", "desk", "workplace"},
+         "tienda": {"store", "shop", "mall", "supermarket", "shopping"}}
+EXTERIOR = {"garden", "forest", "jungle", "nature", "tree", "plant", "beach", "mountain", "field", "park", "flower"}
 # Lugares venidos a menos o de miedo: no encajan con la casa de Mark y Sarah (mismo nivel económico).
 DESENTONA = {"abandoned", "ruin", "ruins", "destroyed", "dirty", "decay", "horror", "creepy", "grunge", "messy",
              "war", "broken", "derelict", "spooky"}
@@ -285,8 +292,11 @@ class Buscador:
                     break
                 if c.clave in self.usados or self.puntuar(c, consulta, "nadie", largo) is None:
                     continue
-                if any(t in " ".join(c.etiquetas) for t in ("hand", "hands", "person", "people", "woman", "man")):
+                tags = _palabras(" ".join(c.etiquetas))
+                if tags & {"hand", "person", "people", "woman", "man"}:
                     continue
+                if not tags & ANCLA[frase.lugar] or (frase.lugar != "ciudad" and tags & EXTERIOR):
+                    continue  # tiene que ser ese lugar, sin jardines ni paisajes
                 try:
                     ruta = self.descargar(c)
                 except Exception:  # noqa: BLE001

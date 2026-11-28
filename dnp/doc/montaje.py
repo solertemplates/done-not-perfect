@@ -274,10 +274,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 actual = []
         if actual:
             grupos.append(actual)
-        for g in grupos:
+        for gi, g in enumerate(grupos):
+            fin_grupo = ini + (tiempos[grupos[gi + 1][0]][1] if gi + 1 < len(grupos) else tiempos[g[-1]][2] + 0.25)
             for k in g:
                 a = ini + tiempos[k][1]
-                b = ini + (tiempos[k + 1][1] if k + 1 < len(tiempos) and k != g[-1] else tiempos[k][2] + 0.18)
+                b = ini + tiempos[k + 1][1] if k != g[-1] else fin_grupo  # nunca se solapan dos líneas
                 partes = []
                 for j in g:
                     w, c = palabras[j]

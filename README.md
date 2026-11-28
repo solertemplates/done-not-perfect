@@ -55,11 +55,9 @@ Degradado radial: centro de color vivo y bordes oscuros. Los personajes son siem
 
 Cada episodio varía solo las estrellas, la ciudad, las luces, el degradado y la música. Hay 8 estilos de música generada por código, distinta en cada vídeo.
 
-## Vídeos largos para YouTube
+## Vídeos largos estilo documental
 
-Sube un `.txt` a [`episodios_largos/`](episodios_largos/) con gancho, 5 capítulos, mensaje y siguiente. El workflow hace un vídeo de 1920x1080 y 8:30, su miniatura de 1280x720 y sus textos (con capítulos y Amazon). Va en paralelo a los Shorts: si falla, los Shorts siguen. Cómo escribirlo: [GUIA_GUIONES.md](GUIA_GUIONES.md#vídeos-largos-para-youtube-episodios_largos).
-
-- Largo 01: https://github.com/solertemplates/done-not-perfect/raw/main/videos/largo01_mismo_sueldo.mp4
+La serie de **Mark y Sarah**: capítulos de unos 9 minutos en inglés y en español, con clips reales de Pixabay, voz natural (Edge TTS), música real (incompetech.com), etalonaje de cine y subtítulos palabra a palabra. Cada capítulo es un `.txt` en [`episodios_largos/`](episodios_largos/). Cómo escribirlo: [GUIA_GUIONES.md](GUIA_GUIONES.md).
 
 ## Publicar de un toque desde el iPhone
 

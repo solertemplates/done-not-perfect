@@ -95,7 +95,7 @@ def silencios(ruta: Path, umbral_db: float = -45, minimo: float = 0.5) -> list[s
 
 def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int, duracion: float,
               rango: tuple[float, float] = (15, 20), tam_miniatura: tuple[int, int] | None = None,
-              silencio: bool = False, tolerancia_bucle: float = 1.0) -> list[Resultado]:
+              silencio: bool = False, tolerancia_bucle: float = 1.0, bucle: bool = True) -> list[Resultado]:
     res: list[Resultado] = []
 
     def chk(nombre, ok, detalle):
@@ -141,7 +141,7 @@ def verificar(mp4: Path, miniatura: Path | None, ancho: int, alto: int, fps: int
     negras = zonas_negras(_blackdetect(mp4))
     chk("Cero fotogramas en negro (blackdetect d=0.03 pix_th=0.10)", not negras,
         "ninguno" if not negras else "; ".join(negras[:3]))
-    if v is not None:
+    if v is not None and bucle:
         primero = _fotograma(mp4, 0, ancho, alto).astype(np.int16)
         ultimo = _fotograma(mp4, esperados - 1, ancho, alto).astype(np.int16)
         dif = float(np.mean(np.abs(primero - ultimo)))

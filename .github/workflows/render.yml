@@ -51,7 +51,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Tests
-        run: python -m pytest -q
+        run: python -m pytest -q --ignore=tests/test_doc.py  # los de los vídeos largos van en su trabajo
 
       - name: Elegir episodios
         env:
@@ -117,9 +117,15 @@ jobs:
           retention-days: 30
 
   largos:
-    # Vídeos largos (1920x1080, 8:30). Van aparte y en paralelo: si un largo falla, los Shorts siguen.
+    # Vídeos largos estilo documental (Mark y Sarah), en inglés y en español. Van aparte y en paralelo:
+    # si un largo falla, los Shorts siguen. En los pull requests se hace solo la prueba de 60 s y se sube
+    # a la rama previews-largo (no a main) para revisarla.
     runs-on: ubuntu-24.04
-    timeout-minutes: 100
+    timeout-minutes: 150
+    env:
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      DNP_CACHE: ${{ github.workspace }}/.cache-dnp
     steps:
       - uses: actions/checkout@v7
         with:
@@ -135,12 +141,20 @@ jobs:
           sudo grep -rlE 'packages\.microsoft\.com' /etc/apt/sources.list.d/ 2>/dev/null | xargs -r sudo rm -f
           sudo apt-get update -qq || echo "::warning::apt-get update falló en algún repositorio; se sigue con lo que hay."
           sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          sudo apt-get install -y -qq fonts-montserrat || echo "::warning::No se pudo instalar Montserrat; se usa DejaVu."
 
       - name: Instalar dependencias de Python
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt -r requirements-largos.txt
+
+      - name: Caché de clips, voces y música
+        uses: actions/cache@v6
+        with:
+          path: .cache-dnp
+          key: dnp-largos-${{ github.run_id }}
+          restore-keys: dnp-largos-
 
       - name: Tests de los vídeos largos
-        run: python -m pytest -q tests/test_largo.py
+        run: python -m pytest -q tests/test_doc.py
 
       - name: Elegir vídeos largos
         env:
@@ -152,19 +166,21 @@ jobs:
             git diff --name-only --diff-filter=AMR "$ANTES" "$GITHUB_SHA" -- 'episodios_largos/*.txt' > largos.txt
           elif [ "$EVENTO" = "workflow_dispatch" ] && [ -n "$ENTRADA" ]; then
             echo "$ENTRADA" | grep '^episodios_largos/' > largos.txt || true
+          elif [ "$EVENTO" = "pull_request" ]; then
+            ls episodios_largos/*.txt 2>/dev/null > largos.txt || true
           else
-            : > largos.txt  # sin nada concreto: solo los que aún no tienen vídeo (--faltan)
+            : > largos.txt
           fi
           echo "Vídeos largos:"; cat largos.txt
 
       - name: Renderizar y comprobar
         run: |
+          if [ ! -s largos.txt ]; then echo "No hay vídeos largos que hacer."; exit 0; fi
+          if [ -z "$PIXABAY_API_KEY" ]; then echo "::error::Falta el secret PIXABAY_API_KEY."; fi
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            python -m dnp.largo --todos --solo-comprobar
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.episodio }}" ] && [ ! -s largos.txt ]; then
-            echo "Se pidió un Short: los vídeos largos no se tocan."
+            python -m dnp.doc --prueba --destino salida/largos_videos $(cat largos.txt)
           else
-            python -m dnp.largo --destino salida/largos_videos --faltan $(cat largos.txt)
+            python -m dnp.doc --destino salida/largos_videos $(cat largos.txt)
           fi
 
       - name: Guardar en videos/ de main
@@ -190,13 +206,33 @@ jobs:
             sleep $((intento * 10))
           done
 
+      - name: Vista previa en la rama previews-largo (solo pull requests)
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          [ -d salida/largos ] || { echo "Nada que enseñar."; exit 0; }
+          mkdir -p /tmp/previa
+          cp salida/largos_videos/* /tmp/previa/ 2>/dev/null || true
+          cp salida/largos/*/*_clips.json /tmp/previa/ 2>/dev/null || true
+          for f in salida/largos/*/*.mp4; do
+            [ -f "$f" ] || continue
+            ffmpeg -v error -y -i "$f" -vf "fps=1/3,scale=480:270,tile=4x5" -frames:v 1 "/tmp/previa/$(basename "$f" .mp4)_hoja.jpg" || true
+          done
+          cp salida/largos/*/*.mp4 salida/largos/*/*_miniatura.png /tmp/previa/ 2>/dev/null || true
+          ls -la /tmp/previa
+          cd /tmp/previa
+          git init -q -b previews-largo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Vista previa del vídeo largo (PR, ejecución ${GITHUB_RUN_ID})"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:previews-largo
+
       - name: Subir el vídeo largo y sus capturas
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: largos
           path: |
-            salida/largos/**/*.png
             salida/largos_videos/*
+            salida/largos/*/*_clips.json
           if-no-files-found: ignore
           retention-days: 30

@@ -480,7 +480,7 @@ quien: nadie
 lugar: casa
 
 texto: That third rule had saved Sarah more than once.
-clip: shop window display | store shelves
+clip: shop window display | store shelves | retail store interior | shopping mall interior
 quien: nadie
 lugar: tienda
 

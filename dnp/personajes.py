@@ -1,7 +1,8 @@
 """Los dos muñequitos de la serie: cabeza redonda grande, ojos de punto,
 sonrisa simple y cuerpo de palo grueso. Siempre blancos.
 
-El Perfeccionista se distingue por las gafas y el lápiz detrás de la oreja.
+El Perfeccionista se distingue por un lápiz grande detrás de la oreja (sin gafas ni
+otros rasgos físicos); el Hacedor, por su martillo.
 
 La postura se describe con pocos datos (cadera, inclinación y adónde van
 manos y pies); codos y rodillas se calculan con cinemática inversa.
@@ -127,7 +128,7 @@ def dibujar(lz: Lienzo, p: Pose, perfeccionista: bool, en_mano=None):
     lz.linea([e["cadera"], e["rod_a"], e["pie_a"]], g)
     lz.linea([e["hombro"], e["codo_a"], e["mano_a"]], g)
     lz.linea([e["cadera"], e["cuello"]], g)
-    _cabeza(lz, e, p, perfeccionista)
+    _cabeza(lz, e, p, False)  # sin gafas: al Perfeccionista se le reconoce por el lápiz
     if perfeccionista:
         _lapiz_oreja(lz, e, p)
     lz.linea([e["cadera"], e["rod_d"], e["pie_d"]], g)
@@ -185,13 +186,13 @@ def _cabeza(lz: Lienzo, e, p: Pose, gafas: bool):
 def _lapiz_oreja(lz: Lienzo, e, p: Pose):
     """Lápiz detrás de la oreja: asoma por la parte trasera-superior de la cabeza."""
     R = R_CABEZA
-    base = _local(e, p, -0.52 * R, 0.02 * R)
-    punta = _local(e, p, -1.68 * R, -0.30 * R)
+    base = _local(e, p, -0.30 * R, 0.10 * R)
+    punta = _local(e, p, -2.15 * R, -0.45 * R)  # lápiz GRANDE y bien visible
     dx, dy = punta[0] - base[0], punta[1] - base[1]
     L = math.hypot(dx, dy)
     ux, uy = dx / L, dy / L
-    nx, ny = -uy * 11, ux * 11
-    cuerpo_fin = (base[0] + ux * (L - 26), base[1] + uy * (L - 26))
+    nx, ny = -uy * 15, ux * 15
+    cuerpo_fin = (base[0] + ux * (L - 36), base[1] + uy * (L - 36))
     cuerpo = [
         (base[0] + nx, base[1] + ny), (cuerpo_fin[0] + nx, cuerpo_fin[1] + ny),
         (cuerpo_fin[0] - nx, cuerpo_fin[1] - ny), (base[0] - nx, base[1] - ny),
@@ -199,10 +200,13 @@ def _lapiz_oreja(lz: Lienzo, e, p: Pose):
     lz.poligono(cuerpo, relleno=fondo(), borde=BLANCO, ancho=4)
     lz.poligono([(cuerpo_fin[0] + nx, cuerpo_fin[1] + ny), punta, (cuerpo_fin[0] - nx, cuerpo_fin[1] - ny)],
                 relleno=fondo(), borde=BLANCO, ancho=4)
-    mina = (base[0] + ux * (L - 8), base[1] + uy * (L - 8))
-    lz.linea([mina, punta], 5, BLANCO)
-    goma = (base[0] + ux * 14, base[1] + uy * 14)
-    lz.linea([(goma[0] + nx, goma[1] + ny), (goma[0] - nx, goma[1] - ny)], 4, BLANCO)
+    mina = (base[0] + ux * (L - 12), base[1] + uy * (L - 12))
+    lz.linea([mina, punta], 9, TINTA)  # mina oscura: se lee como lápiz
+    for k in (18, 30):  # goma con su anilla
+        goma = (base[0] + ux * k, base[1] + uy * k)
+        lz.linea([(goma[0] + nx, goma[1] + ny), (goma[0] - nx, goma[1] - ny)], 4, BLANCO)
+    lz.linea([(base[0] + nx * 0.2 + ux * 40, base[1] + ny * 0.2 + uy * 40),
+              (cuerpo_fin[0] + nx * 0.2, cuerpo_fin[1] + ny * 0.2)], 2.5, BLANCO)  # arista del lápiz
 
 
 def martillo(lz: Lienzo, mano, angulo: float, largo: float = 78):

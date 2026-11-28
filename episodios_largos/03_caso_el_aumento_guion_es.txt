@@ -1,0 +1,94 @@
+# CASO 03 — Nina y Omar. Casos de dinero (Un rato con Rene). Historia ficticia, dramatizada con fines educativos.
+# BORRADOR: solo se valida. Cambia el modo en el guion en inglés cuando esté listo.
+titulo: El aumento que la hizo más pobre
+expediente: CASO 03: EL AUMENTO
+ciudad: Denver, Colorado
+miniatura: MÁS SUELDO. MENOS DINERO.
+siguiente: CASO 04: LA HERENCIA
+pregunta: Heredó cincuenta mil dólares. Dieciocho meses después, no quedaba nada.
+
+
+== GANCHO
+
+texto: Denver, 2019. Una enfermera que gana {+más que nunca}…
+rotulo: DENVER · 2019
+
+texto: …abre la app del banco y ve {-doscientos dólares}.
+
+texto: Su compañero gana {!menos}. Y tiene un año de ahorros.
+
+texto: El ladrón de este caso nunca rompió una ventana. Entró por la puerta principal.
+
+
+== CAPITULO 1 | EL ASCENSO | 2017
+
+texto: 2017. Nina y Omar hacían el turno de noche en el mismo hospital.
+rotulo: DENVER · 2017
+
+texto: Los mismos turnos. El mismo café cansado a las cuatro de la mañana.
+
+texto: Entonces ascendieron a Nina: {+dieciocho mil dólares más al año}.
+evidencia: CARTA DE ASCENSO · +18.000 $ / AÑO
+
+texto: Lo celebró. Se lo merecía. En este caso nadie es el malo.
+
+texto: Pero ese mismo mes, algo empezó a cambiar {!en silencio}.
+
+
+== CAPITULO 2 | EL GOTEO | 2018
+
+texto: Primero, un piso mejor. {-Cuatrocientos más} al mes. “Ahora me lo puedo permitir.”
+rotulo: ALQUILER · +400 $ / MES
+
+texto: Luego, un coche nuevo en leasing.
+
+texto: Después el gimnasio, las plataformas, la comida a domicilio, una limpiadora. Cada uno, una pequeña cuota.
+
+texto: Los economistas lo llaman {-inflación del estilo de vida}. Los investigadores, una fuga lenta.
+
+texto: Omar tuvo un aumento menor. E hizo algo raro con él: {+nada}.
+
+texto: Se quedó en su piso de siempre. Y mandó todo el aumento al ahorro, {+automáticamente}.
+
+texto: Y luego hizo algo aún más raro: volvió a los {+sobres de efectivo}.
+
+texto: Pero una noche de 2019, una {!llamada} los puso a prueba a los dos.
+
+
+== CAPITULO 3 | LA LLAMADA | 2019
+
+texto: El coche de Nina se averió en la autopista. La reparación: {-dos mil cuatrocientos}.
+evidencia: FACTURA DEL TALLER · 2.400 $
+
+texto: Ganaba más que nunca. Y tenía {-doscientos dólares} en el banco.
+
+texto: La reparación fue a la tarjeta de crédito. {!Al veinticuatro por ciento}.
+
+texto: Ese mismo mes se le estropeó el calentador a Omar. Abrió un sobre y pagó. {+Hecho}.
+
+texto: El aumento nunca hizo más pobre a Nina. {-Gastárselo entero}, sí.
+
+texto: No en un día. No en un mes. Pero con {+constancia y disciplina}, sucede.
+
+
+== CAPITULO 4 | LA REGLA | 2021
+
+texto: Nina le preguntó a Omar su secreto. Él escribió una regla en una servilleta.
+
+texto: “{+La mitad de cada aumento es para tu yo del futuro}.”
+
+texto: Dejó el leasing del coche. Se quedó el piso, pero recortó el resto.
+
+texto: 2021. El fondo de emergencia de Nina: {+seis mil dólares}. Por primera vez en su vida.
+rotulo: 2021 · +6.000 $
+
+
+== FINAL
+
+texto: El caso 03 está cerrado. La lección: {+un aumento solo es un aumento si te quedas una parte}.
+
+texto: No en un día. No en un mes. Pero con {+constancia y disciplina}, sucede.
+
+texto: Próximo caso: un hombre hereda {!cincuenta mil dólares}.
+
+texto: Dieciocho meses después, {-no queda nada}.

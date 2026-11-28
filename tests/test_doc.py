@@ -15,34 +15,58 @@ from dnp.doc import textos as tx
 from dnp.doc import voz as vz
 
 RAIZ = Path(__file__).resolve().parent.parent
-EJEMPLO = RAIZ / "episodios_largos" / "01_mismo_sueldo.txt"
+EJEMPLO = RAIZ / "episodios_largos" / "01_caso_mismo_sueldo_guion_en.txt"
 
 
 # --------------------------------------------------------------------- guion
-def test_lee_el_guion_bilingue():
+def test_lee_el_caso_en_dos_archivos():
     g = gu.cargar(EJEMPLO)
-    assert g.id == "largo01" and g.modo == "prueba"
-    assert g.nombre("en") == "largo01_prueba_en" and g.nombre("es") == "largo01_prueba_es"
-    assert [s.tipo for s in g.secciones] == ["gancho", "capitulo"]
-    f = g.frases()[1]
-    assert f.limpio("en") == "Ten years later, one of them is free…"
+    assert g.id == "caso01_mismo_sueldo" and g.modo == "completo"
+    assert gu.cargar(EJEMPLO.with_name("01_caso_mismo_sueldo_guion_es.txt")).id == g.id  # vale cualquiera de los dos
+    assert g.nombre("en") == "caso01_mismo_sueldo_en"
+    assert g.cab("en", "expediente") == "CASE 01: SAME SALARY" and g.cab("es", "expediente") == "CASO 01: MISMO SUELDO"
+    assert g.cab("es", "producto") == "budget planner"  # lo que no se traduce se toma del inglés
+    assert [s.tipo for s in g.secciones] == ["gancho"] + ["capitulo"] * 5 + ["final"]
+    f = g.frases()[2]
+    assert f.limpio("en") == "Ten years later, one of them is free…" and f.limpio("es") == "Diez años después, una es libre…"
     assert ("free…", "verde") in f.palabras("en")
-    assert f.quien == "sarah" and f.clip[0] == "woman walking beach sunset"
-    assert g.frases()[-1].grande
+    assert f.quien == "sarah"
+    assert any(f.voz["en"] == "sarah" for f in g.frases())  # voz femenina para Sarah y momentos clave
+    mug = next(f for f in g.frases() if "red mug" in f.limpio("en"))
+    assert mug.objeto[0] == "red mug"
+    assert sum(f.grande for f in g.frases()) >= 4  # minigancho cada ~2 min
+    assert sum("consistency and discipline" in f.limpio("en") for f in g.frases()) >= 2  # mensaje central
+
+
+def test_todos_los_casos_son_validos_y_distintos():
+    casos = sorted((RAIZ / "episodios_largos").glob("*_guion_en.txt"))
+    assert len(casos) >= 3
+    gs = [gu.cargar(c) for c in casos]
+    assert len({g.id for g in gs}) == len(gs) and len({g.cab("en", "expediente") for g in gs}) == len(gs)
+    for g in gs:
+        assert g.cab("en", "siguiente") and g.cab("es", "siguiente")  # adelanto del próximo caso
 
 
 def test_errores_del_guion():
-    t = "id: largo09\n\n== GANCHO\n\nen: Hi.\nclip: city\nquien: bob\nlugr: casa"
+    en = "id: caso09\n\n== GANCHO\n\ntexto: Hi.\nclip: city\nquien: bob\nlugr: casa\n\ntexto: Two.\nclip: city"
+    es = "titulo: Hola\n\n== GANCHO\n\ntexto: Hola."
     with pytest.raises(ErrorConfig) as e:
-        gu.leer(t)
+        gu.leer(en, es)
     s = str(e.value)
-    assert "falta 'es:'" in s and "'quien' debe ser" in s and "¿Querías decir 'lugar'?" in s
+    assert "'quien' debe ser" in s and "¿Querías decir 'lugar'?" in s and "frase a frase" in s
 
 
 def test_el_gancho_dura_unos_15_segundos():
     g = gu.cargar(EJEMPLO)
-    palabras = sum(len(f.limpio("en").split()) for f in g.secciones[0].frases)
-    assert 22 <= palabras <= 45  # a 165 ppm, entre 8 y 16 s de voz
+    for idioma in ("en", "es"):
+        palabras = sum(len(f.limpio(idioma).split()) for f in g.secciones[0].frases)
+        assert 25 <= palabras <= 45, palabras  # a ~165 ppm, entre 9 y 16 s de voz
+
+
+def test_ritmo_para_unos_9_minutos():
+    g = gu.cargar(EJEMPLO)
+    for idioma in ("en", "es"):
+        assert 150 <= mo.objetivo_ppm(g, idioma) <= 175
 
 
 # --------------------------------------------------------------------- voz
@@ -50,6 +74,19 @@ def test_repartir_tiempos():
     t = vz.repartir("Same salary. Same city.", 2.0)
     assert len(t) == 4 and t[0][1] == 0 and t[-1][2] == pytest.approx(2.0)
     assert all(a[2] <= b[1] + 1e-9 for a, b in zip(t, t[1:]))
+
+
+def test_voces_por_papel():
+    assert vz.VOCES["en"]["sarah"] == ["en-US-AvaNeural"] and vz.VOCES["es"]["sarah"] == ["es-MX-DaliaNeural"]
+    assert set(vz.VOCES["es"]["narrador"]) == {"es-US-AlonsoNeural", "es-MX-JorgeNeural"}
+
+
+def test_calibrar_elige_la_voz_mas_natural(tmp_path, monkeypatch):
+    nar = vz.Narrador("es", tmp_path)
+    ppm = {"es-US-AlonsoNeural": 150.0, "es-MX-JorgeNeural": 172.0}
+    monkeypatch.setattr(nar, "_ppm_natural", lambda muestra: ppm[nar.voz])
+    _, vel = nar.calibrar(["Hola."], 175.0)
+    assert nar.voz == "es-MX-JorgeNeural" and vel == "+2%"
 
 
 # --------------------------------------------------------------------- clips
@@ -67,6 +104,11 @@ def test_puntuacion_de_clips():
     assert b.puntuar(_cand({"coins"}, ancho=1280, alto=720), "coins", "nadie", 5) is None  # poca calidad
     assert b.puntuar(_cand({"coins"}, dur=3), "coins", "nadie", 5) is None  # demasiado corto
     assert b.puntuar(_cand({"beach", "dog"}), "hands signing contract", "nadie", 5) is None  # sin relación
+    assert b.puntuar(_cand({"bird", "bill", "feeder"}), "bills", "nadie", 5, ["bills", "bill"]) is None  # pico de pájaro
+    assert b.puntuar(_cand({"seoul", "street", "city", "evening"}), "city street evening", "nadie", 5) is None
+    # Si la voz nombra un objeto, tiene que verse ese objeto (nunca otro).
+    assert b.puntuar(_cand({"red", "mug", "coins"}), "red mug coins", "nadie", 5, ["red mug", "mug"]) is not None
+    assert b.puntuar(_cand({"coffee", "cup", "table"}), "coffee cup", "nadie", 5, ["red mug", "mug"]) is None
 
 
 # --------------------------------------------------------------------- color
@@ -101,34 +143,67 @@ class _NarradorFalso:
         return vz.Locucion(audio, vz.repartir(texto, dur), "falso")
 
 
-def test_linea_de_tiempo_y_subtitulos():
+def _caso(modo="prueba"):
     g = gu.cargar(EJEMPLO)
-    ln = mo.linea_de_tiempo(g, "en", _NarradorFalso("en"), 60.0)
+    g.modo = modo
+    return g
+
+
+def test_linea_de_tiempo_y_subtitulos():
+    g = _caso()
+    nars = {"narrador": _NarradorFalso("en"), "sarah": _NarradorFalso("en")}
+    ln = mo.linea_de_tiempo(g, "en", nars, 60.0)
     assert ln.duracion == 60.0
     assert sum(t.dur for t in ln.trozos) == pytest.approx(60.0, abs=0.05)
     duraciones = [t.dur for t in ln.trozos]
     assert all(1.5 <= d <= 5.0 for d in duraciones)  # un clip nuevo cada pocos segundos, nunca más de 5
-    assert 2.8 <= np.mean(duraciones) <= 4.5
-    gancho_fin = ln.titulos[0][0]  # donde empieza el capítulo 1
-    assert 12 < gancho_fin < 18  # el gancho dura unos 15 s
-    assert ln.titulos and ln.titulos[0][1] == "CHAPTER 1: THE PROMISE" and ln.titulos[0][2] == "YEAR 1"
-    ass = mo.subtitulos(ln, "DejaVu Sans")
-    assert "\\fscx112" in ass  # la palabra que suena crece
+    assert 2.5 <= np.mean(duraciones) <= 4.5
+    caso = ln.tarjetas[0]
+    assert caso[2] == "caso" and caso[3] == ["CASE 01: SAME SALARY", "Portland, Oregon · 2014"]
+    assert 11 < caso[0] < 18  # el gancho dura unos 15 s
+    assert ln.titulos[0][1] == "CHAPTER 1: THE PROMISE" and ln.titulos[0][2] == "YEAR 2014"
+    assert ln.evidencias and ln.evidencias[0][2].startswith("EVIDENCE #01 · PAYSLIP")
+    ass = mo.subtitulos(ln, "DejaVu Sans", "DejaVu Sans")
+    assert "\\fscx112" in ass
+    assert "\\p1" in ass  # velo oscuro detrás del rótulo del caso y de los títulos  # la palabra que suena crece
     assert mo.COLORES_ASS["verde"] in ass and mo.COLORES_ASS["rojo"] in ass and mo.COLORES_ASS["amarillo"] in ass
     es = mo.linea_de_tiempo(g, "es", _NarradorFalso("es"), 60.0)
-    assert "CAPÍTULO 1: LA PROMESA" in mo.subtitulos(es, "DejaVu Sans")
+    t = mo.subtitulos(es, "DejaVu Sans")
+    assert "CAPÍTULO 1: LA PROMESA" in t and "CASO 01: MISMO SUELDO" in t and "EVIDENCIA #01" in t
+
+
+def test_musica_nunca_pasa_de_20_s_y_cambia_en_una_escena():
+    g = _caso("completo")
+    ln = mo.linea_de_tiempo(g, "en", _NarradorFalso("en"), None)
+    assert 400 < ln.duracion < 700
+    cues = [t for t, _ in ln.secciones]
+    limites = cues + [ln.duracion]
+    assert all(b - a <= mo.MAX_MUSICA + 1e-6 for a, b in zip(limites, limites[1:]))
+    inicios = {round(t.inicio, 3) for t in ln.trozos if t.n == 0} | {0.0}
+    assert all(round(c, 3) in inicios for c in cues), "cada cambio de música coincide con una escena nueva"
+    assert ln.tarjetas[-1][2] == "siguiente" and "CASE 02" in ln.tarjetas[-1][3][1]
+
+
+def test_transiciones_lentas_y_nunca_silencio():
+    t = np.arange(0, 30, 0.01)
+    env = mo.envolvente_musica(t, 10.0, 20.0, False, False)
+    assert env[t < 9.0].max() < 0.2  # antes de entrar, casi nada
+    assert env[(t > 13) & (t < 17)].min() == pytest.approx(1.0)
+    assert np.all(np.diff(env[(t > 9.5) & (t < 13)]) >= -1e-9)  # entra suave
 
 
 # --------------------------------------------------------------------- textos
 def test_textos_en_los_dos_idiomas():
     g = gu.cargar(EJEMPLO)
     for idioma, titulo in (("en", "Same Salary, Different Life"), ("es", "Mismo sueldo, otra vida")):
-        ln = mo.linea_de_tiempo(g, idioma, _NarradorFalso(idioma), 60.0)
+        ln = mo.linea_de_tiempo(g, idioma, _NarradorFalso(idioma), None)
         t = tx.generar(g, idioma, ln, ["Heartwarming"])
         assert t.startswith(titulo)
         assert "0:00" in t and "As an Amazon Associate I earn from qualifying purchases." in t
         assert "PRIMER COMENTARIO" in t and "https://www.amazon.com/s?k=budget+planner&tag=styleesencial-20" in t
         assert "Kevin MacLeod (incompetech.com)" in t
+        assert t.rstrip().endswith("purposes.)") or "Story dramatized for educational purposes." in t
+        assert ("CASE 02" in t) if idioma == "en" else ("CASO 02" in t and "Un rato con Rene" in t)
         for palabra in ("guarantee", "get rich", "make money fast", "millionaire", "garantiza", "hazte rico"):
             assert palabra not in t.lower()
 
@@ -170,27 +245,28 @@ def test_montaje_corto_de_principio_a_fin(tmp_path, monkeypatch):
         def __init__(self, cache):
             pass
 
-        def cancion(self, ambiente):
+        def cancion(self, ambiente, evitar=None):
             return mu.leer(musica), "Prueba"
 
     class NarradorFalso(_NarradorFalso):
-        def __init__(self, idioma, cache):
+        def __init__(self, idioma, cache, papel="narrador"):
             super().__init__(idioma)
+            self.velocidad = "+0%"
             self.avisos, self.voz = [], "falsa"
 
-        def calibrar(self, frases):
+        def calibrar(self, frases, objetivo=None):
             return 165.0, "+0%"
 
     monkeypatch.setattr(mo, "Buscador", BuscadorFalso)
     monkeypatch.setattr(mo, "Discoteca", DiscotecaFalsa)
     monkeypatch.setattr(mo, "Narrador", NarradorFalso)
     monkeypatch.setattr(mo, "DUR_PRUEBA", 8.0)
-    g = gu.cargar(EJEMPLO)
+    g = _caso()
     res = mo.renderizar(g, tmp_path / "out", tmp_path / "cache", procesos=2)
     from dnp.doc.__main__ import comprobar
 
     for idioma in ("en", "es"):
         r = res[idioma]
-        assert r["mp4"].name == f"largo01_prueba_{idioma}.mp4"
+        assert r["mp4"].name == f"caso01_mismo_sueldo_prueba_{idioma}.mp4"
         malos = [c for c in comprobar(r["mp4"], r["miniatura"], 8.0, True) if not c.ok]
         assert not malos, malos

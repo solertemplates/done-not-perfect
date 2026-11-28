@@ -1,6 +1,7 @@
 """Voz del narrador: Edge TTS (voces neuronales de Microsoft, gratis y sin clave).
 
-* Inglés: en-US-AndrewNeural (cercana y con energía). Español: es-MX-JorgeNeural.
+* Narrador: en-US-AndrewNeural; en español es-US-AlonsoNeural o es-MX-JorgeNeural (la más natural).
+* Sarah y momentos clave: en-US-AvaNeural / es-MX-DaliaNeural.
 * Velocidad ajustada sola a unas 165 palabras por minuto.
 * Devuelve el audio de cada frase y el momento exacto de cada palabra (para los subtítulos).
 * Si Edge TTS falla, usa Piper como respaldo y lo avisa (va a ERRORES.txt sin bloquear).
@@ -19,8 +20,11 @@ from pathlib import Path
 import numpy as np
 
 SR = 48000
-VOCES = {"en": "en-US-AndrewNeural", "es": "es-MX-JorgeNeural"}
-VOCES_RESPALDO = {"en": ["en-US-AvaNeural"], "es": ["es-US-AlonsoNeural"]}
+# Por papel: el narrador y una voz femenina para Sarah y los momentos clave. Si hay varias candidatas,
+# `calibrar` se queda con la que suena más natural (la que menos hay que acelerar o frenar).
+VOCES = {"en": {"narrador": ["en-US-AndrewNeural"], "sarah": ["en-US-AvaNeural"]},
+         "es": {"narrador": ["es-US-AlonsoNeural", "es-MX-JorgeNeural"], "sarah": ["es-MX-DaliaNeural"]}}
+VOCES_RESPALDO = {"en": ["en-US-AvaNeural", "en-US-AndrewNeural"], "es": ["es-MX-JorgeNeural", "es-MX-DaliaNeural"]}
 PIPER = {"en": "en_US-ryan-high", "es": "es_MX-claude-high"}
 OBJETIVO_PPM = 165  # palabras por minuto
 PAUSA = 0.32  # segundos entre frases
@@ -111,19 +115,20 @@ def repartir(texto: str, duracion: float) -> list[tuple[str, float, float]]:
 class Narrador:
     """Sintetiza frases con caché, calibra la velocidad y recuerda si tuvo que usar el respaldo."""
 
-    def __init__(self, idioma: str, cache: Path):
+    def __init__(self, idioma: str, cache: Path, papel: str = "narrador"):
         self.idioma = idioma
+        self.papel = papel
         self.cache = cache / "voz"
         self.cache.mkdir(parents=True, exist_ok=True)
         self.velocidad = "+0%"
         self.avisos: list[str] = []
-        self.voz = VOCES[idioma]
+        self.voz = VOCES[idioma][papel][0]
 
     def _clave(self, texto, voz, vel):
         return hashlib.sha1(f"{voz}|{vel}|{texto}".encode()).hexdigest()[:20]
 
     def decir(self, texto: str) -> Locucion:
-        for voz in [self.voz] + VOCES_RESPALDO[self.idioma]:
+        for voz in [self.voz] + [v for v in VOCES_RESPALDO[self.idioma] if v != self.voz]:
             k = self._clave(texto, voz, self.velocidad)
             wav, meta = self.cache / f"{k}.f32", self.cache / f"{k}.json"
             if wav.exists() and meta.exists():
@@ -145,13 +150,31 @@ class Narrador:
         self.avisos.append(f"Edge TTS falló ({type(ultimo).__name__}: {ultimo}); se usó Piper como respaldo.")
         return piper(texto, self.idioma, self.cache / "piper")
 
-    def calibrar(self, frases: list[str]):
-        """Ajusta la velocidad para que la narración vaya a unas 165 palabras por minuto."""
-        muestra = " ".join(frases[:4])
+    def _ppm_natural(self, muestra: str) -> float:
+        guardada = self.velocidad
+        self.velocidad = "+0%"
         loc = self.decir(muestra)
-        palabras = len(muestra.split())
-        ppm = palabras / max(0.5, loc.duracion) * 60
-        pct = int(round((OBJETIVO_PPM * 1.06 / ppm - 1) * 100))  # +6 %: las pausas entre frases también cuentan
-        pct = max(-20, min(25, pct))
+        self.velocidad = guardada
+        return len(muestra.split()) / max(0.5, loc.duracion) * 60
+
+    def calibrar(self, frases: list[str], objetivo_ppm: float = OBJETIVO_PPM * 1.06):
+        """Elige la voz más natural del papel y ajusta la velocidad a `objetivo_ppm` (solo voz, sin pausas)."""
+        muestra = " ".join(frases[:4]) or "This is a short test sentence for the narrator."
+        mejor = None
+        for voz in VOCES[self.idioma][self.papel]:
+            self.voz = voz
+            try:
+                ppm = self._ppm_natural(muestra)
+            except Exception as e:  # noqa: BLE001
+                self.avisos.append(f"La voz {voz} no respondió al calibrar ({e}).")
+                continue
+            cambio = objetivo_ppm / ppm - 1
+            if mejor is None or abs(cambio) < abs(mejor[2]):
+                mejor = (voz, ppm, cambio)
+        if mejor is None:
+            self.voz = VOCES[self.idioma][self.papel][0]
+            return 0.0, self.velocidad
+        self.voz, ppm, cambio = mejor
+        pct = max(-20, min(25, int(round(cambio * 100))))
         self.velocidad = f"{pct:+d}%"
         return ppm, self.velocidad

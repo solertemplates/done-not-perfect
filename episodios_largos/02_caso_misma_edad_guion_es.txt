@@ -1,0 +1,114 @@
+# CASO 02 — Emily y Ryan. Casos de dinero (Un rato con Rene). Historia ficticia, dramatizada con fines educativos.
+# BORRADOR: solo se valida. Cambia el modo en el guion en inglés cuando esté listo.
+titulo: Misma edad, otro futuro
+expediente: CASO 02: MISMA EDAD
+ciudad: Austin, Texas
+miniatura: MISMA EDAD. OTRO FUTURO.
+siguiente: CASO 03: EL AUMENTO
+pregunta: Le subieron mucho el sueldo. Dos años después, tenía menos que antes.
+
+
+== GANCHO
+
+texto: Austin, Texas. Dos amigos, los dos con cuarenta años.
+rotulo: AUSTIN · 2024
+
+texto: Una puso {+menos dinero}… y terminó con {+casi el doble}.
+
+texto: El otro lo hizo todo bien. Solo que {!diez años después}.
+
+texto: Este caso trata de lo único que el dinero no puede recuperar: {!el tiempo}.
+
+
+== CAPITULO 1 | LA APUESTA | 2009
+
+texto: 2009. Emily y Ryan eran amigos desde el instituto.
+rotulo: AUSTIN · 2009
+
+texto: Los dos con veinticinco años. Los dos profesores en el mismo colegio público.
+
+texto: Los dos ganando unos cuarenta mil dólares al año.
+evidencia: SUELDO · 40.000 $ / AÑO
+
+texto: Una tarde, en la sala de profesores, Emily firmó un formulario.
+
+texto: {+Ciento cincuenta dólares al mes} a una cuenta de jubilación. Automático.
+evidencia: FORMULARIO DE JUBILACIÓN · 150 $ / MES
+
+texto: Ryan lo leyó por encima de su hombro y se rió.
+
+texto: “¿Jubilación? Tenemos veinticinco. {!Yo empezaré a los treinta y cinco}, cuando gane dinero de verdad.”
+
+texto: Hicieron una apuesta. Una cena, a pagar dentro de quince años.
+
+texto: Parecía una broma. Fue la apuesta más importante de sus vidas.
+
+
+== CAPITULO 2 | LOS AÑOS TRANQUILOS | 2010
+
+texto: Durante años, no pareció pasar nada.
+
+texto: La cuenta de Emily crecía despacio. Algunos años incluso bajaba.
+
+texto: No la miraba cada día. No vendía cuando bajaba. Solo {+seguía}.
+
+texto: Ryan disfrutó sus veinte. Viajes, una moto, un {-apartamento más grande}.
+
+texto: Nada loco. Nada malo. Solo {!todavía no}.
+
+texto: 2014. El extracto de Emily marcaba {+once mil dólares}. Casi todo, sus propios ingresos.
+rotulo: 2014 · 11.000 $
+
+texto: No parecía mucho. Pero los investigadores lo saben: en casos así, {!la pista es la fecha}.
+
+
+== CAPITULO 3 | EL COMIENZO TARDÍO | 2019
+
+texto: 2019. Ryan cumplió treinta y cinco, y cumplió su palabra.
+rotulo: 2019
+
+texto: Empezó a ahorrar. Y para recuperar, ahorró {+el doble}: trescientos al mes.
+evidencia: FORMULARIO DE JUBILACIÓN · 300 $ / MES
+
+texto: El doble que Emily. Cada mes. Durante cinco años.
+
+texto: Esa es la parte que hace este caso tan extraño.
+
+texto: Porque el dinero de Emily llevaba diez años de ventaja. Y en el dinero, {+el tiempo trabaja como un segundo sueldo}.
+
+texto: Cada año, el crecimiento empezaba a crecer sobre sí mismo.
+
+texto: No en un día. No en un mes. Pero con {+constancia y disciplina}, sucede.
+
+texto: En 2024 llegó la hora de pagar la apuesta. Y de abrir los dos extractos.
+
+
+== CAPITULO 4 | LOS EXTRACTOS | 2024
+
+texto: Un restaurante en el centro de Austin. Dos sobres en la mesa.
+rotulo: AUSTIN · 2024
+
+texto: Ryan había metido dieciocho mil dólares en cinco años.
+evidencia: RYAN · APORTADO 18.000 $
+
+texto: Emily había metido veintisiete mil, en quince años.
+evidencia: EMILY · APORTADO 27.000 $
+
+texto: Pero su cuenta valía {+más del doble que la de él}.
+
+texto: Las cifras de este caso son ilustrativas. Los mercados suben y bajan. {!Nada está asegurado}.
+
+texto: Pero el patrón es real: {+empezar pronto} suele importar más que empezar a lo grande.
+
+texto: Ryan pagó la cena. Después le pidió a Emily el nombre de aquel formulario.
+
+
+== FINAL
+
+texto: El caso 02 está cerrado. La lección: {+el mejor momento para empezar fue ayer. El segundo mejor es hoy}.
+
+texto: No en un día. No en un mes. Pero con {+constancia y disciplina}, sucede.
+
+texto: Próximo caso: una enfermera de Denver recibe el {!mayor aumento} de su carrera.
+
+texto: Dos años después, tiene {-menos dinero que antes}. ¿Cómo?

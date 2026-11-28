@@ -1,6 +1,6 @@
 # Done, not perfect
 
-Serie de vídeos cortos sin voz con dos muñequitos de palo: el **Perfeccionista** (gafas y lápiz en la oreja), que nunca termina, y el **Hacedor**, que lo hace imperfecto pero lo termina.
+Serie de vídeos cortos sin voz con dos muñequitos de palo: el **Perfeccionista** (un lápiz grande detrás de la oreja), que nunca termina, y el **Hacedor** (con su martillo), que lo hace imperfecto pero lo termina.
 
 Todo se genera por código en GitHub Actions: dibujo, animación, música y efectos de sonido.
 
@@ -55,9 +55,9 @@ Degradado radial: centro de color vivo y bordes oscuros. Los personajes son siem
 
 Cada episodio varía solo las estrellas, la ciudad, las luces, el degradado y la música. Hay 8 estilos de música generada por código, distinta en cada vídeo.
 
-## Vídeos largos estilo documental
+## Vídeos largos: "Money Cases" / "Casos de dinero"
 
-La serie de **Mark y Sarah**: capítulos de unos 9 minutos en inglés y en español, con clips reales de Pixabay, voz natural (Edge TTS), música real (incompetech.com), etalonaje de cine y subtítulos palabra a palabra. Cada capítulo es un `.txt` en [`episodios_largos/`](episodios_largos/). Cómo escribirlo: [GUIA_GUIONES.md](GUIA_GUIONES.md).
+Documentales de dinero estilo *true crime*: cada vídeo es un caso nuevo y ficticio, de unos 9 minutos, en inglés y en español. Llevan clips reales de Pixabay, voces naturales (Edge TTS), música real (incompetech.com), etalonaje de cine y subtítulos palabra a palabra. Cada caso son dos `.txt` en [`episodios_largos/`](episodios_largos/) (`_guion_en.txt` y `_guion_es.txt`). Cómo escribirlo: [GUIA_GUIONES.md](GUIA_GUIONES.md).
 
 ## Publicar de un toque desde el iPhone
 

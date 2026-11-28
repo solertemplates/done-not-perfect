@@ -1,0 +1,759 @@
+# CASE 01 — Mark and Sarah. Money Cases (true crime style). Fictional story, dramatized for educational purposes.
+# The Spanish file only has the text: what is shown is taken from this file, sentence by sentence.
+id: caso01_mismo_sueldo
+modo: completo
+titulo: Same Salary, Different Life
+expediente: CASE 01: SAME SALARY
+ciudad: Portland, Oregon
+anio: 2014
+miniatura: SAME SALARY. DIFFERENT LIFE.
+producto: budget planner
+siguiente: CASE 02: SAME AGE
+pregunta: Two friends, the same age. One decision at 25 split their lives in two.
+
+
+== GANCHO
+musica: suspense
+
+texto: March 2024. Portland, Oregon. Two files on the table.
+clip: city aerial drone | aerial city skyline
+quien: nadie
+lugar: ciudad
+rotulo: PORTLAND · MARCH 2024
+
+texto: Same salary. Same city. Same starting line.
+clip: city street evening people walking | downtown street evening
+quien: nadie
+lugar: ciudad
+
+texto: Ten years later, one of them is {+free}…
+clip: woman walking park sunset | woman walking beach sunset
+quien: sarah
+lugar: ciudad
+
+texto: …and the other owes {-forty-one thousand dollars}.
+clip: man bills stress table | pile of bills calculator
+objeto: bills | bill | invoice
+quien: mark
+lugar: casa
+
+texto: It all comes down to one small decision, made on a {!rainy Tuesday}.
+clip: rain window night city lights | rainy window night
+quien: nadie
+lugar: ciudad
+
+
+== CAPITULO 1 | THE PROMISE | 2014
+musica: intriga
+
+texto: To understand this case, we have to go back. Ten years back.
+clip: rain window apartment | rainy window
+quien: nadie
+lugar: casa
+
+texto: October 2014. A tiny rented apartment on the east side of Portland.
+clip: apartment building rain | apartment building exterior evening
+quien: nadie
+lugar: ciudad
+rotulo: OCTOBER 2014
+
+texto: Mark and Sarah had just signed their first lease.
+clip: signing contract pen | contract signature pen
+objeto: contract | signature | signing
+quien: nadie
+lugar: casa
+
+texto: They worked at the same logistics company, with the same job title.
+clip: warehouse logistics boxes | logistics warehouse
+quien: nadie
+lugar: oficina
+
+texto: Same paycheck: three thousand two hundred dollars a month.
+clip: counting money dollars | dollar bills money
+objeto: money | dollars | dollar | cash
+quien: nadie
+lugar: oficina
+evidencia: PAYSLIP · $3,200 / MONTH
+
+texto: On paper, they were identical.
+clip: two coffee cups table | two cups coffee table
+quien: nadie
+lugar: cocina
+
+texto: Same age: twenty-six. Same rent split down the middle: nine hundred dollars each.
+clip: apartment keys | house keys hand
+objeto: keys | key
+quien: nadie
+lugar: casa
+rotulo: RENT · $900 EACH
+
+texto: Same old cars. Same student loans. Same dreams of buying a house one day.
+clip: suburban houses aerial | houses neighborhood aerial
+objeto: house | houses | home
+quien: nadie
+lugar: ciudad
+
+texto: If you had looked at their bank accounts that week, you couldn't have told them apart.
+clip: documents desk | paperwork desk
+objeto: documents | paper | paperwork
+quien: nadie
+lugar: casa
+
+texto: But that first night, something happened that nobody wrote down… except Sarah.
+clip: home interior lamp evening | living room lamp evening
+quien: nadie
+lugar: casa
+musica: emotivo
+
+texto: She opened a small notebook and wrote one line.
+clip: writing notebook pen | notebook pen desk
+objeto: notebook | journal
+quien: nadie
+lugar: casa
+
+texto: “{+Pay myself first}. Every payday. No matter what.”
+voz: sarah
+clip: handwriting notebook | writing journal pen
+objeto: notebook | journal
+quien: nadie
+lugar: casa
+
+texto: Mark laughed. “We just got here,” he said. “Let's wait for the {!perfect moment}.”
+clip: living room sofa evening lamp | cozy living room evening
+quien: nadie
+lugar: casa
+
+texto: Sarah didn't argue.
+clip: rain window evening | raindrops window
+quien: nadie
+lugar: casa
+
+texto: She put a {+red mug} on the kitchen shelf, and dropped in a few coins.
+clip: red mug coins | red mug | coins mug
+objeto: red mug | coins mug | mug
+quien: nadie
+lugar: cocina
+
+texto: Twelve dollars and forty cents.
+clip: coins table | coins counting
+objeto: coins | coin
+quien: nadie
+lugar: cocina
+rotulo: $12.40
+
+texto: It looked like nothing. Investigators call this a small clue. {!Easy to miss}.
+clip: magnifying glass documents | magnifying glass paper
+objeto: magnifying glass | magnifier
+quien: nadie
+lugar: casa
+
+texto: Payday came every two weeks.
+clip: calendar | wall calendar
+objeto: calendar
+quien: nadie
+lugar: casa
+musica: intriga
+
+texto: And every payday, before paying anything else, Sarah moved {+two hundred dollars} into a separate account.
+clip: online banking phone | smartphone banking app
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+evidencia: BANK TRANSFER · $200 · EVERY PAYDAY
+
+texto: Not a fortune. Just a {+habit}.
+clip: piggy bank coins | coins piggy bank
+objeto: piggy bank | coins
+quien: nadie
+lugar: casa
+
+texto: Some months it hurt. She skipped a concert. She took the bus instead of a taxi.
+clip: city bus street | bus stop city
+objeto: bus
+quien: nadie
+lugar: ciudad
+
+texto: But she never skipped the transfer. Not once in the first year.
+clip: calendar | wall calendar
+objeto: calendar
+quien: nadie
+lugar: casa
+
+texto: Mark had a different plan.
+clip: man walking city street | man walking street
+quien: mark
+lugar: ciudad
+
+texto: He would start saving {!later}. Once he earned more. Once things calmed down.
+clip: man office window city | man looking window
+quien: mark
+lugar: oficina
+
+texto: Remember that word: {!later}. In this case, it turned out to be the most expensive word of all.
+clip: clock ticking | wall clock
+objeto: clock
+quien: nadie
+lugar: casa
+
+texto: But the first crack in this story wasn't a bill. It was a {-gift Mark gave himself}.
+clip: city night traffic | city traffic night
+quien: nadie
+lugar: ciudad
+grande: si
+musica: tension
+
+
+== CAPITULO 2 | THE FIRST CRACK | 2016
+musica: tension
+
+texto: Spring 2016. Mark got a small raise: ninety dollars a month.
+clip: office desk computer | office desk
+quien: nadie
+lugar: oficina
+rotulo: APRIL 2016 · +$90 / MONTH
+
+texto: The same week, he walked into a car dealership.
+clip: car dealership | car showroom
+objeto: car dealership | car showroom | car
+quien: nadie
+lugar: tienda
+
+texto: A new SUV. Shiny. Smelling of leather.
+clip: new car interior | suv car
+objeto: car | suv
+quien: nadie
+lugar: tienda
+
+texto: The salesman said the magic words: “{-only four hundred and twelve a month}.”
+clip: car keys hand | car key
+objeto: car keys | car key | key
+quien: nadie
+lugar: tienda
+evidencia: CAR LOAN · $412 × 72 MONTHS
+
+texto: Seventy-two months. {-Six years}.
+clip: calendar pages | calendar
+objeto: calendar
+quien: nadie
+lugar: casa
+
+texto: Mark drove it home that same afternoon. He felt like he had finally made it.
+clip: car driving city | car driving road
+objeto: car
+quien: nadie
+lugar: ciudad
+
+texto: The raise was ninety dollars. The payment was four hundred and twelve. Mark didn't do the math.
+clip: calculator hands | calculator
+objeto: calculator
+quien: nadie
+lugar: casa
+
+texto: To cover the gap, he opened his {-first credit card}.
+clip: credit card payment | credit card
+objeto: credit card | card
+quien: nadie
+lugar: tienda
+musica: intriga
+
+texto: Dinners out, almost every Friday.
+clip: restaurant dinner table | restaurant table food
+objeto: restaurant | dinner
+quien: nadie
+lugar: ciudad
+
+texto: A {-brand-new phone} he didn't really need.
+clip: new phone unboxing | buying a phone | smartphone box
+objeto: new phone | phone | smartphone
+quien: nadie
+lugar: tienda
+
+texto: A weekend in Seattle, paid in four installments.
+clip: seattle aerial | seattle skyline
+quien: nadie
+lugar: ciudad
+
+texto: Each one felt small. But {-each one came with a monthly payment}.
+clip: pile of bills | bills invoices
+objeto: bills | bill | invoice
+quien: nadie
+lugar: casa
+
+texto: Meanwhile, back in the kitchen, the {+red mug} was full.
+clip: red mug coins | coins mug | red mug
+objeto: red mug | coins mug | mug
+quien: nadie
+lugar: cocina
+musica: emotivo
+
+texto: Sarah emptied it into a glass jar with one word on the label: {+emergency}.
+clip: coin jar | jar coins savings
+objeto: jar | coin jar
+quien: nadie
+lugar: cocina
+evidencia: GLASS JAR · LABEL: “EMERGENCY”
+
+texto: Then she started again. Same mug. Same coins.
+clip: dropping coins | coins falling
+objeto: coins | coin
+quien: nadie
+lugar: cocina
+
+texto: Some friends called her boring.
+clip: friends dinner table | dinner party table
+quien: nadie
+lugar: ciudad
+
+texto: When the group planned a trip to Las Vegas, Sarah said no.
+clip: las vegas aerial night | las vegas strip
+quien: nadie
+lugar: ciudad
+
+texto: Mark said yes, and put the hotel on the card.
+clip: hotel lobby | hotel room
+objeto: hotel
+quien: nadie
+lugar: ciudad
+
+texto: “I'm not boring. I'm just {+early}.”
+voz: sarah
+clip: woman walking city evening | woman walking street
+quien: sarah
+lugar: ciudad
+
+texto: December 2016. Sarah's savings: {+four thousand eight hundred dollars}.
+clip: documents desk | paperwork desk
+objeto: documents | paper | paperwork
+quien: nadie
+lugar: casa
+rotulo: DECEMBER 2016 · +$4,800
+
+texto: Mark's credit card balance: {-two thousand nine hundred}.
+clip: credit card bill | credit card
+objeto: credit card | card
+quien: nadie
+lugar: casa
+rotulo: DECEMBER 2016 · −$2,900
+
+texto: Same salary. {!Two directions}.
+clip: road fork aerial | crossroads aerial
+quien: nadie
+lugar: ciudad
+
+texto: And then, in 2018, a letter arrived that only one of them could afford to open.
+clip: letter envelope mailbox | mailbox letter
+objeto: letter | envelope | mail
+quien: nadie
+lugar: casa
+grande: si
+musica: suspense
+
+
+== CAPITULO 3 | THE EVIDENCE | 2018
+musica: intriga
+
+texto: February 2018. The company announced cuts.
+clip: office building | office building exterior
+quien: nadie
+lugar: oficina
+rotulo: FEBRUARY 2018
+
+texto: Hours reduced by a third. For everyone.
+clip: letter paper office | document paper desk
+objeto: letter | paper | document
+quien: nadie
+lugar: oficina
+evidencia: COMPANY MEMO · HOURS CUT 33%
+
+texto: The same salary had just become the same {!pay cut}.
+clip: empty office | office interior empty
+quien: nadie
+lugar: oficina
+
+texto: This is where the two files start to look very different.
+clip: documents folder | file folder documents
+objeto: folder | documents | file
+quien: nadie
+lugar: casa
+
+texto: Sarah opened the jar, and her savings account. {+Seven months of expenses}.
+clip: coin jar | jar coins savings
+objeto: jar | coin jar
+quien: nadie
+lugar: cocina
+
+texto: She didn't panic. She cooked at home, cut back, and waited.
+clip: woman cooking kitchen | cooking vegetables kitchen
+quien: sarah
+lugar: cocina
+musica: emotivo
+
+texto: Mark opened his mail.
+clip: opening envelope | letter envelope
+objeto: envelope | letter | mail
+quien: nadie
+lugar: casa
+musica: tension
+
+texto: Car payment: four hundred and twelve. Card minimum: one hundred and ninety. Phone plan: eighty-five.
+clip: pile of bills | bills invoices
+objeto: bills | bill | invoice
+quien: nadie
+lugar: casa
+evidencia: BILLS · $412 + $190 + $85
+
+texto: So he did what so many people do. {-He paid one card with another card}.
+clip: credit cards | credit card
+objeto: credit card | card
+quien: nadie
+lugar: casa
+
+texto: Investigators have a name for this. It's called a {!debt spiral}.
+clip: spiral staircase | spiral
+objeto: spiral
+quien: nadie
+lugar: casa
+
+texto: It doesn't start with one big mistake. It starts with a lot of {-small yeses}.
+clip: shopping bags | shopping bags store
+objeto: shopping bags | shopping bag
+quien: nadie
+lugar: tienda
+
+texto: Yes to the upgrade. Yes to the delivery app. Yes to “I'll fix it next month.”
+clip: food delivery bag | delivery food door
+objeto: delivery | food delivery
+quien: nadie
+lugar: casa
+
+texto: Every “yes” felt like freedom. Together, they became a {-cage}.
+clip: rain window night | raindrops window night
+quien: nadie
+lugar: ciudad
+
+texto: December 2018. Mark owed {-eleven thousand dollars}.
+clip: man bills stress table | man stress bills
+objeto: bills | bill | invoice
+quien: mark
+lugar: casa
+rotulo: DECEMBER 2018 · −$11,000
+
+texto: And Sarah? She was still dropping coins in the {+red mug}.
+clip: red mug coins | coins mug | red mug
+objeto: red mug | coins mug | mug
+quien: nadie
+lugar: cocina
+musica: intriga
+
+texto: But this file holds one more clue: a page found inside Sarah's notebook.
+clip: notebook pages | open notebook
+objeto: notebook | journal
+quien: nadie
+lugar: casa
+evidencia: SARAH'S NOTEBOOK · PAGE 1
+
+texto: It wasn't a budget. It was a list. Three rules.
+clip: handwriting list paper | writing list
+objeto: list | paper | notebook
+quien: nadie
+lugar: casa
+
+texto: “One: {+pay yourself first}.”
+voz: sarah
+clip: handwriting notebook | writing journal pen
+objeto: notebook | journal
+quien: nadie
+lugar: casa
+
+texto: “Two: {+no payment that lasts longer than the thing you buy}.”
+voz: sarah
+clip: writing notebook pen | notebook pen desk
+objeto: notebook | journal
+quien: nadie
+lugar: casa
+
+texto: “Three: {+wait thirty days before any big purchase}.”
+voz: sarah
+clip: planner writing pen | notebook calendar
+objeto: notebook | planner | journal
+quien: nadie
+lugar: casa
+
+texto: That third rule had saved Sarah more than once.
+clip: shop window display | store shelves
+quien: nadie
+lugar: tienda
+
+texto: In 2017 she wanted a new laptop. She waited thirty days. Her old one still worked. She kept it.
+clip: laptop desk | old laptop desk
+objeto: laptop
+quien: nadie
+lugar: oficina
+
+texto: Simple rules. Boring rules. The kind that win slowly.
+clip: sunrise city aerial | city sunrise
+quien: nadie
+lugar: ciudad
+musica: esperanza
+
+texto: Not in a day. Not in a month. But with {+consistency and discipline}, it happens.
+voz: sarah
+clip: woman walking park morning | woman walking morning
+quien: sarah
+lugar: ciudad
+
+texto: Mark was about to make the decision that changed everything. But not the way you think.
+clip: city night rain street | rainy night street
+quien: nadie
+lugar: ciudad
+grande: si
+musica: suspense
+
+
+== CAPITULO 4 | THE TURN | 2020
+musica: tension
+
+texto: June 2020. Mark sat alone in his car, in an empty parking lot.
+clip: man sitting in car | empty parking lot car
+objeto: car | parking
+quien: mark
+lugar: ciudad
+rotulo: JUNE 2020
+
+texto: The number on his phone screen: {-twenty-three thousand dollars}.
+clip: phone screen hand | smartphone screen
+objeto: phone | smartphone | mobile
+quien: nadie
+lugar: casa
+rotulo: JUNE 2020 · −$23,000
+
+texto: That night, he did something he had avoided for six years.
+clip: city night aerial | city lights night
+quien: nadie
+lugar: ciudad
+
+texto: He knocked on Sarah's door.
+clip: knocking door | apartment door
+objeto: door
+quien: nadie
+lugar: casa
+
+texto: Not to ask for money. {+To ask for the notebook}.
+clip: notebook table | notebook pen desk
+objeto: notebook | journal
+quien: nadie
+lugar: casa
+musica: emotivo
+
+texto: “There's no perfect moment, Mark. There's only {+the next payday}.”
+voz: sarah
+clip: lamp night window | home interior lamp evening
+quien: nadie
+lugar: casa
+
+texto: So he started. Badly. {+Imperfectly}. But he started.
+clip: sunrise window | morning light window
+quien: nadie
+lugar: casa
+musica: esperanza
+
+texto: He sold the SUV and bought a used car, {+paid in cash}.
+clip: used car | old car street
+objeto: car
+quien: nadie
+lugar: ciudad
+evidencia: BILL OF SALE · USED CAR · $6,500 CASH
+
+texto: He {+cut up two credit cards}.
+clip: cutting credit card scissors | scissors credit card
+objeto: credit card | scissors
+quien: nadie
+lugar: casa
+
+texto: He wrote every debt on paper, from the smallest to the largest.
+clip: writing list paper | handwriting list
+objeto: list | paper
+quien: nadie
+lugar: casa
+
+texto: First target: the store card. Six hundred and forty dollars.
+clip: credit card | credit card payment
+objeto: credit card | card
+quien: nadie
+lugar: casa
+rotulo: TARGET #1 · $640
+
+texto: It took him three months. When it hit zero, he wrote one word next to it: {+done}.
+clip: writing list paper | handwriting list
+objeto: list | paper
+quien: nadie
+lugar: casa
+
+texto: Then the next one. And the next.
+clip: walking feet road | footsteps road
+quien: nadie
+lugar: ciudad
+
+texto: And on the shelf of his own kitchen, he put a mug.
+clip: mug shelf kitchen | coffee mug
+objeto: mug | coffee mug
+quien: nadie
+lugar: cocina
+
+texto: It wasn't red. It didn't matter.
+clip: kitchen counter coffee | kitchen morning
+quien: nadie
+lugar: cocina
+
+texto: Remember the clue we told you to watch? Here it is.
+clip: magnifying glass documents | magnifying glass paper
+objeto: magnifying glass | magnifier
+quien: nadie
+lugar: casa
+musica: intriga
+
+texto: The decision that changed everything wasn't a raise. It wasn't luck. It wasn't a perfect plan.
+clip: rain window apartment | rainy window
+quien: nadie
+lugar: casa
+
+texto: It was that first night in 2014: {+pay yourself first, before anything else}.
+voz: sarah
+clip: handwriting notebook | writing journal pen
+objeto: notebook | journal
+quien: nadie
+lugar: casa
+
+texto: Mark made the same decision six years later. {!Six years late}. But he made it.
+clip: man walking city morning | man walking street morning
+quien: mark
+lugar: ciudad
+
+texto: {+Done, not perfect}.
+clip: sunrise city aerial | city sunrise
+quien: nadie
+lugar: ciudad
+
+texto: So where are they now? The last page of this file was written in March 2024.
+clip: documents folder | file folder documents
+objeto: folder | documents | file
+quien: nadie
+lugar: casa
+grande: si
+musica: suspense
+
+
+== CAPITULO 5 | THE VERDICT | 2024
+musica: esperanza
+
+texto: March 2024. Ten years after that first lease.
+clip: city aerial morning | aerial city skyline
+quien: nadie
+lugar: ciudad
+rotulo: MARCH 2024
+
+texto: Sarah has {+one year of expenses saved}, no debt, and a small home of her own.
+clip: small house exterior | house front door
+objeto: house | home
+quien: nadie
+lugar: ciudad
+
+texto: She still has the {+red mug}. These days, it holds coffee.
+clip: red mug coffee | coffee mug | red mug
+objeto: red mug | coffee mug | mug
+quien: nadie
+lugar: cocina
+musica: emotivo
+
+texto: Mark has paid off {+eighteen thousand dollars}.
+clip: documents desk | paperwork desk
+objeto: documents | paper | paperwork
+quien: nadie
+lugar: casa
+rotulo: MARCH 2024 · $5,000 LEFT
+
+texto: He still owes five thousand. He isn't finished.
+clip: man walking city street | man walking street
+quien: mark
+lugar: ciudad
+
+texto: “I lost six years waiting for the perfect moment,” he says. “I won't lose another day.”
+clip: man looking window | man office window city
+quien: mark
+lugar: oficina
+
+texto: But for the first time in ten years, his numbers are moving {+in the right direction}.
+clip: man walking park morning | man walking morning
+quien: mark
+lugar: ciudad
+
+texto: Two people. Same salary. Same city.
+clip: city aerial drone | city buildings aerial drone
+quien: nadie
+lugar: ciudad
+musica: esperanza
+
+texto: The difference between them was never income.
+clip: city street evening people walking | downtown street people walking
+quien: nadie
+lugar: ciudad
+
+texto: It was {+how early} they started, and {+how consistently} they kept going.
+clip: woman walking park sunset | woman walking beach sunset
+quien: sarah
+lugar: ciudad
+
+texto: Two hundred dollars every payday doesn't sound like much.
+clip: dollar bills money | counting money dollars
+objeto: money | dollars | dollar | cash
+quien: nadie
+lugar: casa
+
+texto: But ten years of paydays, without skipping one, is what made the difference in this case.
+clip: calendar pages | calendar
+objeto: calendar
+quien: nadie
+lugar: casa
+
+
+== FINAL
+musica: emotivo
+
+texto: Case 01 is closed. Here is the lesson.
+clip: closing folder | file folder documents
+objeto: folder | documents | file
+quien: nadie
+lugar: casa
+
+texto: You don't need a perfect moment. You need a {+first step}, and the {+discipline} to repeat it.
+clip: walking feet road | footsteps road
+quien: nadie
+lugar: ciudad
+
+texto: Not in a day. Not in a month. But with {+consistency and discipline}, it happens.
+voz: sarah
+clip: sunset city aerial | city sunset aerial
+quien: nadie
+lugar: ciudad
+
+texto: What's your red mug going to be? Tell us in the comments where you'll start.
+clip: red mug coins | coins mug | red mug
+objeto: red mug | coins mug | mug
+quien: nadie
+lugar: cocina
+
+texto: Next case: two friends. The same age. The same school.
+clip: school hallway | school building
+quien: nadie
+lugar: ciudad
+musica: suspense
+
+texto: At twenty-five, one of them made a choice the other one laughed at.
+clip: city street night | city traffic night
+quien: nadie
+lugar: ciudad
+
+texto: Fifteen years later, {!nobody is laughing}.
+clip: city aerial night | skyline aerial night
+quien: nadie
+lugar: ciudad

@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       episodio:
-        description: "Archivo, p. ej. episodios/07_kioscos.txt o episodios_largos/01_mismo_sueldo.txt (vacío = todos los Shorts)"
+        description: "Archivo, p. ej. episodios/07_kioscos.txt o episodios_largos/01_caso_mismo_sueldo_guion_en.txt (vacío = todos los Shorts)"
         required: false
         default: ""
 
@@ -117,7 +117,7 @@ jobs:
           retention-days: 30
 
   largos:
-    # Vídeos largos estilo documental (Mark y Sarah), en inglés y en español. Van aparte y en paralelo:
+    # Vídeos largos "Money Cases" / "Casos de dinero", en inglés y en español. Van aparte y en paralelo:
     # si un largo falla, los Shorts siguen. En los pull requests se hace solo la prueba de 60 s y se sube
     # a la rama previews-largo (no a main) para revisarla.
     runs-on: ubuntu-24.04

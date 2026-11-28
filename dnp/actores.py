@@ -1,7 +1,7 @@
 """Personajes y sus acciones, para usarlos desde el JSON ("personajes": [...]).
 
 Dos clases de personaje:
-* Muñecos de palo: "hacedor" y "perfeccionista" (gafas y lápiz en la oreja).
+* Muñecos de palo: "hacedor" (martillo) y "perfeccionista" (lápiz grande en la oreja).
 * Objetos con vida: "martillo_hacedor" y "martillo_perfeccionista".
 
 Cada personaje tiene una lista de acciones con "desde_s" y "hasta_s" (segundos
@@ -1019,13 +1019,13 @@ TAM_MARTILLO = 1.25
 
 
 class MartilloVivo(Actor):
-    """Martillo con cara. El "martillo_perfeccionista" lleva gafas pequeñas y brazos (regla y clavo)."""
+    """Martillo con cara. El "martillo_perfeccionista" lleva brazos (regla y clavo) y no lleva gafas."""
 
     def __init__(self, conf, indice, objetos):
         super().__init__(conf, indice, objetos)
         self.perfeccionista = conf["tipo"] == "martillo_perfeccionista"
         self.tam = conf.get("tamano", TAM_MARTILLO)
-        self.forma = martillo(gafas=self.perfeccionista, brazos=self.perfeccionista, tam=self.tam)
+        self.forma = martillo(gafas=False, brazos=self.perfeccionista, tam=self.tam)  # se le reconoce por la regla
         if self.perfeccionista:
             self.forma.brazo = (92.0, 88.0)
         self.x, self.y = conf.get("x", 478), conf.get("y", pz.MESA)

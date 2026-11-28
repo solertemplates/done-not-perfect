@@ -32,11 +32,16 @@ CARAS = {"face", "portrait", "selfie", "headshot", "smile", "smiling", "eyes", "
 MUJER = {"woman", "women", "female", "girl", "lady", "her", "mother", "wife"}
 HOMBRE = {"man", "men", "male", "guy", "businessman", "father", "husband", "boy"}
 # Si no hay clip que encaje: plano neutro del lugar, sin manos.
-NEUTROS = {"casa": ["cozy living room interior", "modern apartment interior", "home interior lamp evening"],
-           "cocina": ["modern kitchen interior", "kitchen counter coffee", "coffee kitchen morning"],
-           "ciudad": ["city aerial", "city street evening", "skyline aerial"],
-           "oficina": ["office interior empty", "desk office", "office building"],
-           "tienda": ["store shelves", "shopping mall interior", "supermarket aisle"]}
+NEUTROS = {"casa": ["cozy living room interior", "modern apartment interior", "home interior lamp evening",
+                    "living room sofa lamp", "apartment window evening", "bedroom interior morning light"],
+           "cocina": ["modern kitchen interior", "kitchen counter coffee", "coffee kitchen morning",
+                      "kitchen table morning light", "coffee cup kitchen window"],
+           "ciudad": ["city aerial", "city street evening", "skyline aerial", "city traffic night",
+                      "downtown street people walking", "city buildings aerial drone"],
+           "oficina": ["office interior empty", "desk office", "office building", "office desk computer evening",
+                       "modern office interior"],
+           "tienda": ["store shelves", "shopping mall interior", "supermarket aisle", "shop window display",
+                      "retail store interior"]}
 CONTINUIDAD = {"sarah": "woman beige sweater", "mark": "man blue shirt"}
 # El plano neutro tiene que ser de verdad ese lugar (una de estas palabras) y no otra cosa.
 ANCLA = {"casa": {"interior", "living", "apartment", "bedroom", "sofa", "couch", "lamp"},
@@ -47,7 +52,12 @@ ANCLA = {"casa": {"interior", "living", "apartment", "bedroom", "sofa", "couch",
 EXTERIOR = {"garden", "forest", "jungle", "nature", "tree", "plant", "beach", "mountain", "field", "park", "flower"}
 # Lugares venidos a menos o de miedo: no encajan con la casa de Mark y Sarah (mismo nivel económico).
 DESENTONA = {"abandoned", "ruin", "ruins", "destroyed", "dirty", "decay", "horror", "creepy", "grunge", "messy",
-             "war", "broken", "derelict", "spooky"}
+             "war", "broken", "derelict", "spooky",
+             # La historia pasa en ciudades de EE. UU.: nada de letreros ni ciudades de otros países.
+             "korea", "korean", "seoul", "japan", "japanese", "tokyo", "china", "chinese", "hong kong", "asia", "asian",
+             "india", "thailand", "vietnam", "taiwan", "bangkok", "shanghai", "beijing", "singapore", "dubai",
+             # Animales: "bill" también es el pico de un pájaro.
+             "bird", "birds", "animal", "animals", "wildlife", "feeder"}
 # Objetos que llaman la atención: si la frase no los pide, el clip no encaja (p. ej. "notebook" no es un portátil).
 LLAMATIVOS = {"laptop", "computer", "keyboard", "smartphone", "phone", "tablet", "car", "dog", "cat", "baby"}
 
@@ -173,8 +183,11 @@ class Buscador:
         return out
 
     # ------------------------------------------------------------- puntuar
-    def puntuar(self, c: Candidato, consulta: str, quien: str, minimo: float) -> float | None:
-        """Puntuación del clip para esta frase (None = descartado)."""
+    def puntuar(self, c: Candidato, consulta: str, quien: str, minimo: float, objeto=None) -> float | None:
+        """Puntuación del clip para esta frase (None = descartado).
+
+        `objeto`: lo que la voz nombra y TIENE que verse (lista de alternativas, p. ej. ["red mug", "mug"]).
+        """
         etiquetas = " ".join(c.etiquetas)
         if c.duracion < minimo or c.alto < 1080 or c.ancho < 1920 or c.ancho / max(1, c.alto) < 1.6:
             return None
@@ -182,9 +195,11 @@ class Buscador:
             return None
         if any(t in c.etiquetas for t in CARAS):
             return None
-        if _palabras(etiquetas) & {_singular(d) for d in DESENTONA}:
+        if (_palabras(etiquetas) & {_singular(d) for d in DESENTONA}) - _palabras(consulta):  # salvo si se pide
             return None
         palabras_tags = _palabras(etiquetas)
+        if objeto and not any(_palabras(o) - VACIAS <= palabras_tags for o in objeto):
+            return None  # no se ve el objeto que dice la voz: mejor un plano neutro que otro objeto
         if quien == "sarah" and palabras_tags & HOMBRE and not palabras_tags & MUJER:
             return None
         if quien == "mark" and palabras_tags & MUJER and not palabras_tags & HOMBRE:
@@ -264,12 +279,14 @@ class Buscador:
             for c in self.por_id(pid):
                 candidatos.append((1e9, c))
                 vistos.add(c.clave)
-        for consulta in frase.clip:
+        objeto = getattr(frase, "objeto", None) or None
+        consultas = list(objeto or []) + [q for q in frase.clip if q not in (objeto or [])]  # primero el objeto exacto
+        for consulta in consultas:
             for c in self.buscar(consulta):
                 if c.clave in vistos:
                     continue
                 vistos.add(c.clave)
-                p = self.puntuar(c, consulta, frase.quien, largo)
+                p = self.puntuar(c, consulta, frase.quien, largo, objeto)
                 if p is not None:
                     candidatos.append((p, c))
         candidatos.sort(key=lambda x: -x[0])

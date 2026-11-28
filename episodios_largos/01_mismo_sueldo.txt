@@ -1,10 +1,96 @@
-id: largo01_mismo_sueldo
-gancho: Same salary. 10 years later.
-capitulos:
-- Savings
-- Debt
-- Habits
-- Decisions
-- Business
-mensaje: Not in a day. Not in a month. But with consistency and discipline, it happens.
-siguiente: Same age. Different choices.
+# Largo 01 — Mark y Sarah (Marcos y Sara). Mismo sueldo, otra vida.
+# modo: prueba = solo los primeros 60 s (gancho + inicio del capítulo 1). Cambia a "completo" cuando esté aprobado.
+id: largo01
+modo: prueba
+titulo_en: Same Salary, Different Life
+titulo_es: Mismo sueldo, otra vida
+miniatura_en: SAME SALARY. DIFFERENT LIFE.
+miniatura_es: MISMO SUELDO. OTRA VIDA.
+producto: budget planner
+pregunta_en: What did Mark hide in that envelope?
+pregunta_es: ¿Qué escondía Marcos en ese sobre?
+
+== GANCHO
+musica: suspense
+
+en: Same salary. Same city.
+es: Mismo sueldo. Misma ciudad.
+clip: city aerial drone | aerial city skyline
+quien: nadie
+lugar: ciudad
+
+en: Ten years later, one of them is {+free}…
+es: Diez años después, una es {+libre}…
+clip: woman walking beach sunset | woman walking park sunset
+quien: sarah
+lugar: ciudad
+
+en: …and the other is {-drowning in debt}.
+es: …y el otro se {-ahoga en deudas}.
+clip: man bills table stress | pile of bills calculator
+quien: mark
+lugar: casa
+
+en: Nobody saw it coming. Not even them. So what really happened?
+es: Nadie lo vio venir. Ni siquiera ellos. ¿Qué pasó de verdad?
+clip: city night rain street | rainy window night city
+quien: nadie
+lugar: ciudad
+
+== CAPITULO 1 | THE PROMISE | LA PROMESA | 1
+musica: emotivo
+
+en: It all started on a rainy Tuesday, in a tiny apartment.
+es: Todo empezó un martes lluvioso, en un apartamento diminuto.
+clip: rain window apartment | rainy window
+quien: nadie
+lugar: casa
+
+en: Mark and Sarah had just signed their first lease.
+es: Marcos y Sara acababan de firmar su primer contrato de alquiler.
+clip: hands signing contract | signing document pen
+quien: pareja
+lugar: casa
+
+en: Same job title. Same paycheck.
+es: Mismo puesto. Mismo sueldo.
+clip: counting money hands | paycheck money
+quien: nadie
+lugar: oficina
+
+en: That night, Sarah opened a small notebook and wrote one line: {+save first}.
+es: Esa noche, Sara abrió una libreta pequeña y escribió una sola línea: {+ahorra primero}.
+clip: woman hands writing notebook | writing notebook pen table
+quien: sarah
+lugar: casa
+
+en: Mark laughed. "We just got here," he said. "Let's wait for the {!perfect moment}."
+es: Marcos se rió. "Acabamos de llegar", dijo. "Esperemos el {!momento perfecto}."
+clip: man sofa phone living room | man watching tv sofa
+quien: mark
+lugar: casa
+
+en: She didn't argue. She just placed a {+red mug} on the shelf… and dropped a few coins in it.
+es: Ella no discutió. Solo puso una {+taza roja} en la estantería… y dejó caer unas monedas.
+clip: coins jar hands | dropping coins jar
+quien: sarah
+lugar: cocina
+
+en: Every month, the same {+small habit}.
+es: Cada mes, el mismo {+pequeño hábito}.
+clip: coins saving jar | calendar pages
+quien: nadie
+lugar: casa
+
+en: And every month, Mark found a new reason to wait.
+es: Y cada mes, Marcos encontraba una nueva razón para esperar.
+clip: online shopping laptop credit card | man shopping online laptop
+quien: mark
+lugar: casa
+
+en: But that first year, there was one decision nobody saw coming…
+es: Pero ese primer año hubo una decisión que nadie vio venir…
+clip: city night aerial | street night lights
+quien: nadie
+lugar: ciudad
+grande: si

@@ -52,60 +52,73 @@ Lo que no pongas se queda como en el episodio original de esa plantilla. Si algo
 
 ---
 
-## Vídeos largos para YouTube (episodios_largos/)
+## Vídeos largos estilo documental (episodios_largos/)
 
-Un `.txt` en `episodios_largos/`, por ejemplo `episodios_largos/01_mismo_sueldo.txt`. Al subirlo, el workflow hace solo el vídeo (tarda unos 25 minutos).
+Serie dramática de **Mark y Sarah** (en español, Marcos y Sara). Ganan lo mismo y piensan distinto sobre el dinero: Sarah es constante y Mark espera "el momento perfecto". Cada `.txt` es un capítulo de su vida, de unos 9 minutos, y sale en inglés y en español.
+
+**Cómo se hace el vídeo (todo gratis, en Actions):**
+- **Voz:** Edge TTS (en-US-AndrewNeural / es-MX-JorgeNeural), a unas 165 palabras por minuto. Si falla, se usa Piper y se avisa en `ERRORES.txt`.
+- **Clips reales** de Pixabay (secret `PIXABAY_API_KEY`) y, si hay clave, de Pexels (`PEXELS_API_KEY`). Se buscan **frase a frase** con las palabras de `clip:`. Se descartan:
+  - los de aspecto barato;
+  - la cámara lenta;
+  - los de menos de 1920x1080;
+  - los que enseñan una cara de cerca (lo detecta OpenCV);
+  - los que no encajan con el personaje.
+
+  Si no hay ninguno que encaje, se usa un plano neutro del lugar, sin manos. Hay un clip nuevo cada 3-5 s, nunca se repite, con movimiento suave y a velocidad normal.
+- **Mismo etalonaje** en todo el vídeo: balance de blancos y brillo normalizados, la misma LUT de cine (cálida y contrastada), franjas finas, viñeta y grano ligero.
+- **Subtítulos** grandes palabra a palabra. `{+libre}` sale en verde, `{-deuda}` en rojo y `{!riesgo}` en amarillo. Títulos de capítulo estilo película ("CHAPTER 1: THE PROMISE", "YEAR 1").
+- **Música real** de Kevin MacLeod (incompetech.com, CC BY 4.0), distinta en cada sección y más baja que la voz. El crédito va al final de la descripción.
+
+**El .txt** (bloques separados por una línea en blanco):
 
 ```
-id: largo01_mismo_sueldo
-gancho: Same salary. 10 years later.
-capitulos:
-- Savings
-- Debt
-- Habits
-- Decisions
-- Business
-mensaje: Not in a day. Not in a month. But with consistency and discipline, it happens.
-siguiente: Same age. Different choices.
+id: largo01
+modo: prueba                       # prueba = solo 60 s; completo = el capítulo entero
+titulo_en: Same Salary, Different Life
+titulo_es: Mismo sueldo, otra vida
+miniatura_en: SAME SALARY. DIFFERENT LIFE.
+miniatura_es: MISMO SUELDO. OTRA VIDA.
+producto: budget planner
+pregunta_en: What did Mark hide in that envelope?
+pregunta_es: ¿Qué escondía Marcos en ese sobre?
+
+== GANCHO
+musica: suspense
+
+en: Ten years later, one of them is {+free}…
+es: Diez años después, una es {+libre}…
+clip: woman walking beach sunset | woman walking park sunset
+quien: sarah
+lugar: ciudad
+
+== CAPITULO 1 | THE PROMISE | LA PROMESA | 1
+musica: emotivo
+...
 ```
 
-- **capitulos**: 5 líneas, cada una de estas: Savings, Debt, Habits, Decisions o Business (también en español: Ahorro, Deuda, Hábitos, Decisiones, Negocio). También vale en una línea separada por comas.
-- **gancho** (máx. 40 letras), **mensaje** (máx. 110) y **siguiente** (máx. 40). Si no pones `id`, sale del nombre del archivo (`01_mismo_sueldo.txt` → `largo01_mismo_sueldo`).
-
-**Cómo es siempre el vídeo:** 1920x1080, 30 fps y 8:30 exactos, sin voz.
-
-| Minuto | Qué pasa |
-|---|---|
-| 0:00 | **Gancho** (20 s): se ve el final (el Hacedor tranquilo en verde, el Perfeccionista agobiado en rojo) y rebobina hasta "Year 1" |
-| 0:20 | **5 capítulos** de 1:32, de 2 años cada uno: contador de años arriba ("Year 3", "Month 5"…), marcador verde/rojo abajo y progreso que empieza lento y luego sube (efecto compuesto) |
-| 2:00, 4:00, 6:00, 8:00 | **Minigancho** de 3 s con texto grande |
-| varias veces | **Mensaje central** |
-| 8:00 | **Final** (30 s): vuelve la escena del gancho, "Done > Perfect" y "Next: …" con flecha y "Watch next ▶". El último fotograma es igual que el primero |
-
-**Qué pasa en cada capítulo:**
-- **Savings:** el Hacedor guarda una moneda cada mes y su hucha crece; el Perfeccionista espera "el momento perfecto".
-- **Debt:** compras pequeñas que se acumulan en rojo frente a facturas pagadas primero en verde.
-- **Habits:** un calendario lleno de marcas verdes frente a uno que empieza y se deja.
-- **Decisions:** el Hacedor avanza por el camino "TODAY"; el otro duda en el cruce.
-- **Business:** un puesto de limonada que empieza pequeño y mejora, frente a planes y bolas de papel.
-
-**Música:** generada por código, con un estilo distinto en cada capítulo y fundidos entre ellos, para que nunca se quede en silencio.
+- **Secciones:** `== GANCHO` (15 s), `== CAPITULO n | título en inglés | título en español | año` y `== FINAL`.
+- **musica:** suspense, intriga, emotivo, epico, tension o esperanza.
+- **Cada frase lleva:**
+  - `en:` y `es:`: lo que dice la voz;
+  - `clip:`: palabras de lo que se ve, con alternativas separadas por `|`;
+  - `quien:`: sarah, mark, pareja o nadie;
+  - `lugar:`: casa, cocina, ciudad, oficina o tienda;
+  - `pin:` (opcional): id de Pixabay fijo;
+  - `grande: si` (opcional): texto grande, para los miniganchos.
+- **producto:** budget planner, cash envelope wallet, piggy bank, Atomic Habits, The Psychology of Money o The Total Money Makeover.
 
 **Lo que sale en `videos/`:**
-- `<id>.mp4`;
-- `<id>_miniatura.png` (1280x720, con el gancho en grande y verde frente a rojo);
-- `<id>_textos.txt`, con título, descripción, capítulos con sus minutos, hashtags, producto de Amazon (piggy bank o Atomic Habits) y PRIMER COMENTARIO.
+- `largo01_en.mp4` y `largo01_es.mp4` (en modo prueba: `largo01_prueba_en.mp4` y `largo01_prueba_es.mp4`);
+- sus miniaturas de 1280x720;
+- `_textos.txt` con título, descripción, capítulos con minutos, hashtags, Amazon, créditos de la música y PRIMER COMENTARIO.
 
 **Comprobaciones:**
-- dura exactamente 8:30 a 30 fps;
-- H.264 High y yuv420p;
-- audio AAC 48 kHz estéreo y +faststart;
-- cero fotogramas negros;
-- nunca en silencio;
-- la última imagen es la primera;
-- miniatura de 1280x720.
+- 1920x1080 a 30 fps;
+- cero fotogramas negros y nunca en silencio;
+- menos de 95 MB.
 
-Si algo falla, va al apartado LARGOS de `videos/ERRORES.txt` y no bloquea los Shorts.
+Los errores van al apartado LARGOS de `videos/ERRORES.txt` y no bloquean los Shorts. En los pull requests solo se hace la prueba de 60 s, que se sube a la rama `previews-largo` para revisarla.
 
 ---
 

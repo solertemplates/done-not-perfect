@@ -225,7 +225,8 @@ class Buscador:
             return self._analisis[k]
         import cv2
 
-        cara = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        detectores = [cv2.CascadeClassifier(cv2.data.haarcascades + n) for n in
+                      ("haarcascade_frontalface_default.xml", "haarcascade_profileface.xml")]
         info = sondear(ruta)
         ok, motivo = True, ""
         for f in (0.2, 0.5, 0.8):
@@ -233,8 +234,9 @@ class Buscador:
             if img is None:
                 continue
             gris = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-            caras = cara.detectMultiScale(gris, 1.15, 6, minSize=(40, 40))
-            if len(caras) and max(w * h for _, _, w, h in caras) > 0.025 * 640 * 360:
+            caras = [c for d in detectores for c in d.detectMultiScale(gris, 1.12, 5, minSize=(30, 30))]
+            caras += [c for d in detectores[1:] for c in d.detectMultiScale(cv2.flip(gris, 1), 1.12, 5, minSize=(30, 30))]
+            if len(caras) and max(w * h for _, _, w, h in caras) > 0.012 * 640 * 360:  # cara de cerca o a media distancia
                 ok, motivo = False, "cara de cerca"
                 break
             if quien in ("sarah", "mark", "pareja"):

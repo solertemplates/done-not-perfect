@@ -72,8 +72,8 @@ lugar: casa
 
 en: Mark laughed. "We just got here," he said. "Let's wait for the {!perfect moment}."
 es: Marcos se rió. "Acabamos de llegar", dijo. "Esperemos el {!momento perfecto}."
-clip: couple living room sofa | living room television evening | couple relaxing couch
-quien: pareja
+clip: living room sofa evening lamp | cozy living room evening | empty sofa living room
+quien: nadie
 lugar: casa
 
 en: She didn't argue. She just placed a {+red mug} on the shelf… and dropped a few coins in it.
@@ -90,8 +90,8 @@ lugar: casa
 
 en: And every month, Mark found a new reason to wait.
 es: Y cada mes, Marcos encontraba una nueva razón para esperar.
-clip: online shopping laptop credit card | shopping online laptop | shopping cart website laptop
-quien: mark
+clip: hourglass sand time | sand timer hourglass | clock ticking time
+quien: nadie
 lugar: casa
 
 en: A new phone. A weekend trip. A {-credit card} he swore he'd pay off next month.

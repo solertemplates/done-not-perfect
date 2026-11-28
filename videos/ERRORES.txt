@@ -1,0 +1,13 @@
+########## LARGOS ##########
+Hay que corregir algo antes de poder hacer el vídeo.
+
+Archivo: episodios_largos/01_caso_mismo_sueldo_guion_en.txt
+  1. No se pudo hacer el vídeo largo (RuntimeError: No hay clips para "That third rule had saved Sarah more than once." (buscado: shop window display, store shelves).).
+
+Cómo arreglarlo:
+  1. En github.com abre el archivo de arriba y pulsa el lápiz (Editar).
+  2. Corrige lo que dice cada punto. Los nombres entre comillas son los campos del JSON o del .txt.
+  3. Guarda (Commit changes). El vídeo se volverá a hacer solo en unos minutos.
+  Las comillas curvas del iPhone (“ ”) se aceptan; no hace falta cambiarlas.
+
+(Comprobado el 2026-11-28 19:00 UTC. Este archivo se borra solo cuando todo está bien.)

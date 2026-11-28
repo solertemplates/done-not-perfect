@@ -127,7 +127,7 @@ Los errores van al apartado LARGOS de `videos/ERRORES.txt` y no bloquean los Sho
 | Regla | Valor |
 |---|---|
 | Formato | vertical 1080x1920, 30 fps, de 15 a 20 s, sin voz |
-| Personajes | **siempre blancos**, con cara de puntos y sonrisa simple. El Perfeccionista lleva gafas y lápiz en la oreja (o, si es un objeto, gafas pequeñas) |
+| Personajes | **siempre blancos**, con cara de puntos y sonrisa simple. El Perfeccionista lleva un lápiz grande detrás de la oreja (si es un martillo, una regla). Sin gafas ni rasgos físicos |
 | Decorado | líneas blancas finas, estilo boceto, sobre un fondo de color vivo con degradado radial |
 | Carteles | como mucho **1** en todo el episodio |
 | Estructura | gancho (segundo 0) → rebobinado → acción → vuelve la imagen del gancho con el texto final |
@@ -325,9 +325,9 @@ Herramientas y accesorios que salen solos con las acciones: **martillo**, **mand
 | Tipo | Qué es |
 |---|---|
 | `hacedor` | muñeco de palo blanco: lo hace imperfecto, pero lo termina |
-| `perfeccionista` | muñeco con gafas y lápiz en la oreja: nunca termina |
+| `perfeccionista` | muñeco con un lápiz grande detrás de la oreja: nunca termina |
 | `martillo_hacedor` | martillo blanco con cara, decidido |
-| `martillo_perfeccionista` | martillo con gafas pequeñas y brazos finos (sujeta la regla y el clavo) |
+| `martillo_perfeccionista` | martillo con brazos finos que sujeta la regla y el clavo |
 
 | Campo | Valores |
 |---|---|

@@ -1,6 +1,6 @@
 # Done, not perfect
 
-Serie de vídeos cortos sin voz con dos muñequitos de palo: el **Perfeccionista** (gafas y lápiz en la oreja), que nunca termina, y el **Hacedor**, que lo hace imperfecto pero lo termina.
+Serie de vídeos cortos sin voz con dos muñequitos de palo: el **Perfeccionista** (un lápiz grande detrás de la oreja), que nunca termina, y el **Hacedor** (con su martillo), que lo hace imperfecto pero lo termina.
 
 Todo se genera por código en GitHub Actions: dibujo, animación, música y efectos de sonido.
 

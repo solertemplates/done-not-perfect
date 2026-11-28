@@ -306,19 +306,25 @@ ScaledBorderAndShadow: yes
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Sub,{fuente},82,&H00FFFFFF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,1,0,1,4.5,2,2,120,120,{FRANJA + 70},1
 Style: Grande,{fuente},84,&H00FFFFFF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,2,0,1,5,3,5,160,160,0,1
-Style: Titulo,{fina},74,&H00FFFFFF,&H00FFFFFF,&H00101010,&H78000000,0,0,0,0,100,100,16,0,1,1.2,2,5,100,100,0,1
-Style: Anio,{fina},42,&H0073C8FF,&H0073C8FF,&H00101010,&H78000000,0,0,0,0,100,100,22,0,1,1,1.5,5,100,100,0,1
-Style: Caso,{fina},86,&H00FFFFFF,&H00FFFFFF,&H00101010,&H78000000,0,0,0,0,100,100,14,0,1,1.2,2,5,100,100,0,1
-Style: Evidencia,{fina},34,&H00FFFFFF,&H00FFFFFF,&H003C28FF,&H96000000,0,0,0,0,100,100,8,0,3,6,0,7,90,90,90,1
-Style: Rotulo,{fina},38,&H0073C8FF,&H0073C8FF,&H00101010,&H96000000,0,0,0,0,100,100,10,0,1,1.2,1.5,1,90,90,{FRANJA + 60},1
+Style: Titulo,{fina},76,&H00FFFFFF,&H00FFFFFF,&H00000000,&H50000000,0,0,0,0,100,100,16,0,1,2,3,5,100,100,0,1
+Style: Anio,{fina},46,&H0073C8FF,&H0073C8FF,&H00000000,&H50000000,0,0,0,0,100,100,22,0,1,1.6,2.5,5,100,100,0,1
+Style: Caso,{fina},88,&H00FFFFFF,&H00FFFFFF,&H00000000,&H50000000,0,0,0,0,100,100,14,0,1,2,3,5,100,100,0,1
+Style: Evidencia,{fina},46,&H00FFFFFF,&H00FFFFFF,&H003C28FF,&H96000000,0,0,0,0,100,100,8,0,3,6,0,7,90,90,90,1
+Style: Rotulo,{fina},50,&H0073C8FF,&H0073C8FF,&H00000000,&H64000000,0,0,0,0,100,100,10,0,1,2,2.5,1,90,90,{FRANJA + 60},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     fina = fina or fuente
     ev = []
+
+    def velo(a, b):  # oscurece el plano detrás de los rótulos grandes para que la letra fina se lea siempre
+        ev.append(f"Dialogue: 1,{_t(a)},{_t(b)},Sub,,0,0,0,,{{\\an7\\pos(0,0)\\p1\\bord0\\shad0\\c&H000000&"
+                  f"\\alpha&H60&\\fad(400,400)}}m 0 0 l {ANCHO} 0 {ANCHO} {ALTO} 0 {ALTO}{{\\p0}}")
+
     for ini, dur, tipo, lineas in linea.tarjetas or []:
         fin = ini + dur
+        velo(ini, fin)
         ev.append(f"Dialogue: 2,{_t(ini + 0.2)},{_t(fin)},Caso,,0,0,0,,{{\\fad(500,500)\\pos({ANCHO // 2},{ALTO // 2 - 30})}}"
                   f"{_limpiar(lineas[0])}")
         if len(lineas) > 1 and lineas[1]:
@@ -330,6 +336,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         ev.append(f"Dialogue: 2,{_t(ini)},{_t(ini + dur)},Rotulo,,0,0,0,,{{\\fad(300,300)}}{_limpiar(texto)}")
     for ini, t1, t2 in linea.titulos:
         fin = ini + PAUSA_CAPITULO + 0.4
+        velo(ini, fin)
         ev.append(f"Dialogue: 2,{_t(ini + 0.15)},{_t(fin)},Titulo,,0,0,0,,{{\\fad(450,450)\\pos({ANCHO // 2},{ALTO // 2 - 40})}}{t1}")
         ev.append(f"Dialogue: 2,{_t(ini + 0.55)},{_t(fin)},Anio,,0,0,0,,{{\\fad(450,450)\\pos({ANCHO // 2},{ALTO // 2 + 55})}}{t2}")
     for f, loc, ini in linea.frases:

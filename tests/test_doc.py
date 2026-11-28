@@ -104,6 +104,8 @@ def test_puntuacion_de_clips():
     assert b.puntuar(_cand({"coins"}, ancho=1280, alto=720), "coins", "nadie", 5) is None  # poca calidad
     assert b.puntuar(_cand({"coins"}, dur=3), "coins", "nadie", 5) is None  # demasiado corto
     assert b.puntuar(_cand({"beach", "dog"}), "hands signing contract", "nadie", 5) is None  # sin relación
+    assert b.puntuar(_cand({"bird", "bill", "feeder"}), "bills", "nadie", 5, ["bills", "bill"]) is None  # pico de pájaro
+    assert b.puntuar(_cand({"seoul", "street", "city", "evening"}), "city street evening", "nadie", 5) is None
     # Si la voz nombra un objeto, tiene que verse ese objeto (nunca otro).
     assert b.puntuar(_cand({"red", "mug", "coins"}), "red mug coins", "nadie", 5, ["red mug", "mug"]) is not None
     assert b.puntuar(_cand({"coffee", "cup", "table"}), "coffee cup", "nadie", 5, ["red mug", "mug"]) is None
@@ -162,7 +164,8 @@ def test_linea_de_tiempo_y_subtitulos():
     assert ln.titulos[0][1] == "CHAPTER 1: THE PROMISE" and ln.titulos[0][2] == "YEAR 2014"
     assert ln.evidencias and ln.evidencias[0][2].startswith("EVIDENCE #01 · PAYSLIP")
     ass = mo.subtitulos(ln, "DejaVu Sans", "DejaVu Sans")
-    assert "\\fscx112" in ass  # la palabra que suena crece
+    assert "\\fscx112" in ass
+    assert "\\p1" in ass  # velo oscuro detrás del rótulo del caso y de los títulos  # la palabra que suena crece
     assert mo.COLORES_ASS["verde"] in ass and mo.COLORES_ASS["rojo"] in ass and mo.COLORES_ASS["amarillo"] in ass
     es = mo.linea_de_tiempo(g, "es", _NarradorFalso("es"), 60.0)
     t = mo.subtitulos(es, "DejaVu Sans")

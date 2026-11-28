@@ -52,7 +52,12 @@ ANCLA = {"casa": {"interior", "living", "apartment", "bedroom", "sofa", "couch",
 EXTERIOR = {"garden", "forest", "jungle", "nature", "tree", "plant", "beach", "mountain", "field", "park", "flower"}
 # Lugares venidos a menos o de miedo: no encajan con la casa de Mark y Sarah (mismo nivel económico).
 DESENTONA = {"abandoned", "ruin", "ruins", "destroyed", "dirty", "decay", "horror", "creepy", "grunge", "messy",
-             "war", "broken", "derelict", "spooky"}
+             "war", "broken", "derelict", "spooky",
+             # La historia pasa en ciudades de EE. UU.: nada de letreros ni ciudades de otros países.
+             "korea", "korean", "seoul", "japan", "japanese", "tokyo", "china", "chinese", "hong kong", "asia", "asian",
+             "india", "thailand", "vietnam", "taiwan", "bangkok", "shanghai", "beijing", "singapore", "dubai",
+             # Animales: "bill" también es el pico de un pájaro.
+             "bird", "birds", "animal", "animals", "wildlife", "feeder"}
 # Objetos que llaman la atención: si la frase no los pide, el clip no encaja (p. ej. "notebook" no es un portátil).
 LLAMATIVOS = {"laptop", "computer", "keyboard", "smartphone", "phone", "tablet", "car", "dog", "cat", "baby"}
 
@@ -190,7 +195,7 @@ class Buscador:
             return None
         if any(t in c.etiquetas for t in CARAS):
             return None
-        if _palabras(etiquetas) & {_singular(d) for d in DESENTONA}:
+        if (_palabras(etiquetas) & {_singular(d) for d in DESENTONA}) - _palabras(consulta):  # salvo si se pide
             return None
         palabras_tags = _palabras(etiquetas)
         if objeto and not any(_palabras(o) - VACIAS <= palabras_tags for o in objeto):

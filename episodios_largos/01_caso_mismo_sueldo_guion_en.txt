@@ -100,7 +100,7 @@ quien: nadie
 lugar: casa
 
 texto: But that first night, something happened that nobody wrote down… except Sarah.
-clip: lamp night window | home interior lamp evening
+clip: home interior lamp evening | living room lamp evening
 quien: nadie
 lugar: casa
 musica: emotivo
